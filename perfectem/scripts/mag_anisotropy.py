@@ -29,9 +29,9 @@ import logging
 import numpy as np
 import scipy.optimize as opt
 import matplotlib.pyplot as plt
+import serialem as sem
 
 from ..common import BaseSetup
-from ..config import DEBUG
 
 
 class Anisotropy(BaseSetup):
@@ -42,13 +42,13 @@ class Anisotropy(BaseSetup):
 
         Calculation funcs are written by Greg McMullan @ MRC-LMB. """
 
-    def __init__(self, logFn="mag_anisotropy", **kwargs):
-        super().__init__(logFn, **kwargs)
+    def __init__(self, log_fn="mag_anisotropy", **kwargs):
+        super().__init__(log_fn, **kwargs)
         self.num_img = 10  # number of images
         self.def_min = 5000  # min def in Angstroms
         self.def_max = 50000  # max def in Angstroms
 
-    def _findLimits(self, defocus, var):
+    def _find_limits(self, defocus, var):
         """ The analytic expressions are very ugly and
             so it is simpler to just search over the range. """
 
@@ -148,7 +148,7 @@ class Anisotropy(BaseSetup):
         dfstep = 1.05 * dmax[0] / nout
         for i in range(nout):
             df = dfstep * i
-            res = self._findLimits(df, var)
+            res = self._find_limits(df, var)
             xout[i] = df
             yout[i] = res[0] - res[1]
             aout[i] = 180.0 * res[2] / math.pi
@@ -171,19 +171,18 @@ class Anisotropy(BaseSetup):
         plt.ylabel('Astigmatism magnitude and direction')
         label = "\n".join([astig_str, angast_str, anisomag_str, anisoang_str])
         logging.info("############# Results #############")
-        logging.info(f"Detector: {sem.ReportCameraName()}")
+        logging.info(f"Detector: {sem.ReportCameraName(self.CAMERA_NUM)}")
         logging.info(label)
         plt.text(1.15, 0.5, label, transform=ax.transAxes)
 
         fig.tight_layout()
         fig.savefig(f"mag_anisotropy_test_{self.ts}.png")
 
-    def run(self):
-        logging.info(f"Starting test {type(self).__name__} {BaseSetup.timestamp()}")
-        BaseSetup.setup_beam(self.mag, self.spot, self.beam_size)
-        BaseSetup.setup_area(self.exp, self.binning, preset="R")
-        BaseSetup.setup_area(self.exp, self.binning, preset="F")
-        BaseSetup.autofocus(0, 0.05)
+    def _run(self):
+        self.setup_beam(self.mag, self.spot, self.beam_size)
+        self.setup_area(self.exp, self.binning, preset="R")
+        self.setup_area(self.exp, self.binning, preset="F")
+        self.autofocus(0, 0.05)
         sem.ResetDefocus()
         sem.SaveFocus()
 
@@ -196,8 +195,8 @@ class Anisotropy(BaseSetup):
             logging.info(f"Acquiring image with defocus of {-def_set} A")
             sem.SetDefocus(-def_set / 10000)
             sem.Record()
-            if DEBUG:
-                sem.SaveToOtherFile("A", "JPG", "NONE", self.logDir + f"/def_{def_set}.jpg")
+            #if DEBUG:
+            #    sem.SaveToOtherFile("A", "JPG", "NONE", self.logDir + f"/def_{def_set}.jpg")
             sem.FFT("A")
             try:
                 min_limit = -def_set/10000+2
@@ -214,9 +213,7 @@ class Anisotropy(BaseSetup):
                                 astang_get])
                 def_set += step
             except Exception as e:
-                logging.error(e)
+                logging.error(str(e))
 
         self.prepare_for_plot(results)
         sem.RestoreFocus()
-        logging.info(f"Completed test {type(self).__name__} {BaseSetup.timestamp()}")
-        sem.Exit(1)

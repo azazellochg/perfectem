@@ -24,36 +24,29 @@
 # *
 # **************************************************************************
 
-
 import os
-import datetime as dt
 import logging
+import serialem as sem
+from datetime import datetime
 
-from .config import SCOPE
-
-SCOPE_HAS_C3 = True
+from .config import SCOPE_NAME, DEBUG
+from .utils import pretty_date
 
 
 class BaseSetup:
     """ Initialization and common functions. """
 
-    def __init__(self, logFn, **kwargs):
-        """ Setup log, set common SerialEM params and camera settings. """
+    def __init__(self, log_fn, **kwargs):
+        """ Setup logger, camera settings and set common SerialEM params. """
 
-        self.ts = self.timestamp()
-        cwd = os.path.dirname(os.path.realpath(__file__))
-        self.logDir = os.path.join(cwd, f"{SCOPE}-{self.ts.split('_')[0]}")
-        os.makedirs(self.logDir, exist_ok=True)
-        os.chdir(self.logDir)
-        logging.basicConfig(level=logging.INFO,
-                            format='%(message)s',
-                            handlers=[
-                                logging.FileHandler(f"{logFn}_{self.ts}.log"),
-                                logging.StreamHandler()])
+        self.SCOPE_HAS_C3 = False
+        self.SCOPE_HAS_AUTOFILL = False
+        self.CAMERA_NUM = 1
 
-        sem.SuppressReports()
-        # sem.NoMessageBoxOnError()
-        sem.ErrorsToLog()
+        self.setup_log(log_fn)
+        self.get_scope_type()
+        self.select_camera()
+
         sem.SetUserSetting("DriftProtection", 1, 1)
 
         # Set settings for astig & coma correction to match Record
@@ -61,6 +54,7 @@ class BaseSetup:
         sem.SetUserSetting("CtfDoFullArray", 0)
         sem.SetUserSetting("CtfDriftSettling", 0.)
         sem.SetUserSetting("CtfExposure", 0)
+        #UserMaxCtfFitRes
         sem.SetUserSetting("MinCtfBasedDefocus", -0.4)
         sem.SetUserSetting("ComaIterationThresh", 0.02)
         sem.SetUserSetting("CtfUseFullField", 0)
@@ -73,88 +67,171 @@ class BaseSetup:
         self.beam_size = kwargs.get("beam", 1.0)
         self.spot = kwargs.get("spot", 3)
 
-    @classmethod
-    def timestamp(cls):
-        return dt.datetime.now().strftime("%d%m%y_%H%M")
+    def setup_log(self, log_fn):
+        """ Create a log file for the script run. """
 
-    @classmethod
-    def get_scope_type(cls):
-        global SCOPE_HAS_C3
+        self.ts = pretty_date()
+        cwd = os.path.dirname(os.path.realpath(__file__))
+        self.logDir = os.path.join(cwd, f"{SCOPE_NAME}-{self.ts}")
+        os.makedirs(self.logDir, exist_ok=True)
+        os.chdir(self.logDir)
+        #level = logging.INFO if not DEBUG else logging.DEBUG
+        logging.basicConfig(level=logging.INFO,
+                            format='%(message)s',
+                            handlers=[
+                                logging.FileHandler(f"{log_fn}_{self.ts}.log"),
+                                logging.StreamHandler()])
+
+        sem.SuppressReports()
+        #sem.NoMessageBoxOnError()
+        sem.ErrorsToLog()
+
+    def select_camera(self):
+        """ Choose camera to use. """
+
+        camera_num = 1
+        camera_names = []
+        while True:
+            name = sem.ReportCameraName(camera_num)
+            if name == "NOCAM":
+                break
+            else:
+                camera_names.append(name)
+                camera_num += 1
+
+        print("Choose camera to use with SerialEM:\n")
+        for i, c in enumerate(camera_names):
+            print(f"\t[{i + 1}] {c}")
+
+        camera_num = int(input("\nInput the camera number: ").strip())
+        if camera_num > len(camera_names) or camera_num < 1:
+            raise IndexError("Wrong camera number!")
+        else:
+            sem.SelectCamera(camera_num)
+            self.CAMERA_NUM = camera_num
+            _, _, mode = sem.ReportMag()
+            if mode == 1:  # EFTEM
+                sem.SetSlitIn(0)  # retract slit
+
+        if not sem.ReportColumnOrGunValve():
+            print("Opening col. valves...")
+            sem.SetColumnOrGunValve(1)
+        sem.SetLowDoseMode(0)
+
+    def get_scope_type(self):
+        """ Get some global microscope-type related params. """
+
         value1, value2 = sem.ReportPercentC2()
-        if (value1 * 0.01 - value2) < 0.00001:  # (percents, fraction) 2-condenser lens system
-            SCOPE_HAS_C3 = False
-        else:  # (illum. area, fraction)
-            SCOPE_HAS_C3 = True
+        if not (value1 * 0.01 - value2) < 0.00001:  # (percents, fraction) 2-condenser lens system
+            self.SCOPE_HAS_C3 = True
 
-    @classmethod
-    def check_eps(cls):
+        try:
+            sem.AreDewarsFilling()
+            self.SCOPE_HAS_AUTOFILL = True
+        except sem.SEMerror or sem.SEMmoduleError:
+            pass
+
+        logging.info(f"Microscope type detected: hasC3={self.SCOPE_HAS_C3}, hasAutofill={self.SCOPE_HAS_AUTOFILL}")
+
+    def _run(self):
+        """ Should be implemented in a script. """
+
+        raise NotImplementedError
+
+    def run(self):
+        """ Main function to execute a script. """
+
+        test_name = type(self).__name__
+        _dt = datetime.now()
+        logging.info(f"Starting script {test_name} {_dt.strftime('%d/%m/%Y %H:%M:%S')}")
+
+        try:
+            self._run()
+        except Exception as e:
+            logging.error(f"Script {test_name} has failed: {str(e)}")
+
+        elapsed = datetime.now() - _dt
+        logging.info(f"Completed script {test_name}, elapsed time: {elapsed}")
+
+        sem.Exit(1)
+
+    def check_eps(self):
         """ Check max eps after setup beam but before area setup. """
-        old_exp, _ = sem.ReportExposure("F")
-        old_bin = sem.reportBinning("F")
 
-        cls.setup_area(exp=0.1, binning=1, preset="F")
+        logging.info("Checking dose rate...")
+        old_exp, _ = sem.ReportExposure("F")
+        old_bin = int(sem.ReportBinning("F"))
+
+        self.setup_area(exp=0.1, binning=1, preset="F")
         sem.Focus()
         _, _, _, _, eps = sem.ElectronStats("A")
-        spot = sem.ReportSpotSize()
+        logging.info(f"Dose rate: {eps} eps")
+        spot = int(sem.ReportSpotSize())
         while True:
             eps /= 2
             spot += 1
             if eps < 120:  # keep below 120 eps
                 break
 
-        if spot != sem.ReportSpotSize() and spot < 12:
+        if spot != int(sem.ReportSpotSize()) and spot < 12:
             logging.info(f"Increasing spot size to {spot} to reduce dose rate below 120 eps")
             sem.SetSpotSize(spot)
 
         # Restore previous settings
-        sem.setExposure(old_exp)
-        sem.setBinning(old_bin)
+        sem.SetExposure("F", old_exp)
+        sem.SetBinning("F", old_bin)
 
-    @classmethod
-    def check_drift(cls, crit=2.0, interval=2, timeout=60):
+    def check_drift(self, crit=2.0, interval=2, timeout=60):
         """ Wait for drift to go below crit in Angstroms/s.
         :param crit: A/s target rate
         :param interval: repeat every N seconds
         :param timeout: give up and raise error after N seconds
         """
+
         if (10 * sem.ReportFocusDrift() - crit) > 0.01:
+            logging.info(f"Waiting for drift to get below {crit} A/sec...")
             sem.DriftWaitTask(crit, "A", timeout, interval, 1, "A")
 
-    @classmethod
-    def setup_beam(cls, mag, spot, beamsize, mode="nano"):
+    def setup_beam(self, mag, spot, beamsize, mode="nano"):
         """ Set illumination params. """
 
+        logging.info(f"Setting illumination: probe={mode}, mag={mag}, spot={spot}, beam={beamsize}")
         sem.SetProbeMode(mode)
         sem.SetMag(mag)
         sem.SetSpotSize(spot)
 
-        if not SCOPE_HAS_C3:
+        if not self.SCOPE_HAS_C3:
             sem.SetPercentC2(beamsize)
         else:  # (illum. area, fraction)
             sem.SetIlluminatedArea(beamsize * 0.01)
 
-        cls.check_eps()
+        logging.info("Setting illumination: done!")
+        self.check_eps()
 
-    @classmethod
-    def setup_area(cls, exp, binning, area="F", preset="F"):
+    def setup_area(self, exp, binning, area="F", preset="F"):
         """ Setup camera settings for a certain preset. """
 
+        logging.info(f"Setting camera: preset={preset}, exp={exp}, binning={binning}, area={area}")
         sem.SetExposure(preset, exp)
         sem.SetBinning(preset, binning)
         sem.SetCameraArea(preset, area)  # full area
         sem.SetProcessing(preset, 2)  # gain-normalized
-        try:
-            sem.SetK2ReadMode(preset, 0)  # linear mode
-        except:
-            pass
 
-    @classmethod
-    def euc_by_beamtilt(cls):
+        if sem.ReportReadMode(preset) != 0:
+            try:
+                sem.SetK2ReadMode(preset, 0)  # linear mode
+            except sem.SEMerror or sem.SEMmoduleError:
+                pass
+
+        logging.info("Setting camera: done!")
+
+    def euc_by_beamtilt(self):
+        """ tbd. """
         old_mag, _, _ = sem.ReportMag()
         old_spot = sem.ReportSpotSize()
         old_beam = sem.ReportIlluminatedArea()
-        cls.setup_beam(mag=6500, spot=3, beamsize=11)
-        cls.setup_area(exp=0.5, binning=2, preset="F")
+        self.setup_beam(mag=6500, spot=3, beamsize=11)
+        self.setup_area(exp=0.5, binning=2, preset="F")
 
         sem.SaveFocus()
         old_offset = sem.ReportAutofocusOffset()
@@ -175,8 +252,7 @@ class BaseSetup:
         sem.SetSpotSize(old_spot)
         sem.SetIlluminatedArea(old_beam)
 
-    @classmethod
-    def autofocus(cls, target, precision=0.05, do_ast=True, do_coma=False):
+    def autofocus(self, target, precision=0.05, do_ast=True, do_coma=False):
         """ Autofocus until the result is within precision (um) from a target. """
 
         if do_ast:
@@ -191,22 +267,33 @@ class BaseSetup:
                     logging.info("Correcting coma...")
                     sem.FixComaByCTF()
             except Exception as e:
-                logging.error(e)
+                logging.error(str(e))
                 sem.Exit()
 
         sem.SetTargetDefocus(target)
         sem.SetAutofocusOffset(target / 2)
+        logging.info(f"Autofocusing to {target} um...")
         sem.AutoFocus()
         v = sem.ReportAutoFocus()[0]
         while abs(v - target) > precision:
             sem.AutoFocus()
             v = sem.ReportAutoFocus()[0]
 
-    @classmethod
-    def check_before_acquire(cls):
+        logging.info(f"Autofocusing: done!")
+
+    def check_before_acquire(self):
         """ Check dewars and pumps before acquiring. """
+
+        logging.info("Checking dewars and pumps...")
+
+        def _test():
+            if self.SCOPE_HAS_AUTOFILL:
+                return sem.AreDewarsFilling() == 0. and sem.IsPVPRunning() == 0.
+            else:
+                return sem.IsPVPRunning() == 0.
+
         for i in range(10):
-            if sem.AreDewarsFilling() == 0. and sem.IsPVPRunning() == 0.:
+            if _test():
                 break
             else:
                 logging.info("Dewars are filling or PVP running, waiting for 60 sec..")

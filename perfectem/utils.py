@@ -25,6 +25,17 @@
 # **************************************************************************
 
 import numpy as np
+import matplotlib.pyplot as plt
+import logging
+from datetime import datetime
+
+
+def pretty_date(get_time=False):
+    date_str = '%d-%m-%Y'
+    if get_time:
+        date_str += ' %H:%M:%S'
+
+    return datetime.now().strftime(date_str)
 
 
 def moving_average(x, window):
@@ -43,3 +54,59 @@ def radial_profile(data):
     radialprofile = tbin / nr
 
     return radialprofile[2:int(center[0])]
+
+
+def plot_fft_and_text(data, spec=None, pix=1.0, text=None, add_bottom_plot=False):
+    """ Two subplots arranged horizontally: FFT (with an optional ring) and some text.
+    :param data: fft data
+    :param spec: specification in nm for plotting a circle onto fft
+    :param pix: pixel size in A, required for the spec plot
+    :param text: text for the second subplot
+    :param add_bottom_plot: create an optional bottom plot (second row)
+
+    """
+    fig = plt.figure(figsize=(19.2, 14.4))
+    gs = fig.add_gridspec(2, 2)
+    ax1 = fig.add_subplot(gs[0, 0])
+    ax2 = fig.add_subplot(gs[0, 1])
+    axes = [ax1, ax2]
+    if add_bottom_plot:
+        ax3 = fig.add_subplot(gs[1, :])
+        axes.append(ax3)
+
+    ax1.imshow(data, cmap='gray')
+    ax1.axis('off')
+
+    if spec is not None:
+        # mark specification
+        dim = data.shape[0]  # fft should be squared already
+        if 2 * pix >= spec * 10:
+            logging.error(f"At this mag the Nyquist is at {2*pix}, cannot plot {spec*10}A ring!")
+        else:
+            rad = dim * pix / (spec * 10)
+            ring = plt.Circle((dim/2, dim/2), rad, color='w', fill=False, linestyle='--')
+            ax1.add_patch(ring)
+
+    if text is not None:
+        ax2.text(0, 0.2, text, fontsize=20)
+
+    ax2.axis('off')
+
+    fig.tight_layout()
+
+    return fig, axes
+
+
+def invert_pixel_axis(dims=1024, pixsize=1.0):
+    """ Convert X axis from pixel values to resolution (nm).
+        To be used in FFT plots. Returns new X axis ticks and labels.
+
+        :param dims: size of the FFT
+        :param pixsize: pixel size in Angstroms
+    """
+    step = dims // 20
+    x_ticks = np.arange(0, dims // 2, step)
+    x_labels = np.round(np.array([dims * pixsize / (i + 1e-5) for i in x_ticks]) / 10, 2)
+    x_labels[0] = np.inf
+
+    return x_ticks.tolist(), x_labels.tolist()

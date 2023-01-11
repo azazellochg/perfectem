@@ -26,9 +26,11 @@
 
 import logging
 import numpy as np
-import matplotlib.pyplot as plt
+import serialem as sem
 
 from ..common import BaseSetup
+from ..utils import plot_fft_and_text, pretty_date
+from ..config import SCOPE_NAME
 
 
 class InfoLimit(BaseSetup):
@@ -37,21 +39,22 @@ class InfoLimit(BaseSetup):
         Take two images with a small image shift (2 nm), add them together and calculate FFT.
         You should observe Young fringes going up to 1 A (Krios G3i spec is 2.3 A at 0 tilt). """
 
-    def __init__(self, logFn="info_limit_0-tilt", **kwargs):
-        super().__init__(logFn, **kwargs)
+    def __init__(self, log_fn="info_limit_0-tilt", **kwargs):
+        super().__init__(log_fn, **kwargs)
         self.shift = 0.002  # image shift in um
         self.delay = 5  # in sec
         self.defocus = kwargs.get("defocus", -0.5)
+        self.specification = kwargs.get("spec", 0.14)  # for Krios, in nm
 
-    def run(self):
-        logging.info(f"Starting test {type(self).__name__} {BaseSetup.timestamp()}")
-        BaseSetup.setup_beam(self.mag, self.spot, self.beam_size)
-        BaseSetup.setup_area(exp=1, binning=2, preset="R")
-        BaseSetup.setup_area(exp=0.5, binning=2, preset="F")
-        BaseSetup.autofocus(self.defocus, 0.05, do_coma=True)
-        BaseSetup.check_drift()
-        BaseSetup.setup_area(self.exp, self.binning, preset="R")
-        BaseSetup.check_before_acquire()
+    def _run(self):
+        sem.TiltTo(0)
+        self.setup_beam(self.mag, self.spot, self.beam_size)
+        self.setup_area(exp=1, binning=2, preset="R")
+        self.setup_area(exp=0.5, binning=2, preset="F")
+        self.autofocus(self.defocus, 0.05, do_coma=True)
+        self.check_drift()
+        self.setup_area(self.exp, self.binning, preset="R")
+        self.check_before_acquire()
 
         logging.info(f"Taking two images with {self.shift} um image shift difference")
         sem.SetDivideBy2(1)
@@ -59,27 +62,30 @@ class InfoLimit(BaseSetup):
         sem.ImageShiftByMicrons(self.shift, 0.)
         sem.Delay(self.delay)
         sem.Record()
+        params = sem.ImageProperties("A")
+        pix = params[4] * 10
         sem.AddImages("A", "B")
         sem.FFT("A")
-        sem.SaveToOtherFile("A", "JPG", "NONE", self.logDir + f"/info_limit_0-tilt_{self.ts}.jpg")
-        data = np.asarray(sem.bufferImage("AF")).astype("int16")
-        params = sem.ImageProperties("A")
-        dim, pix = params[0], params[4] * 10
-        if 2*pix >= 1.0:
-            logging.error(f"At this mag the Nyquist is at {2*pix}, cannot plot 1A ring!")
-            sem.Exit(1)
-
-        # plot 1A ring on FFT
-        rad = dim * pix / 1
-        ring = plt.Circle((dim/2, dim/2), rad, color='w', fill=False)
-        fig, ax = plt.subplots(1, figsize=(19.2, 14.4))
-        ax.imshow(data, cmap='gray')
-        ax.add_patch(ring)
-        plt.text(dim/2-rad-50, dim/2, "1A", color="w", size="xx-large")
-
-        fig.tight_layout()
-        fig.savefig(f"info_limit_0-tilt_{self.ts}.png")
-
+        sem.SaveToOtherFile("AF", "JPG", "NONE", self.logDir + f"/info_limit_0-tilt_{self.ts}.jpg")
         sem.ImageShiftByMicrons(-self.shift, 0.)
-        logging.info(f"Completed test {type(self).__name__} {BaseSetup.timestamp()}")
-        sem.Exit(1)
+        data = np.asarray(sem.bufferImage("AF")).astype("int16")
+
+        textstr = f"""
+                    INFORMATION LIMIT at 0 degrees tilt
+
+                    Measurement performed       {pretty_date(get_time=True)}
+                    Microscope name             {SCOPE_NAME}
+                    Recorded at magnification   {self.mag // 1000} kx
+                    Defocus                     {-self.defocus} um
+                    Camera used                 {sem.ReportCameraName(self.CAMERA_NUM)}
+
+                    The information limit is a measure of the highest frequency
+                    that is transferred through the optical system. During exposure
+                    of the CCD the image is shifted ~2nm to produce Young's fringes
+                    in the FFT. The extent of the fringes is a measure of the information limit.
+
+                    Specification: {self.specification} nm
+        """
+
+        fig, axes = plot_fft_and_text(data, spec=self.specification, pix=pix, text=textstr)
+        fig.savefig(f"info_limit_0-tilt_{self.ts}.png")

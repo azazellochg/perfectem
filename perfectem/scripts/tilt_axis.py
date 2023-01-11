@@ -28,6 +28,7 @@ import logging
 import numpy as np
 import matplotlib.pyplot as plt
 import scipy.optimize as opt
+import serialem as sem
 
 from ..common import BaseSetup
 
@@ -42,17 +43,17 @@ class TiltAxis(BaseSetup):
         Revision: v1.1
     """
 
-    def __init__(self, logFn="tilt_axis", **kwargs):
-        super().__init__(logFn, **kwargs)
+    def __init__(self, log_fn="tilt_axis", **kwargs):
+        super().__init__(log_fn, **kwargs)
         self.increment = 5  # tilt step
         self.maxTilt = 15  # maximum +/- tilt angle
         self.offset = 5  # +/- offset for measured positions in microns from tilt axis
         # (also accepts lists e.g. [2, 4, 6])
 
-    def _dZ(self, alpha, y0):
+    def _dz(self, alpha, y0):
         return y0 * np.tan(np.radians(-alpha))
 
-    def _Tilt(self, tilt, offsets, focus0, focus, angles):
+    def _tilt(self, tilt, offsets, focus0, focus, angles):
         sem.TiltTo(tilt)
 
         for i in range(len(offsets)):
@@ -68,34 +69,32 @@ class TiltAxis(BaseSetup):
 
         angles.append(float(tilt))
 
-    def plot_results(self, offsets, relFocus, angles):
-        offsets, relFocus = zip(*sorted(zip(offsets, relFocus)))  # ensure right order for plot points
+    def plot_results(self, offsets, rel_focus, angles):
+        offsets, rel_focus = zip(*sorted(zip(offsets, rel_focus)))  # ensure right order for plot points
         fig, ax = plt.subplots(figsize=(8, 6))
         ax.set_title('Z Shifts [microns]')
         for i in range(len(angles)):
             values = []
             for j in range(len(offsets)):
-                values.append(relFocus[j][i])
+                values.append(rel_focus[j][i])
             ax.plot(offsets, values, label=str(angles[i]) + " deg")
 
         ax.legend()
         fig.tight_layout()
         fig.savefig(f"tilt_axis_offset_{self.ts}.png")
 
-    def run(self):
-        logging.info(f"Starting test {type(self).__name__} {BaseSetup.timestamp()}")
-        sem.ResetClock()
+    def _run(self):
         # Rough eucentricity first
-        BaseSetup.setup_beam(mag=11000, spot=5, beamsize=11)
-        BaseSetup.setup_area(self.exp, self.binning, preset="V")
-        oldOffset = sem.ReportTiltAxisOffset()[0]
-        logging.info(f"Currently set tilt axis offset: {oldOffset}")
+        self.setup_beam(mag=11000, spot=5, beamsize=11)
+        self.setup_area(self.exp, self.binning, preset="V")
+        old_offset = sem.ReportTiltAxisOffset()[0]
+        logging.info(f"Currently set tilt axis offset: {old_offset}")
         sem.Eucentricity(1)
 
         # Autofocus
-        BaseSetup.setup_beam(self.mag, self.spot, self.beam_size)
-        BaseSetup.setup_area(self.exp, self.binning, preset="F")
-        BaseSetup.autofocus(-2, 0.1, do_ast=False)
+        self.setup_beam(self.mag, self.spot, self.beam_size)
+        self.setup_area(self.exp, self.binning, preset="F")
+        self.autofocus(-2, 0.1, do_ast=False)
 
         starttilt = -self.maxTilt
         sem.TiltTo(starttilt)
@@ -116,31 +115,28 @@ class TiltAxis(BaseSetup):
         tilt = starttilt
         for i in range(int(steps)):
             logging.info(f"Tilt to {tilt} deg")
-            self._Tilt(tilt, offsets, focus0, focus, angles)
+            self._tilt(tilt, offsets, focus0, focus, angles)
             tilt += self.increment
 
-        relFocus = focus
+        rel_focus = focus
         for i in range(len(angles)):
             for j in range(len(offsets)):
-                relFocus[j][i] -= focus0[j]
+                rel_focus[j][i] -= focus0[j]
 
         y0 = np.zeros(len(offsets))
         for j in range(len(offsets)):
-            y0[j], cov = opt.curve_fit(self._dZ, angles, relFocus[j], p0=0)
+            y0[j], cov = opt.curve_fit(self._dz, angles, rel_focus[j], p0=0)
 
         logging.info(f"Remaining tilt axis offsets:")
         for i in range(0, len(offsets)):
             logging.info(f"[{offsets[i]}]: {round(y0[i] + offsets[i], 2)}")
 
-        avgOffset = sum(y0) / len(offsets)
-        logging.info(f"Average remaining tilt axis offset: {avgOffset:0.2f}")
-        totalOffset = round(avgOffset + oldOffset, 2)
-        logging.info(f"Total tilt axis offset is {totalOffset}")
+        avg_offset = sum(y0) / len(offsets)
+        logging.info(f"Average remaining tilt axis offset: {avg_offset:0.2f}")
+        total_offset = round(avg_offset + old_offset, 2)
+        logging.info(f"Total tilt axis offset is {total_offset}")
 
         sem.TiltTo(0)
         sem.ResetImageShift()
-        sem.ReportClock()
 
-        self.plot_results(offsets, relFocus, angles)
-        logging.info(f"Completed test {type(self).__name__} {BaseSetup.timestamp()}")
-        sem.Exit(1)
+        self.plot_results(offsets, rel_focus, angles)

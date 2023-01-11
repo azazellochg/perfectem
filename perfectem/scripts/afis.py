@@ -25,6 +25,7 @@
 # **************************************************************************
 
 import logging
+import serialem as sem
 
 from ..common import BaseSetup
 
@@ -34,19 +35,18 @@ class AFIS(BaseSetup):
 
         Measure residual beam tilt at +-12 image shift positions. Shifts are along tilt axis! """
 
-    def __init__(self, logFn="afis", **kwargs):
-        super().__init__(logFn, **kwargs)
+    def __init__(self, log_fn="afis", **kwargs):
+        super().__init__(log_fn, **kwargs)
         self.defocus = kwargs.get("defocus", -2)
         self.shift = kwargs.get("max_imgsh", 12)
 
-    def run(self):
+    def _run(self):
         sem.Pause("Open EPU and set Acquisition mode = Faster in the Session Setup")
-        logging.info(f"Starting test {type(self).__name__} {BaseSetup.timestamp()}")
-        BaseSetup.setup_beam(self.mag, self.spot, self.beam_size)
-        BaseSetup.setup_area(self.exp, self.binning, preset="R")
-        BaseSetup.setup_area(exp=0.5, binning=2, preset="F")
+        self.setup_beam(self.mag, self.spot, self.beam_size)
+        self.setup_area(self.exp, self.binning, preset="R")
+        self.setup_area(exp=0.5, binning=2, preset="F")
         sem.SetImageShift(0, 0)
-        BaseSetup.autofocus(self.defocus, 0.05, do_ast=True, do_coma=True)
+        self.autofocus(self.defocus, 0.05, do_ast=True, do_coma=True)
 
         # move stage and apply opposite BIS
         bis_positions = [(-self.shift, -self.shift),
@@ -65,10 +65,8 @@ class AFIS(BaseSetup):
             sem.ImageShiftByMicrons(sh[0], sh[1])
             sem.Delay(5)
             sem.FixComaByCTF(1, 1, 0)
-            btX, btY = sem.ReportComaTiltNeeded()
+            bt_x, bt_y = sem.ReportComaTiltNeeded()
             sem.ImageShiftByMicrons(-sh[0], -sh[1])
-            logging.info(f"Residual beam tilt at {sh} um: [{btX}, {btY}] mrad")
+            logging.info(f"Residual beam tilt at {sh} um: [{bt_x}, {bt_y}] mrad")
 
         sem.SetImageShift(0, 0)
-        logging.info(f"Completed test {type(self).__name__} {BaseSetup.timestamp()}")
-        sem.Exit(1)

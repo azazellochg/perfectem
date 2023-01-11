@@ -24,7 +24,7 @@
 # *
 # **************************************************************************
 
-import logging
+import serialem as sem
 
 from ..common import BaseSetup
 
@@ -34,16 +34,13 @@ class GainRef(BaseSetup):
 
     Take a picture of a flood beam and check the auto-correlation. """
 
-    def __init__(self, logFn="gain_ref", **kwargs):
-        super().__init__(logFn, **kwargs)
+    def __init__(self, log_fn="gain_ref", **kwargs):
+        super().__init__(log_fn, **kwargs)
 
-    def run(self):
+    def _run(self):
         sem.Pause("Please move stage to an empty area")
-        logging.info(f"Starting test {type(self).__name__} {BaseSetup.timestamp()}")
-        BaseSetup.setup_beam(self.mag, self.spot, self.beam_size)
-        BaseSetup.setup_area(self.exp, self.binning, preset="R")
+        self.setup_beam(self.mag, self.spot, self.beam_size)
+        self.setup_area(self.exp, self.binning, preset="R")
 
         sem.Record()
         sem.SaveToOtherFile("A", "JPG", "NONE", self.logDir + f"/gain_check_{self.ts}.jpg")
-        logging.info(f"Completed test {type(self).__name__} {BaseSetup.timestamp()}")
-        sem.Exit(1)

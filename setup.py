@@ -54,8 +54,7 @@ setup(
     packages=find_packages(),
     install_requires=['mrcfile', 'numpy', 'scipy', 'matplotlib'],
     entry_points={'console_scripts': [
-        'run_performance_tests=perfectem:main',
-        'check_sem_connection=perfectem:check_sem'
+        'run_script=perfectem:main',
     ]},
     project_urls={
         'Bug Reports': 'https://github.com/azazellochg/perfectem/issues',

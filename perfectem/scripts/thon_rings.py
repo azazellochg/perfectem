@@ -24,36 +24,35 @@
 # *
 # **************************************************************************
 
-import datetime as dt
-import logging
 import numpy as np
 import matplotlib.pyplot as plt
+import serialem as sem
 
 from ..common import BaseSetup
-from ..config import SCOPE
-from ..utils import radial_profile
+from ..config import SCOPE_NAME
+from ..utils import radial_profile, plot_fft_and_text, invert_pixel_axis, pretty_date
 
 
 class ThonRings(BaseSetup):
     """ Thon rings limit test.
 
         Take a high-resolution image on carbon and fit CTF rings as far as you can.
-        Calculate a radial average from one quadrant and mark 0.33nm specification (Krios)
+        Calculate a radial average from one quadrant and mark 0.33 nm specification (Krios)
 
     """
 
-    def __init__(self, logFn="thon_rings", **kwargs):
-        super().__init__(logFn, **kwargs)
+    def __init__(self, log_fn="thon_rings", **kwargs):
+        super().__init__(log_fn, **kwargs)
         self.defocus = kwargs.get("defocus", -0.5)
+        self.specification = kwargs.get("spec", 0.33)  # for Krios, in nm
 
-    def run(self):
-        logging.info(f"Starting test {type(self).__name__} {BaseSetup.timestamp()}")
-        BaseSetup.setup_beam(self.mag, self.spot, self.beam_size)
-        BaseSetup.setup_area(self.exp, self.binning, preset="R")
-        BaseSetup.setup_area(exp=0.5, binning=2, preset="F")
-        BaseSetup.autofocus(self.defocus, 0.05)
-        BaseSetup.check_drift()
-        BaseSetup.check_before_acquire()
+    def _run(self):
+        self.setup_beam(self.mag, self.spot, self.beam_size)
+        self.setup_area(self.exp, self.binning, preset="R")
+        self.setup_area(exp=0.5, binning=2, preset="F")
+        self.autofocus(self.defocus, 0.05)
+        self.check_drift()
+        self.check_before_acquire()
 
         sem.SetDivideBy2(1)
         sem.Record()
@@ -70,48 +69,38 @@ class ThonRings(BaseSetup):
         res[halfx:, halfy:] = 0
 
         rad = radial_profile(res)
-        sem.SaveToOtherFile("A", "JPG", "NONE", self.logDir + f"/thon_rings_{self.ts}.jpg")
-
-        fig = plt.figure(figsize=(19.2, 14.4))
-        gs = fig.add_gridspec(2, 2)
-        ax1 = fig.add_subplot(gs[0, 0])
-        ax2 = fig.add_subplot(gs[0, 1])
-        ax3 = fig.add_subplot(gs[1, :])
-
-        # set X ticks to nm
-        step = dim // 20
-        a = np.arange(0, dim // 2, step)
-        b = np.round(np.array([dim * pix / (i + 1e-5) for i in a]) / 10, 2)
-        b[0] = np.inf
+        sem.SaveToOtherFile("AF", "JPG", "NONE", self.logDir + f"/thon_rings_{self.ts}.jpg")
 
         textstr = f"""
                     THON RINGS
 
-                    Measurement performed       {dt.datetime.now().strftime('%d-%m-%Y')}
-                    Microscope type             {SCOPE}
+                    Measurement performed       {pretty_date(get_time=True)}
+                    Microscope name             {SCOPE_NAME}
                     Recorded at magnification   {self.mag // 1000} kx
                     Defocus                     {-self.defocus} um
-                    Camera used                 {sem.ReportCameraName()}
+                    Camera used                 {sem.ReportCameraName(self.CAMERA_NUM)}
 
                     The Thon ring profile is calculated from the FFT
                     of a high-resolution image.The profile itself is
                     a radial average of one top right quadrant.
+
+                    Specification: {self.specification} nm
+
         """
 
-        ax1.imshow(data, cmap='gray')
-        ax1.axis('off')
-        ax2.text(0, 0.2, textstr, fontsize=20)
-        ax2.axis('off')
-        ax3.plot(rad)
+        fig, axes = plot_fft_and_text(data, spec=self.specification,
+                                      pix=pix, text=textstr, add_bottom_plot=True)
+        axes[-1].plot(rad)
         plt.xlabel('Resolution (nm)')
-        plt.xticks(a.tolist(), b.tolist())
+        x_ticks, x_labels = invert_pixel_axis(dim, pix)
+        plt.xticks(x_ticks, x_labels)
         plt.minorticks_on()
         plt.xlim(0)
 
-        # mark 3.3A
-        mark = dim * pix / 3.3
+        # mark 0.33 nm
+        mark = dim * pix / (self.specification * 10)
         value = rad[int(mark)]
-        plt.annotate('0.33nm', xy=(mark, value + 0.01),
+        plt.annotate(f'{self.specification} nm', xy=(mark, value + 0.01),
                      xytext=(mark, value + 0.1), fontsize=20,
                      arrowprops=dict(facecolor='red',
                                      shrink=0.05))
@@ -119,5 +108,3 @@ class ThonRings(BaseSetup):
         fig.tight_layout()
         plt.grid()
         fig.savefig(f"thon_rings_{self.ts}.png")
-        logging.info(f"Completed test {type(self).__name__} {BaseSetup.timestamp()}")
-        sem.Exit(1)

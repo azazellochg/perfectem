@@ -27,6 +27,7 @@
 import math
 import logging
 import matplotlib.pyplot as plt
+import serialem as sem
 
 from ..common import BaseSetup
 from ..config import DEBUG
@@ -38,8 +39,8 @@ class StageDrift(BaseSetup):
     At each Navigator position perform the following: move the stage in 4 directions by 1 um,
     3 times each direction, followed by drift estimation."""
 
-    def __init__(self, logFn="stage_drift", **kwargs):
-        super().__init__(logFn, **kwargs)
+    def __init__(self, log_fn="stage_drift", **kwargs):
+        super().__init__(log_fn, **kwargs)
         self.drift_crit = 1  # stop after reaching this A/sec
         self.max_time = 180.  # give up after max_time in sec
         self.times = 3  # times to move/measure in one direction
@@ -59,7 +60,6 @@ class StageDrift(BaseSetup):
             "-Y": []
         }
 
-        logging.info(f"Starting test {type(self).__name__} {BaseSetup.timestamp()}")
         logging.info(f"Moving stage to a measuring position and settling for {self.delay}s")
         nav_index = int(sem.NavIndexWithLabel(nav_label))
         sem.MoveToNavItem(nav_index)
@@ -143,15 +143,14 @@ class StageDrift(BaseSetup):
         # plt.show()
         # plt.pause(0.1)
 
-    def run(self):
+    def _run(self):
         """ Run the actual test for all points that have Acquire flag. """
-        logging.info(f"Starting test {type(self).__name__} {BaseSetup.timestamp()}")
-        BaseSetup.setup_beam(self.mag, self.spot, self.beam_size)
-        BaseSetup.setup_area(self.exp, self.binning, preset="F")
-        BaseSetup.autofocus(-2, 0.05, do_ast=False)
+        self.setup_beam(self.mag, self.spot, self.beam_size)
+        self.setup_area(self.exp, self.binning, preset="F")
+        self.autofocus(-2, 0.05, do_ast=False)
 
-        isNavOpen = sem.ReportIfNavOpen()
-        if not isNavOpen:
+        is_nav_open = sem.ReportIfNavOpen()
+        if not is_nav_open:
             sem.Exit(1, "Please open Navigator and add a few points for drift measuring")
         items = int(sem.ReportNumTableItems())
         items_to_use = list(range(1, items+1))
@@ -166,6 +165,3 @@ class StageDrift(BaseSetup):
 
         if not items_to_use:
             logging.error("No Acquire points found in Navigator. Exiting.")
-
-        logging.info(f"Completed test {type(self).__name__} {BaseSetup.timestamp()}")
-        sem.Exit(1)

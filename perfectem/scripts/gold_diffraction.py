@@ -24,42 +24,53 @@
 # *
 # **************************************************************************
 
-import logging
 import numpy as np
-import matplotlib.pyplot as plt
+import serialem as sem
 
 from ..common import BaseSetup
+from ..utils import plot_fft_and_text, pretty_date
+from ..config import SCOPE_NAME
 
 
 class GoldDiffr(BaseSetup):
     """ Take high mag image of gold and check the diffraction spots up to 1 A in all directions. """
 
-    def __init__(self, logFn="gold_diffr", **kwargs):
-        super().__init__(logFn, **kwargs)
+    def __init__(self, log_fn="gold_diffr", **kwargs):
+        super().__init__(log_fn, **kwargs)
         self.defocus = kwargs.get("defocus", -0.5)
+        self.specification = kwargs.get("spec", 0.1)  # for Krios, in nm
 
-    def run(self):
+    def _run(self):
         sem.Pause("Please change C2 aperture to 150um")
-
-        logging.info(f"Starting test {type(self).__name__} {BaseSetup.timestamp()}")
-        #BaseSetup.euc_by_beamtilt()
-        BaseSetup.setup_beam(self.mag, self.spot, self.beam_size)
-        BaseSetup.setup_area(exp=3, binning=4, preset="F")
-        BaseSetup.setup_area(exp=3, binning=4, preset="R")
-        BaseSetup.autofocus(self.defocus, 0.05, do_coma=True)
-        BaseSetup.check_drift()
-        BaseSetup.setup_area(self.exp, self.binning, preset="R")
-        BaseSetup.check_before_acquire()
+        self.setup_beam(self.mag, self.spot, self.beam_size)
+        self.setup_area(exp=3, binning=4, preset="F")
+        self.setup_area(exp=3, binning=4, preset="R")
+        self.autofocus(self.defocus, 0.05, do_coma=True)
+        self.check_drift()
+        self.setup_area(self.exp, self.binning, preset="R")
+        self.check_before_acquire()
 
         sem.SetDivideBy2(1)
         sem.Record()
+        params = sem.ImageProperties("A")
+        pix = params[4] * 10
         sem.FFT("A")
-        sem.SaveToOtherFile("A", "JPG", "NONE", self.logDir + f"/gold_diffr_{self.ts}.jpg")
-
+        sem.SaveToOtherFile("AF", "JPG", "NONE", self.logDir + f"/gold_diffr_{self.ts}.jpg")
         data = np.asarray(sem.bufferImage("AF")).astype("int16")
-        fig, ax = plt.subplots(1, figsize=(19.2, 14.4))
-        ax.imshow(data, cmap='gray')
-        fig.tight_layout()
+
+        textstr = f"""
+                    DIFFRACTION LIMIT at 0 degrees tilt
+
+                    Measurement performed       {pretty_date(get_time=True)}
+                    Microscope type             {SCOPE_NAME}
+                    Recorded at magnification   {self.mag // 1000} kx
+                    Defocus                     {-self.defocus} um
+                    Camera used                 {sem.ReportCameraName(self.CAMERA_NUM)}
+
+                    One should see gold diffraction spots beyond 1 A.
+
+                    Specification: {self.specification} nm
+        """
+
+        fig, axes = plot_fft_and_text(data, spec=self.specification, pix=pix, text=textstr)
         fig.savefig(f"gold_diffr_{self.ts}.png")
-        logging.info(f"Completed test {type(self).__name__} {BaseSetup.timestamp()}")
-        sem.Exit(1)

@@ -10,8 +10,7 @@ Requirements:
 
     * python >= 3.6
     * matplotlib, mrcfile, numpy, scipy
-    * SerialEM python module
-    * network connection to SerialEM PC
+    * network connection to PC with SerialEM that controls the microscope
 
 Installation from PyPI on Windows
 #################################
@@ -30,12 +29,12 @@ Offline installation on Windows
 Option A (from PyPi)
 ^^^^^^^^^^^^^^^^^^^^
 
-#. Download \*.whl files for perfectem, mrcfile, numpy, matplotlib and scipy into the current folder
+#. Download \*.whl files for `perfectem <https://pypi.org/project/perfectem/#files>`_, `matplotlib <https://pypi.org/project/matplotlib/#files>`_, `mrcfile <https://pypi.org/project/mrcfile/#files>`_, `numpy <https://pypi.org/project/numpy/#files>`_ and `scipy <https://pypi.org/project/scipy/#files>`_ into the current folder
 #. Execute from the command line (assuming you have your Python interpreter in the path):
 
 .. code-block:: python
 
-    py -m pip install mrcfile numpy matplotlib scipy perfectem --no-index --find-links .
+    py -m pip install matplotlib mrcfile numpy scipy perfectem --no-index --find-links .
 
 Option B (from sources)
 ^^^^^^^^^^^^^^^^^^^^^^^
@@ -45,10 +44,18 @@ Option B (from sources)
 
 .. code-block:: python
 
-    py -m pip install mrcfile numpy scipy matplotlib --no-index --find-links .
+    py -m pip install matplotlib mrcfile numpy scipy --no-index --find-links .
     py -m pip install -e <source_directory>
 
 Available scripts
 -----------------
 
-    * tbd
+* Stage drift
+* Magnification anisotropy
+* Information limit (Young fringes)
+* Thon rings
+* Gold diffraction
+* C2 Fresnel fringes
+* Tilt axis offset
+* Gain reference check
+* AFIS check

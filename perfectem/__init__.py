@@ -24,48 +24,12 @@
 # *
 # **************************************************************************
 
-try:
-    import serialem as sem
-except ImportError:
-    print("Failed to import SerialEM Python module. "
-          "Check https://bio3d.colorado.edu/SerialEM/download.html#PythonModules")
-
-from .config import DEBUG
-from .common import BaseSetup
-from .scripts import *
+from .config import params_dict
 
 __version__ = '0.6'
 
 
 def main():
-    BaseSetup.get_scope_type()
-    camera_num = 1
-    camera_names = []
-    while True:
-        name = sem.ReportCameraName(camera_num)
-        if name == "NOCAM":
-            break
-        else:
-            camera_names.append(name)
-            camera_num += 1
-
-    print("Choose camera to use with SerialEM:\n")
-    for i, c in enumerate(camera_names):
-        print(f"\t[{i+1}] {c}")
-
-    camera_num = int(input("\nInput the camera number: ").strip())
-    if camera_num > len(camera_names) or camera_num < 1:
-        raise IndexError("Wrong camera number!")
-    else:
-        sem.SelectCamera(camera_num)
-        _, _, mode = sem.ReportMag()
-        if mode == 1:  # EFTEM
-            sem.SetSlitIn(0)  # retract slit
-
-    if not sem.ReportColumnOrGunValve():
-        sem.SetColumnOrGunValve(1)
-    sem.SetLowDoseMode(0)
-
     print("\nChoose a performance test to run:\n\n"
           "\t[1] Stage drift\n"
           "\t[2] Magnification anisotropy\n"
@@ -79,22 +43,34 @@ def main():
           )
 
     num = int(input("\nInput the test number: ").strip())
+
     if num in range(1, 10):
-        test_dict = {
-            # beam size in microns (Krios, 3-cond. lenses) or percents (2-cond. lenses)
-
-            1: (StageDrift, {"beam": 1.0, "spot": 3, "mag": 96000, "exp": 0.5, "binning": 2}),  # For drift test you need an opened Navigator file with Acquire points
-            2: (Anisotropy, {"beam": 1.0, "spot": 3, "mag": 96000, "exp": 0.5, "binning": 2}),  # Run this test for both pre-GIF and post-GIF camera
-            3: (InfoLimit, {"beam": 0.6, "spot": 3, "mag": 250000, "exp": 2, "binning": 1, "defocus": -0.5}),
-            4: (ThonRings, {"beam": 0.6, "spot": 3, "mag": 250000, "exp": 1, "binning": 2, "defocus": -0.5}),  # Titan Krios G3i 195kx -2um defocus - spec is 0.33nm
-            5: (GoldDiffr, {"beam": 1.05, "spot": 3, "mag": 600000, "exp": 3, "binning": 2, "defocus": -0.5}),  # For this test you need C2 150um and sample
-            6: (C2Fringes, {"beam": 0.4, "spot": 3, "mag": 75000, "exp": 0.1, "binning": 1}),  # For this test you need to go to an empty area
-            7: (TiltAxis, {"beam": 1.0, "spot": 3, "mag": 75000, "exp": 0.5, "binning": 2}),
-            8: (GainRef, {"beam": 1.1, "spot": 3, "mag": 75000, "exp": 1, "binning": 1, "defocus": -2}),  # For this test you need to go to an empty area
-            9: (AFIS, {"beam": 1.0, "spot": 7, "mag": 96000, "exp": 1, "binning": 2, "defocus": -2}),
-        }
-
-        test, params = test_dict[num][0], test_dict[num][1]
-        test(**params).run()
+        if num == 1:
+            from .scripts import StageDrift
+            StageDrift(**params_dict['StageDrift']).run()
+        elif num == 2:
+            from .scripts import Anisotropy
+            Anisotropy(**params_dict['Anisotropy']).run()
+        elif num == 3:
+            from .scripts import InfoLimit
+            InfoLimit(**params_dict['InfoLimit']).run()
+        elif num == 4:
+            from .scripts import ThonRings
+            ThonRings(**params_dict['ThonRings']).run()
+        elif num == 5:
+            from .scripts import GoldDiffr
+            GoldDiffr(**params_dict['GoldDiffr']).run()
+        elif num == 6:
+            from .scripts import C2Fringes
+            C2Fringes(**params_dict['C2Fringes']).run()
+        elif num == 7:
+            from .scripts import TiltAxis
+            TiltAxis(**params_dict['TiltAxis']).run()
+        elif num == 8:
+            from .scripts import GainRef
+            GainRef(**params_dict['GainRef']).run()
+        elif num == 9:
+            from .scripts import AFIS
+            AFIS(**params_dict['AFIS']).run()
     else:
         raise IndexError("Wrong test number!")

@@ -24,11 +24,11 @@
 # *
 # **************************************************************************
 
-import logging
 import numpy as np
 import matplotlib.pyplot as plt
 import scipy.ndimage as ndimg
 from scipy.signal import savgol_filter
+import serialem as sem
 
 from ..common import BaseSetup
 
@@ -38,24 +38,23 @@ class C2Fringes(BaseSetup):
 
     Take a picture of a flood beam to see if the fringes from C2 aperture extend all the way to the center. """
 
-    def __init__(self, logFn="C2_fringes", **kwargs):
-        super().__init__(logFn, **kwargs)
+    def __init__(self, log_fn="C2_fringes", **kwargs):
+        super().__init__(log_fn, **kwargs)
 
-    def run(self):
+    def _run(self):
         sem.Pause("Please move stage to an empty area")
-        logging.info(f"Starting test {type(self).__name__} {BaseSetup.timestamp()}")
-        BaseSetup.setup_beam(self.mag, self.spot, self.beam_size)
-        BaseSetup.setup_area(self.exp, self.binning, preset="R")
+        self.setup_beam(self.mag, self.spot, self.beam_size)
+        self.setup_area(self.exp, self.binning, preset="R")
 
         sem.Record()
         params = sem.ImageProperties("A")
-        dimX, dimY = params[0], params[1]
+        dim_x, dim_y = params[0], params[1]
         data = np.asarray(sem.bufferImage("A")).astype("int16")
         sem.SaveToOtherFile("A", "JPG", "NONE", self.logDir + f"/C2_fringes_{self.ts}.jpg")
 
         # Extract the line
-        x1, y1 = dimX/2, dimY/2
-        num = int(np.sqrt((dimX/2) ** 2 + (dimY/2) ** 2))
+        x1, y1 = dim_x/2, dim_y/2
+        num = int(np.sqrt((dim_x/2) ** 2 + (dim_y/2) ** 2))
         x, y = np.linspace(0, x1, num), np.linspace(0, y1, num)
 
         # Extract the values along the line, using cubic interpolation
@@ -73,5 +72,3 @@ class C2Fringes(BaseSetup):
 
         fig.tight_layout()
         fig.savefig(f"C2_fringes_{self.ts}.png")
-        logging.info(f"Completed test {type(self).__name__} {BaseSetup.timestamp()}")
-        sem.Exit(1)

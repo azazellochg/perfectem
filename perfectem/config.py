@@ -24,8 +24,43 @@
 # *
 # **************************************************************************
 
-
 # set to 1 for more diagnostic output
-DEBUG = 0
+DEBUG = 1
+SCOPE_NAME = "Krios2"
 
-SCOPE = "Krios2"
+params_dict = {
+    # beam size in microns (Krios, 3-cond. lenses) or percents (2-cond. lenses)
+
+    "StageDrift":
+        {"beam": 1.0, "spot": 3, "mag": 96000, "exp": 0.5, "binning": 2},
+    # For drift test you need an opened Navigator file with Acquire points
+
+    "Anisotropy":
+        {"beam": 1.0, "spot": 3, "mag": 96000, "exp": 0.5, "binning": 2},
+    # Run this test for both pre-GIF and post-GIF camera
+
+    "InfoLimit":
+        {"beam": 0.6, "spot": 3, "mag": 250000, "exp": 2, "binning": 1, "defocus": -0.5},
+
+    "ThonRings":
+        {"beam": 0.6, "spot": 3, "mag": 250000, "exp": 1, "binning": 2, "defocus": -0.5},
+    # Titan Krios G3i 195kx -2um defocus - spec is 0.33nm
+
+    "GoldDiffr":
+        {"beam": 1.05, "spot": 3, "mag": 600000, "exp": 3, "binning": 2, "defocus": -0.5},
+    # For this test you need C2 150um and sample
+
+    "C2Fringes":
+        {"beam": 0.4, "spot": 3, "mag": 75000, "exp": 0.1, "binning": 1},
+    # For this test you need to go to an empty area
+
+    "TiltAxis":
+        {"beam": 1.0, "spot": 3, "mag": 75000, "exp": 0.5, "binning": 2},
+
+    "GainRef":
+        {"beam": 1.1, "spot": 3, "mag": 75000, "exp": 1, "binning": 1, "defocus": -2},
+    # For this test you need to go to an empty area
+
+    "AFIS":
+        {"beam": 1.0, "spot": 7, "mag": 96000, "exp": 1, "binning": 2, "defocus": -2},
+}
