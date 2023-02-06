@@ -66,7 +66,7 @@ class GoldDiffr(BaseSetup):
                     Measurement performed       {pretty_date(get_time=True)}
                     Microscope type             {SCOPE_NAME}
                     Recorded at magnification   {self.mag // 1000} kx
-                    Defocus                     {-self.defocus} um
+                    Defocus                     {self.defocus} um
                     Camera used                 {sem.ReportCameraName(self.CAMERA_NUM)}
 
                     One should see gold diffraction spots beyond 1 A.
