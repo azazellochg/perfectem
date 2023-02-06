@@ -85,11 +85,11 @@ class TiltAxis(BaseSetup):
 
     def _run(self):
         # Rough eucentricity first
-        self.setup_beam(mag=11000, spot=5, beamsize=11)
-        self.setup_area(self.exp, self.binning, preset="V")
+        self.setup_beam(mag=6500, spot=7, beamsize=11)
+        self.setup_area(self.exp, self.binning, preset="T")
         old_offset = sem.ReportTiltAxisOffset()[0]
         logging.info(f"Currently set tilt axis offset: {old_offset}")
-        sem.Eucentricity(1)
+        self.euc_by_stage()
 
         # Autofocus
         self.setup_beam(self.mag, self.spot, self.beam_size)

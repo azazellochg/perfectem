@@ -38,7 +38,7 @@ class AFIS(BaseSetup):
     def __init__(self, log_fn="afis", **kwargs):
         super().__init__(log_fn, **kwargs)
         self.defocus = kwargs.get("defocus", -2)
-        self.shift = kwargs.get("max_imgsh", 12)
+        self.shift = kwargs.get("max_imgsh", 12.0)
 
     def _run(self):
         sem.Pause("Open EPU and set Acquisition mode = Faster in the Session Setup")
@@ -48,7 +48,6 @@ class AFIS(BaseSetup):
         sem.SetImageShift(0, 0)
         self.autofocus(self.defocus, 0.05, do_ast=True, do_coma=True)
 
-        # move stage and apply opposite BIS
         bis_positions = [(-self.shift, -self.shift),
                          (-self.shift, 0),
                          (-self.shift, self.shift),
@@ -56,17 +55,17 @@ class AFIS(BaseSetup):
                          (0, self.shift),
                          (self.shift, -self.shift),
                          (self.shift, self.shift)]
-
-        x, y, _ = sem.ReportStageXYZ()
-        stage_positions = [(x-i[0], y-i[1]) for i in bis_positions]
-
-        for sh, pos in zip(bis_positions, stage_positions):
-            sem.MoveStage(pos[0], pos[1])
-            sem.ImageShiftByMicrons(sh[0], sh[1])
-            sem.Delay(5)
-            sem.FixComaByCTF(1, 1, 0)
+        
+        sem.NoMessageBoxOnError()
+        for img in bis_positions:
+            sem.SetImageShift(img[0], img[1], self.DELAY+2)  # units match microns in delphi adapter    
+            try:
+                sem.FixComaByCTF(1, 1, 0)
+            except sem.SEMerror as e:
+                logging.error(str(e))
+                continue
             bt_x, bt_y = sem.ReportComaTiltNeeded()
-            sem.ImageShiftByMicrons(-sh[0], -sh[1])
-            logging.info(f"Residual beam tilt at {sh} um: [{bt_x}, {bt_y}] mrad")
+            logging.info(f"Residual beam tilt at {img} um: {round(bt_x, 3)}, {round(bt_y, 3)} mrad")
 
         sem.SetImageShift(0, 0)
+        sem.NoMessageBoxOnError(0)

@@ -29,7 +29,7 @@ import serialem as sem
 
 from ..common import BaseSetup
 from ..utils import plot_fft_and_text, pretty_date
-from ..config import SCOPE_NAME
+from ..config import SCOPE_NAME, DEBUG
 
 
 class GoldDiffr(BaseSetup):
@@ -50,12 +50,14 @@ class GoldDiffr(BaseSetup):
         self.setup_area(self.exp, self.binning, preset="R")
         self.check_before_acquire()
 
-        sem.SetDivideBy2(1)
+        if self.CAMERA_HAS_DIVIDEBY2:
+            sem.SetDivideBy2(1)
         sem.Record()
         params = sem.ImageProperties("A")
         pix = params[4] * 10
         sem.FFT("A")
-        sem.SaveToOtherFile("AF", "JPG", "NONE", self.logDir + f"/gold_diffr_{self.ts}.jpg")
+        if DEBUG:
+            sem.SaveToOtherFile("AF", "JPG", "NONE", self.logDir + f"/gold_diffr_{self.ts}.jpg")
         data = np.asarray(sem.bufferImage("AF")).astype("int16")
 
         textstr = f"""

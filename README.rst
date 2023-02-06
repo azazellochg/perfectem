@@ -59,3 +59,12 @@ Available scripts
 * Tilt axis offset
 * Gain reference check
 * AFIS check
+
+Running scripts
+---------------
+
+To start the program, simply type:
+
+.. code-block:: python
+
+    run_script

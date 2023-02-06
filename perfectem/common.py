@@ -25,6 +25,7 @@
 # **************************************************************************
 
 import os
+import math
 import logging
 import serialem as sem
 from datetime import datetime
@@ -42,6 +43,8 @@ class BaseSetup:
         self.SCOPE_HAS_C3 = False
         self.SCOPE_HAS_AUTOFILL = False
         self.CAMERA_NUM = 1
+        self.CAMERA_HAS_DIVIDEBY2 = True
+        self.DELAY = 1
 
         self.setup_log(log_fn)
         self.get_scope_type()
@@ -54,7 +57,7 @@ class BaseSetup:
         sem.SetUserSetting("CtfDoFullArray", 0)
         sem.SetUserSetting("CtfDriftSettling", 0.)
         sem.SetUserSetting("CtfExposure", 0)
-        #UserMaxCtfFitRes
+        sem.SetUserSetting("UserMaxCtfFitRes", 0)
         sem.SetUserSetting("MinCtfBasedDefocus", -0.4)
         sem.SetUserSetting("ComaIterationThresh", 0.02)
         sem.SetUserSetting("CtfUseFullField", 0)
@@ -77,9 +80,10 @@ class BaseSetup:
         os.chdir(self.logDir)
         #level = logging.INFO if not DEBUG else logging.DEBUG
         logging.basicConfig(level=logging.INFO,
-                            format='%(message)s',
+                            datefmt='%d-%m-%Y %H:%M:%S',
+                            format='%(asctime)s %(message)s',
                             handlers=[
-                                logging.FileHandler(f"{log_fn}_{self.ts}.log"),
+                                logging.FileHandler(f"{log_fn}_{self.ts}.log", "w", "utf-8"),
                                 logging.StreamHandler()])
 
         sem.SuppressReports()
@@ -109,6 +113,8 @@ class BaseSetup:
         else:
             sem.SelectCamera(camera_num)
             self.CAMERA_NUM = camera_num
+            if sem.ReportCameraName(self.CAMERA_NUM) == "Falcon 4EC":
+                self.CAMERA_HAS_DIVIDEBY2 = False
             _, _, mode = sem.ReportMag()
             if mode == 1:  # EFTEM
                 sem.SetSlitIn(0)  # retract slit
@@ -120,10 +126,13 @@ class BaseSetup:
 
     def get_scope_type(self):
         """ Get some global microscope-type related params. """
+        sem.NoMessageBoxOnError()
 
-        value1, value2 = sem.ReportPercentC2()
-        if not (value1 * 0.01 - value2) < 0.00001:  # (percents, fraction) 2-condenser lens system
+        try:
+            sem.ReportIlluminatedArea()
             self.SCOPE_HAS_C3 = True
+        except sem.SEMerror or sem.SEMmoduleError:
+            pass
 
         try:
             sem.AreDewarsFilling()
@@ -131,6 +140,7 @@ class BaseSetup:
         except sem.SEMerror or sem.SEMmoduleError:
             pass
 
+        sem.NoMessageBoxOnError(0)
         logging.info(f"Microscope type detected: hasC3={self.SCOPE_HAS_C3}, hasAutofill={self.SCOPE_HAS_AUTOFILL}")
 
     def _run(self):
@@ -168,14 +178,16 @@ class BaseSetup:
         logging.info(f"Dose rate: {eps} eps")
         spot = int(sem.ReportSpotSize())
         while True:
-            eps /= 2
-            spot += 1
-            if eps < 120:  # keep below 120 eps
+            if eps < 120.0:  # keep below 120 eps
                 break
+            else:
+                eps /= 2
+                spot += 1
 
         if spot != int(sem.ReportSpotSize()) and spot < 12:
             logging.info(f"Increasing spot size to {spot} to reduce dose rate below 120 eps")
             sem.SetSpotSize(spot)
+            sem.NormalizeLenses(4)
 
         # Restore previous settings
         sem.SetExposure("F", old_exp)
@@ -187,8 +199,9 @@ class BaseSetup:
         :param interval: repeat every N seconds
         :param timeout: give up and raise error after N seconds
         """
-
-        if (10 * sem.ReportFocusDrift() - crit) > 0.01:
+        x, y = sem.ReportFocusDrift()[0], sem.ReportFocusDrift()[1]
+        drift = math.sqrt(x**2 + y**2)
+        if (10 * drift - crit) > 0.01:
             logging.info(f"Waiting for drift to get below {crit} A/sec...")
             sem.DriftWaitTask(crit, "A", timeout, interval, 1, "A")
 
@@ -196,14 +209,38 @@ class BaseSetup:
         """ Set illumination params. """
 
         logging.info(f"Setting illumination: probe={mode}, mag={mag}, spot={spot}, beam={beamsize}")
-        sem.SetProbeMode(mode)
-        sem.SetMag(mag)
-        sem.SetSpotSize(spot)
+
+        new_probe = 0 if mode == "nano" else 1
+        probe_changed = sem.ReportProbeMode() != new_probe
+        old_mag, old_lm, _ = sem.ReportMag()
+        mag_changed = old_mag != mag
+        spot_changed = int(sem.ReportSpotSize()) != spot
+
+        normalize = dict()
+        if probe_changed:
+            sem.SetProbeMode(mode)
+            normalize.update({"PROJ": 1, "OBJ": 2, "COND": 4})
+        if spot_changed:
+            sem.SetSpotSize(spot)
+            normalize.update({"COND": 4})
+        if mag_changed:
+            sem.SetMag(mag)
+            normalize.update({"PROJ": 1, "COND": 4})
+            _, new_lm, _ = sem.ReportMag()
+            if new_lm != old_lm:
+                normalize.update({"PROJ": 1, "OBJ": 2})
+
+        norm = sum(normalize.values())
+        if norm != 0:
+            logging.info(f"Normalizing lenses... ({norm})")
+            sem.NormalizeLenses(norm)
 
         if not self.SCOPE_HAS_C3:
             sem.SetPercentC2(beamsize)
         else:  # (illum. area, fraction)
             sem.SetIlluminatedArea(beamsize * 0.01)
+
+        sem.Delay(self.DELAY)
 
         logging.info("Setting illumination: done!")
         self.check_eps()
@@ -218,12 +255,28 @@ class BaseSetup:
         sem.SetProcessing(preset, 2)  # gain-normalized
 
         if sem.ReportReadMode(preset) != 0:
+            sem.NoMessageBoxOnError()
             try:
                 sem.SetK2ReadMode(preset, 0)  # linear mode
             except sem.SEMerror or sem.SEMmoduleError:
                 pass
+            sem.NoMessageBoxOnError(0)
 
         logging.info("Setting camera: done!")
+
+    def euc_by_stage(self, fine=False):
+        """ Check FOV before running eucentricity by stage. """
+        min_FOV = sem.ReportProperty("EucentricityCoarseMinField")  # um
+        pix = sem.ReportCurrentPixelSize("T")  # nm
+        binning = sem.ReportBinning("T")
+        area_x, area_y, _, _, _, _ = sem.ReportCameraSetArea("T")  # binned pix
+        area = area_x * binning * pix / 1000  # um
+        if area < min_FOV:
+            logging.error(f"With current View settings, the FOV is "
+                          f"{area} um < {min_FOV}, decrease the magnification!")
+            sem.Exit()
+        else:
+            sem.Eucentricity(2 if fine else 1)
 
     def euc_by_beamtilt(self):
         """ tbd. """

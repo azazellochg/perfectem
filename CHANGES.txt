@@ -1,2 +1,18 @@
+TODO:
+    - check mag is in the table before setting
+    - redo stage drift test
+    - check installation requirements
+    - add readme
+    - redo tilt axis and mag aniso plots
+    - test afis script
+0.7:
+    - add divide by 2 check
+    - fix C3 lens presence check
+    - fix drift rate check
+    - add lens normalization depending on the illum. params change
+    - add FOV check before euc. by stage
 0.6:
-    - tbd
+    - add delay 1 (Krios) or 2 (Glacios) sec after setting spot size
+    - save jpg from SEM buffer only in debug mode
+    - fix dose rate check
+    - detect C3 lens presence and autofill capability

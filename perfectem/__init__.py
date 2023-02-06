@@ -26,7 +26,7 @@
 
 from .config import params_dict
 
-__version__ = '0.6'
+__version__ = '0.7'
 
 
 def main():

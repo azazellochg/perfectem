@@ -29,7 +29,7 @@ import matplotlib.pyplot as plt
 import serialem as sem
 
 from ..common import BaseSetup
-from ..config import SCOPE_NAME
+from ..config import SCOPE_NAME, DEBUG
 from ..utils import radial_profile, plot_fft_and_text, invert_pixel_axis, pretty_date
 
 
@@ -54,7 +54,8 @@ class ThonRings(BaseSetup):
         self.check_drift()
         self.check_before_acquire()
 
-        sem.SetDivideBy2(1)
+        if self.CAMERA_HAS_DIVIDEBY2:
+            sem.SetDivideBy2(1)
         sem.Record()
         params = sem.ImageProperties("A")
         dim, pix = params[0], params[4] * 10
@@ -69,7 +70,8 @@ class ThonRings(BaseSetup):
         res[halfx:, halfy:] = 0
 
         rad = radial_profile(res)
-        sem.SaveToOtherFile("AF", "JPG", "NONE", self.logDir + f"/thon_rings_{self.ts}.jpg")
+        if DEBUG:
+            sem.SaveToOtherFile("AF", "JPG", "NONE", self.logDir + f"/thon_rings_{self.ts}.jpg")
 
         textstr = f"""
                     THON RINGS

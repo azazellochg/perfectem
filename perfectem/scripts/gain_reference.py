@@ -38,9 +38,10 @@ class GainRef(BaseSetup):
         super().__init__(log_fn, **kwargs)
 
     def _run(self):
-        sem.Pause("Please move stage to an empty area")
+        sem.Pause("Please move stage to an empty area and spread the beam.")
         self.setup_beam(self.mag, self.spot, self.beam_size)
         self.setup_area(self.exp, self.binning, preset="R")
 
         sem.Record()
+        #get autocorrelation from sem or otherwise and save it
         sem.SaveToOtherFile("A", "JPG", "NONE", self.logDir + f"/gain_check_{self.ts}.jpg")

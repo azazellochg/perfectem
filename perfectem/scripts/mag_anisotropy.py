@@ -32,6 +32,7 @@ import matplotlib.pyplot as plt
 import serialem as sem
 
 from ..common import BaseSetup
+from ..config import DEBUG
 
 
 class Anisotropy(BaseSetup):
@@ -162,7 +163,7 @@ class Anisotropy(BaseSetup):
         ax.grid(True)
         ax.legend()
 
-        astig_str = 'Residual astigmatism ' + '{:6.1f}'.format(var[2]) + u'\u212B'
+        astig_str = 'Residual astigmatism ' + '{:6.1f}'.format(var[2]) + u'\u212b'
         angast_str = 'Direction ' + '{:6.1f}'.format(180.0 * var[3] / math.pi) + '\u00b0'
         anisomag_str = 'Anisotropy ' + '{:6.2f}'.format(100 * var[0]) + '%'
         anisoang_str = 'Aniso angle ' + '{:6.1f}'.format(180.0 * var[1] / math.pi) + '\u00b0'
@@ -195,8 +196,8 @@ class Anisotropy(BaseSetup):
             logging.info(f"Acquiring image with defocus of {-def_set} A")
             sem.SetDefocus(-def_set / 10000)
             sem.Record()
-            #if DEBUG:
-            #    sem.SaveToOtherFile("A", "JPG", "NONE", self.logDir + f"/def_{def_set}.jpg")
+            if DEBUG:
+                sem.SaveToOtherFile("A", "JPG", "NONE", self.logDir + f"/def_{def_set}.jpg")
             sem.FFT("A")
             try:
                 min_limit = -def_set/10000+2

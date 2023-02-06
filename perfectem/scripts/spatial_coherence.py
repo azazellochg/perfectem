@@ -31,6 +31,7 @@ from scipy.signal import savgol_filter
 import serialem as sem
 
 from ..common import BaseSetup
+from ..config import DEBUG
 
 
 class C2Fringes(BaseSetup):
@@ -42,15 +43,16 @@ class C2Fringes(BaseSetup):
         super().__init__(log_fn, **kwargs)
 
     def _run(self):
-        sem.Pause("Please move stage to an empty area")
         self.setup_beam(self.mag, self.spot, self.beam_size)
         self.setup_area(self.exp, self.binning, preset="R")
+        sem.Pause("Please move stage to an empty area and center the beam such that it can fit into the FOV")
 
         sem.Record()
         params = sem.ImageProperties("A")
         dim_x, dim_y = params[0], params[1]
         data = np.asarray(sem.bufferImage("A")).astype("int16")
-        sem.SaveToOtherFile("A", "JPG", "NONE", self.logDir + f"/C2_fringes_{self.ts}.jpg")
+        if DEBUG:
+            sem.SaveToOtherFile("A", "JPG", "NONE", self.logDir + f"/C2_fringes_{self.ts}.jpg")
 
         # Extract the line
         x1, y1 = dim_x/2, dim_y/2

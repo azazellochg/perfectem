@@ -30,7 +30,7 @@ import serialem as sem
 
 from ..common import BaseSetup
 from ..utils import plot_fft_and_text, pretty_date
-from ..config import SCOPE_NAME
+from ..config import SCOPE_NAME, DEBUG
 
 
 class InfoLimit(BaseSetup):
@@ -57,7 +57,8 @@ class InfoLimit(BaseSetup):
         self.check_before_acquire()
 
         logging.info(f"Taking two images with {self.shift} um image shift difference")
-        sem.SetDivideBy2(1)
+        if self.CAMERA_HAS_DIVIDEBY2:
+            sem.SetDivideBy2(1)
         sem.Record()
         sem.ImageShiftByMicrons(self.shift, 0.)
         sem.Delay(self.delay)
@@ -66,7 +67,8 @@ class InfoLimit(BaseSetup):
         pix = params[4] * 10
         sem.AddImages("A", "B")
         sem.FFT("A")
-        sem.SaveToOtherFile("AF", "JPG", "NONE", self.logDir + f"/info_limit_0-tilt_{self.ts}.jpg")
+        if DEBUG:
+            sem.SaveToOtherFile("AF", "JPG", "NONE", self.logDir + f"/info_limit_0-tilt_{self.ts}.jpg")
         sem.ImageShiftByMicrons(-self.shift, 0.)
         data = np.asarray(sem.bufferImage("AF")).astype("int16")
 
