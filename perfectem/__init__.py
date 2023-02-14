@@ -79,9 +79,10 @@ def main(argv=None):
         num = int(input("\nInput the test number: ").strip())
 
         if num in range(1, 10):
+            funcname = test_dict[num][0]
             module = importlib.import_module("perfectem.scripts")
-            func = getattr(module, test_dict[num][0])
+            func = getattr(module, funcname)
             print(func.__doc__)
-            func(**params_dict[func]).run()
+            func(**params_dict[funcname]).run()
         else:
             raise IndexError("Wrong test number!")
