@@ -34,10 +34,14 @@ from ..config import SCOPE_NAME, DEBUG
 
 
 class InfoLimit(BaseSetup):
-    """ Information limit test.
-
-        Take two images with a small image shift (2 nm), add them together and calculate FFT.
-        You should observe Young fringes going up to 1 A (Krios G3i spec is 2.3 A at 0 tilt). """
+    """
+        Name: Information limit test.
+        Desc: Take two images with a small image shift (2 nm), add them together
+              and calculate FFT. You should observe Young fringes going up
+              to 1 A.
+        Specification (Krios): 0.14 nm at 0 tilt, 0.23 nm at 70 deg. tilt.
+        Specification (Glacios): 0.23 nm at 0 tilt, 0.34 nm at 70 deg. tilt.
+    """
 
     def __init__(self, log_fn="info_limit_0-tilt", **kwargs):
         super().__init__(log_fn, **kwargs)

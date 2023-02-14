@@ -34,12 +34,12 @@ from ..common import BaseSetup
 
 
 class TiltAxis(BaseSetup):
-    """ Tilt axis offset check
-
-        Purpose:  Estimates tilt axis offset for PACEtomo. (Thanks to Wim Hagen for the suggestion!)
-                  More information at http://github.com/eisfabian/PACEtomo
-        Author:	  Fabian Eisenstein
-        Created:  2022/05/10
+    """
+        Name: Tilt axis offset check
+        Desc: Estimates tilt axis offset for PACEtomo.
+              More information at http://github.com/eisfabian/PACEtomo
+        Author: Fabian Eisenstein
+        Created: 2022/05/10
         Revision: v1.1
     """
 

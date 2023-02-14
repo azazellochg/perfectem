@@ -34,10 +34,12 @@ from ..config import DEBUG
 
 
 class StageDrift(BaseSetup):
-    """ Stage drift test.
-
-    At each Navigator position perform the following: move the stage in 4 directions by 1 um,
-    3 times each direction, followed by drift estimation."""
+    """
+        Name: Stage drift test.
+        Desc: At each Navigator position perform the following:
+              move the stage in 4 directions by 1 um, 3 times each direction,
+              followed by drift estimation.
+    """
 
     def __init__(self, log_fn="stage_drift", **kwargs):
         super().__init__(log_fn, **kwargs)

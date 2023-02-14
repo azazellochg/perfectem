@@ -30,7 +30,7 @@ import logging
 import serialem as sem
 from datetime import datetime
 
-from .config import SCOPE_NAME, DEBUG
+from .config import SCOPE_NAME
 from .utils import pretty_date
 
 
@@ -44,7 +44,7 @@ class BaseSetup:
         self.SCOPE_HAS_AUTOFILL = False
         self.CAMERA_NUM = 1
         self.CAMERA_HAS_DIVIDEBY2 = True
-        self.DELAY = 1
+        self.DELAY = 3
 
         self.setup_log(log_fn)
         self.get_scope_type()
@@ -258,6 +258,7 @@ class BaseSetup:
             sem.NoMessageBoxOnError()
             try:
                 sem.SetK2ReadMode(preset, 0)  # linear mode
+                sem.SetDoseFracParams(preset, 0, 0, 0)  # no frames
             except sem.SEMerror or sem.SEMmoduleError:
                 pass
             sem.NoMessageBoxOnError(0)

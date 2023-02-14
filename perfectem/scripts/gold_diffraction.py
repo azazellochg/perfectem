@@ -33,12 +33,16 @@ from ..config import SCOPE_NAME, DEBUG
 
 
 class GoldDiffr(BaseSetup):
-    """ Take high mag image of gold and check the diffraction spots up to 1 A in all directions. """
+    """
+        Name: Diffraction limit test.
+        Desc: Take a high magnification image of Au-Pt and check the diffraction
+              spots up to 1 A in all directions.
+    """
 
     def __init__(self, log_fn="gold_diffr", **kwargs):
         super().__init__(log_fn, **kwargs)
         self.defocus = kwargs.get("defocus", -0.5)
-        self.specification = kwargs.get("spec", 0.1)  # for Krios, in nm
+        self.specification = kwargs.get("spec", 0.1)  # nm
 
     def _run(self):
         sem.Pause("Please change C2 aperture to 150um")

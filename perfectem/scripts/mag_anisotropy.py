@@ -32,22 +32,23 @@ import matplotlib.pyplot as plt
 import serialem as sem
 
 from ..common import BaseSetup
-from ..config import DEBUG
+from ..utils import pretty_date
+from ..config import SCOPE_NAME, DEBUG
 
 
 class Anisotropy(BaseSetup):
-    """ Magnification anisotropy test.
-
-        Acquire a defocus series and plot astigmatism versus defocus.
-        Calculate anisotropy by estimating deviation from linear behaviour.
-
-        Calculation funcs are written by Greg McMullan @ MRC-LMB. """
+    """
+        Name: Magnification anisotropy test.
+        Desc: Acquire a defocus series and plot astigmatism versus defocus.
+              Calculate anisotropy by estimating deviation from linear behaviour.
+        Notes: Calculation funcs are written by Greg McMullan @ MRC-LMB.
+    """
 
     def __init__(self, log_fn="mag_anisotropy", **kwargs):
         super().__init__(log_fn, **kwargs)
         self.num_img = 10  # number of images
-        self.def_min = 5000  # min def in Angstroms
-        self.def_max = 50000  # max def in Angstroms
+        self.def_min = 2500  # min def in Angstroms
+        self.def_max = 30000  # max def in Angstroms
 
     def _find_limits(self, defocus, var):
         """ The analytic expressions are very ugly and
@@ -154,27 +155,51 @@ class Anisotropy(BaseSetup):
             yout[i] = res[0] - res[1]
             aout[i] = 180.0 * res[2] / math.pi
 
-        fig, ax = plt.subplots(figsize=(19.2, 14.4))
-        ax.plot(b[:, 0], b[:, 1], 'ro', label="Ast. magnitude (A)")
-        ax.plot(b[:, 0], input_angles, 'go', label="Ast. direction (deg)")
-        ax.plot(xout, yout, 'r')
-        ax.plot(xout, aout, 'g')
-        ax.set_title('Linear magnification anisotropy')
-        ax.grid(True)
-        ax.legend()
+        fig = plt.figure(figsize=(19.2, 14.4))
+        gs = fig.add_gridspec(2, 2)
+        ax1 = fig.add_subplot(gs[0, 0])
+        ax2 = fig.add_subplot(gs[0, 1])
+
+        ax1.plot(b[:, 0], b[:, 1], 'ro', label="Ast. magnitude (A)")
+        ax1.plot(b[:, 0], input_angles, 'go', label="Ast. direction (deg)")
+        ax1.plot(xout, yout, 'r')
+        ax1.plot(xout, aout, 'g')
+        ax1.grid(True)
+        ax1.legend()
 
         astig_str = 'Residual astigmatism ' + '{:6.1f}'.format(var[2]) + u'\u212b'
         angast_str = 'Direction ' + '{:6.1f}'.format(180.0 * var[3] / math.pi) + '\u00b0'
         anisomag_str = 'Anisotropy ' + '{:6.2f}'.format(100 * var[0]) + '%'
         anisoang_str = 'Aniso angle ' + '{:6.1f}'.format(180.0 * var[1] / math.pi) + '\u00b0'
 
-        plt.xlabel(r'Defocus ($\mathrm{\AA}$)')
-        plt.ylabel('Astigmatism magnitude and direction')
+        ax1.set_xlabel(r'Defocus ($\mathrm{\AA}$)')
+        ax1.set_ylabel('Astigmatism magnitude and direction')
+
         label = "\n".join([astig_str, angast_str, anisomag_str, anisoang_str])
         logging.info("############# Results #############")
         logging.info(f"Detector: {sem.ReportCameraName(self.CAMERA_NUM)}")
         logging.info(label)
-        plt.text(1.15, 0.5, label, transform=ax.transAxes)
+
+        textstr = f"""
+                    Linear magnification anisotropy
+
+                    Measurement performed       {pretty_date(get_time=True)}
+                    Microscope type             {SCOPE_NAME}
+                    Recorded at magnification   {self.mag // 1000} kx
+                    Defocus range               {self.def_min // 10000}-{self.def_max // 10000} um
+                    Camera used                 {sem.ReportCameraName(self.CAMERA_NUM)}
+
+                    Anisotropy is measured as a deviation from linear dependence of astigmatism vs defocus.
+
+                    {astig_str}
+                    {angast_str}
+                    {anisomag_str}
+                    {anisoang_str}
+
+                    Specification: anisotropy <1%
+        """
+        ax2.text(0, 0, textstr, fontsize=20)
+        ax2.axis('off')
 
         fig.tight_layout()
         fig.savefig(f"mag_anisotropy_test_{self.ts}.png")

@@ -30,9 +30,10 @@ from ..common import BaseSetup
 
 
 class GainRef(BaseSetup):
-    """ Gain reference check for Falcon.
-
-    Take a picture of a flood beam and check the auto-correlation. """
+    """
+        Name: Gain reference check for Falcon.
+        Desc: Take a picture of a flood beam and check the auto-correlation.
+    """
 
     def __init__(self, log_fn="gain_ref", **kwargs):
         super().__init__(log_fn, **kwargs)

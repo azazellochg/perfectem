@@ -34,11 +34,12 @@ from ..utils import radial_profile, plot_fft_and_text, invert_pixel_axis, pretty
 
 
 class ThonRings(BaseSetup):
-    """ Thon rings limit test.
-
-        Take a high-resolution image on carbon and fit CTF rings as far as you can.
-        Calculate a radial average from one quadrant and mark 0.33 nm specification (Krios)
-
+    """
+        Name: Thon rings limit test.
+        Desc: Take a high-resolution image on carbon and fit CTF rings as far as you can.
+              Calculate a radial average from one quadrant.
+        Specification (Krios): rings visible beyond 0.33 nm at -1 um defocus.
+        Specification (Glacios): rings visible beyond 0.37 nm at -2 um defocus.
     """
 
     def __init__(self, log_fn="thon_rings", **kwargs):

@@ -35,9 +35,11 @@ from ..config import DEBUG
 
 
 class C2Fringes(BaseSetup):
-    """ Source spatial coherence test
-
-    Take a picture of a flood beam to see if the fringes from C2 aperture extend all the way to the center. """
+    """
+        Name: Source spatial coherence test
+        Desc: Take a picture of a flood beam to see if the fringes
+              from C2 aperture extend all the way to the center (non-FFI systems).
+    """
 
     def __init__(self, log_fn="C2_fringes", **kwargs):
         super().__init__(log_fn, **kwargs)

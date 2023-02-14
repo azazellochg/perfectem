@@ -24,53 +24,64 @@
 # *
 # **************************************************************************
 
+import importlib
+import argparse
+
 from .config import params_dict
 
-__version__ = '0.7'
+__version__ = '0.8'
+
+test_dict = {
+    # num: [Func name, Name, Desc]
+    1: ["StageDrift", "Stage Drift", ""],
+    2: ["Anisotropy", "Magnification anisotropy", ""],
+    3: ["InfoLimit", "Information limit (Young fringes)"],
+    4: ["ThonRings", "Thon Rings", ""],
+    5: ["GoldDiffr", "Gold diffraction", ""],
+    6: ["C2Fringes", "C2 Fresnel fringes", ""],
+    7: ["TiltAxis", "Tilt axis offset", ""],
+    8: ["GainRef", "Gain reference check", ""],
+    9: ["AFIS", "AFIS check", ""]
+}
 
 
-def main():
-    print("\nChoose a performance test to run:\n\n"
-          "\t[1] Stage drift\n"
-          "\t[2] Magnification anisotropy\n"
-          "\t[3] Information limit (Young fringes)\n"
-          "\t[4] Thon rings\n"
-          "\t[5] Gold diffraction\n"
-          "\t[6] C2 Fresnel fringes\n"
-          "\t[7] Tilt axis offset\n"
-          "\t[8] Gain reference check\n"
-          "\t[9] AFIS check\n"
-          )
+def show(extra=False):
+    for t in test_dict:
+        print(f"\t[{t}] {test_dict[t][1]}")
+        if extra:
+            module = importlib.import_module("perfectem.scripts")
+            func = getattr(module, test_dict[t][0])
+            print(func.__doc__)
+            print("="*80)
 
-    num = int(input("\nInput the test number: ").strip())
 
-    if num in range(1, 10):
-        if num == 1:
-            from .scripts import StageDrift
-            StageDrift(**params_dict['StageDrift']).run()
-        elif num == 2:
-            from .scripts import Anisotropy
-            Anisotropy(**params_dict['Anisotropy']).run()
-        elif num == 3:
-            from .scripts import InfoLimit
-            InfoLimit(**params_dict['InfoLimit']).run()
-        elif num == 4:
-            from .scripts import ThonRings
-            ThonRings(**params_dict['ThonRings']).run()
-        elif num == 5:
-            from .scripts import GoldDiffr
-            GoldDiffr(**params_dict['GoldDiffr']).run()
-        elif num == 6:
-            from .scripts import C2Fringes
-            C2Fringes(**params_dict['C2Fringes']).run()
-        elif num == 7:
-            from .scripts import TiltAxis
-            TiltAxis(**params_dict['TiltAxis']).run()
-        elif num == 8:
-            from .scripts import GainRef
-            GainRef(**params_dict['GainRef']).run()
-        elif num == 9:
-            from .scripts import AFIS
-            AFIS(**params_dict['AFIS']).run()
+def main(argv=None):
+    try:
+        import serialem
+    except ImportError:
+        raise ImportError("This program must be run on the computer with SerialEM Python module")
+
+    parser = argparse.ArgumentParser(description="This script launches selected TEM performance test")
+    parser.add_argument("-l", "--list", default=False, action='store_true',
+                        help="List all available tests")
+    parser.add_argument("-d", "--desc", default=False, action='store_true',
+                        help="Show description for each test")
+
+    args = parser.parse_args(argv)
+
+    if args.list or args.desc:
+        print("\nAvailable tests:")
+        show(args.desc)
+        exit(0)
     else:
-        raise IndexError("Wrong test number!")
+        print("\nChoose a performance test to run:")
+        show()
+        num = int(input("\nInput the test number: ").strip())
+
+        if num in range(1, 10):
+            module = importlib.import_module("perfectem.scripts")
+            func = getattr(module, test_dict[num][0])
+            print(func.__doc__)
+            func(**params_dict[func]).run()
+        else:
+            raise IndexError("Wrong test number!")
