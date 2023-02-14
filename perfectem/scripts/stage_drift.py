@@ -30,68 +30,82 @@ import matplotlib.pyplot as plt
 import serialem as sem
 
 from ..common import BaseSetup
-from ..config import DEBUG
+from ..utils import pretty_date
+from ..config import SCOPE_NAME, DEBUG
 
 
 class StageDrift(BaseSetup):
     """
         Name: Stage drift test.
-        Desc: At each Navigator position perform the following:
-              move the stage in 4 directions by 1 um, 3 times each direction,
-              followed by drift estimation.
+        Desc: 1) From a starting position move 1 um in each
+              direction and measure drift until it is below threshold.
+              2) Repeat the same test by tilting to +/- 45 deg instead of shift
+        Specification: < 0.5 nm/min
     """
 
     def __init__(self, log_fn="stage_drift", **kwargs):
         super().__init__(log_fn, **kwargs)
         self.drift_crit = 1  # stop after reaching this A/sec
         self.max_time = 180.  # give up after max_time in sec
+        self.shift = 1  # shift in um to use
+        self.tilt = 45  # tilt in deg to use
         self.times = 3  # times to move/measure in one direction
-        self.delay = 0  # delay in sec after moving to a stage position
 
-    def measure_drift(self, nav_label):
-        """ Measure drift in 4 directions N times. Return a dict with results. """
-        moves = {"+X": (1, 0),
-                 "-X": (-1, 0),
-                 "+Y": (0, 1),
-                 "-Y": (0, -1)}
+    def measure_drift(self):
+        """ Measure drift in different directions N times. Return a dict with results. """
+        moves = {"+X": (self.shift, 0),
+                 "-X": (-self.shift, 0),
+                 "+Y": (0, self.shift),
+                 "-Y": (0, -self.shift),
+                 "-A": -self.tilt,
+                 "+A": self.tilt}
 
         res = {
             "+X": [],
             "-X": [],
             "+Y": [],
-            "-Y": []
+            "-Y": [],
+            "-A": [],
+            "+A": []
         }
-
-        logging.info(f"Moving stage to a measuring position and settling for {self.delay}s")
-        nav_index = int(sem.NavIndexWithLabel(nav_label))
-        sem.MoveToNavItem(nav_index)
-        sem.Delay(self.delay)
 
         stage = sem.ReportStageXYZ()
         logging.info(f"Current position is: {stage}")
 
+        def timer():
+            """ Measure drift and save (drift, time) values"""
+            sem.ResetClock()
+            r = []
+            while True:
+                sem.AutoFocus(-2)
+                (x, y) = sem.ReportFocusDrift()
+                drift = 10 * math.sqrt(x ** 2 + y ** 2)
+                t = sem.ReportClock()
+                r.append((drift, t))
+                if drift <= self.drift_crit:
+                    logging.info(f"--> Drift reached {self.drift_crit} A/s after {t:0.2f}s")
+                    break
+                else:
+                    logging.info(f"--> Elapsed time {t:0.2f}s: drift {drift:0.2f} A/s")
+                if t > self.max_time:
+                    logging.info(f"--> Reached {self.max_time}s limit. Giving up.")
+                    break
+            return r
+
         for move in moves.items():
-            logging.info(f"Moving 1um in {move[0]} direction")
-            for i in range(self.times):
-                logging.info(f"Measure #{i + 1}")
-                sem.MoveStage(move[1][0], move[1][1])
-                sem.ResetClock()
-                r = []
-                while True:
-                    sem.AutoFocus(-2)
-                    (x, y) = sem.ReportFocusDrift()
-                    drift = 10 * math.sqrt(x ** 2 + y ** 2)
-                    t = sem.ReportClock()
-                    r.append((drift, t))
-                    if drift <= self.drift_crit:
-                        logging.info(f"--> Drift reached {self.drift_crit} A/s after {t:0.2f}s")
-                        break
-                    else:
-                        logging.info(f"--> Elapsed time {t:0.2f}s: drift {drift:0.2f} A/s")
-                    if t > self.max_time:
-                        logging.info(f"--> Reached {self.max_time}s limit. Giving up.")
-                        break
+            if "A" in move[0]:
+                logging.info(f"Tilting in {move[0]} direction")
+                sem.TiltTo(move[1], 1)
+                r = timer()
                 res[move[0]].append(r)
+                sem.TiltTo(0, 1)
+            else:
+                logging.info(f"Moving 1um in {move[0]} direction")
+                for i in range(self.times):
+                    logging.info(f"Measure #{i + 1}")
+                    sem.MoveStage(move[1][0], move[1][1])
+                    r = timer()
+                    res[move[0]].append(r)
             logging.info("-" * 40)
 
         if DEBUG:
@@ -114,11 +128,18 @@ class StageDrift(BaseSetup):
 
         return res, avg_res, stage
 
-    def plot_results(self, res, avg_res, stage, nav_item):
-        fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(nrows=2, ncols=2, figsize=(19.2, 14.4),
-                                                     gridspec_kw={'wspace': 0.5,
-                                                                  'hspace': 0.5})
-        ax = [ax1, ax2, ax3, ax4]
+    def plot_results(self, res, avg_res, position):
+        fig = plt.figure(figsize=(19.2, 14.4))
+        gs = fig.add_gridspec(4, 2)
+        ax0 = fig.add_subplot(gs[0, :])  # text
+        ax1 = fig.add_subplot(gs[1, 1])
+        ax2 = fig.add_subplot(gs[1, 0])
+        ax3 = fig.add_subplot(gs[2, 1])
+        ax4 = fig.add_subplot(gs[2, 0])
+        ax5 = fig.add_subplot(gs[3, 1])
+        ax6 = fig.add_subplot(gs[3, 0])
+
+        ax = [ax1, ax2, ax3, ax4, ax5, ax6]
 
         for r, a in zip(res, ax):
             data = res[r]
@@ -135,35 +156,38 @@ class StageDrift(BaseSetup):
                     a.text(0.5, 0.5, 'Target drift not reached', transform=a.transAxes)
                 a.grid(True)
 
-        fig.suptitle(f'Drift measurement at XYZ: {stage[0]:0.2f},{stage[1]:0.2f},{stage[2]:0.2f}')
+        textstr = f"""
+                            Stage drift test
+
+                            Measurement performed       {pretty_date(get_time=True)}
+                            Microscope type             {SCOPE_NAME}
+                            Recorded at magnification   {self.mag // 1000} kx
+                            Stage position:             {[round(x, 2) for x in position]}
+                            Camera used                 {sem.ReportCameraName(self.CAMERA_NUM)}
+
+                            1) From a starting position move {self.shift} um in each direction and 
+                            measure drift until it is below threshold.
+                            2) Same test but instead tilting to +/- {self.tilt} deg.
+
+                            Specification (Krios): < 0.5 nm/min
+                """
+        ax0.text(0, 0, textstr, fontsize=20)
+        ax0.axis('off')
+
         lines, labels = fig.axes[-1].get_legend_handles_labels()
         fig.legend(lines, labels, bbox_to_anchor=(1.25, 0.8))
         fig.tight_layout()
-        fig.savefig(f"stage_drift_pos{nav_item}_{self.ts}.png")
+        #fig.savefig(f"stage_drift_{self.ts}.png")
 
-        # plt.ion()
-        # plt.show()
-        # plt.pause(0.1)
+        plt.ion()
+        plt.show()
+        plt.pause(0.1)
 
     def _run(self):
-        """ Run the actual test for all points that have Acquire flag. """
         self.setup_beam(self.mag, self.spot, self.beam_size)
         self.setup_area(self.exp, self.binning, preset="F")
         self.autofocus(-2, 0.05, do_ast=False)
 
-        is_nav_open = sem.ReportIfNavOpen()
-        if not is_nav_open:
-            sem.Exit(1, "Please open Navigator and add a few points for drift measuring")
-        items = int(sem.ReportNumTableItems())
-        items_to_use = list(range(1, items+1))
-        sem.Pause("Found %d navigator items" % items)
-
-        for nav_item in items_to_use:
-            logging.info(f"Moving to item {nav_item}")
-            res, avg_res, stage = self.measure_drift("%s" % nav_item)
-            if DEBUG:
-                logging.debug(f"Results for position at item {nav_item}: {res}")
-            self.plot_results(res, avg_res, stage, nav_item)
-
-        if not items_to_use:
-            logging.error("No Acquire points found in Navigator. Exiting.")
+        res, avg_res, position = self.measure_drift()
+        position = sem.ReportStageXYZ()
+        self.plot_results(res, avg_res, position)
