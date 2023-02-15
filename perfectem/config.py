@@ -31,29 +31,41 @@ SCOPE_NAME = "Krios2"
 
 # beam size in microns (Krios, 3-cond. lenses) or percents (2-cond. lenses)
 
-krios_falcon4 = {
-    "StageDrift": {"beam": 1.0, "spot": 3, "mag": 96000, "exp": 0.5, "binning": 2},  # For drift test you need an opened Navigator file with Acquire points
-    "Anisotropy": {"beam": 1.0, "spot": 3, "mag": 96000, "exp": 0.5, "binning": 2},  # Run this test for both pre-GIF and post-GIF camera
-    "InfoLimit": {"beam": 1.0, "spot": 3, "mag": 250000, "exp": 2, "binning": 1, "defocus": -0.5, "spec": 0.14},
-    "ThonRings": {"beam": 1.0, "spot": 3, "mag": 250000, "exp": 1, "binning": 2, "defocus": -0.5, "spec": 0.33},  # Titan Krios G3i 195kx -2um defocus - spec is 0.33nm
-    "GoldDiffr": {"beam": 1.0, "spot": 4, "mag": 600000, "exp": 3, "binning": 2, "defocus": -0.5, "spec": 0.1},  # For this test you need C2 150um and sample
-    "C2Fringes": {"beam": 0.42, "spot": 6, "mag": 75000, "exp": 0.1, "binning": 1},  # For this test you need to go to an empty area
-    "TiltAxis": {"beam": 1.0, "spot": 5, "mag": 75000, "exp": 0.5, "binning": 2},
-    "GainRef": {"beam": 1.1, "spot": 7, "mag": 96000, "exp": 1, "binning": 1},  # For this test you need to go to an empty area
-    "AFIS": {"beam": 1.0, "spot": 7, "mag": 96000, "exp": 1, "binning": 2, "defocus": -2, "spec": (750, 100)},  # specs: (coma in nm, astig in nm)
+krios2_falcon4 = {
+    "StageDrift": {"beam": 1.1, "spot": 3, "mag": 96000, "exp": 0.5, "binning": 2},
+    "Anisotropy": {"beam": 1.1, "spot": 3, "mag": 96000, "exp": 0.5, "binning": 2},
+    "InfoLimit": {"beam": 1.1, "spot": 3, "mag": 250000, "exp": 2, "binning": 1, "defocus": -0.5, "spec": 0.14},
+    "ThonRings": {"beam": 1.1, "spot": 3, "mag": 250000, "exp": 1, "binning": 2, "defocus": -0.5, "spec": 0.33},
+    "GoldDiffr": {"beam": 1.1, "spot": 4, "mag": 600000, "exp": 3, "binning": 2, "defocus": -0.2, "spec": 0.1},
+    "C2Fringes": {"beam": 0.42, "spot": 6, "mag": 75000, "exp": 0.1, "binning": 1},
+    "TiltAxis": {"beam": 1.1, "spot": 5, "mag": 75000, "exp": 0.5, "binning": 2},
+    "GainRef": {"beam": 1.1, "spot": 7, "mag": 96000, "exp": 1, "binning": 1},
+    "AFIS": {"beam": 1.1, "spot": 7, "mag": 96000, "exp": 1, "binning": 2, "defocus": -2, "max_imgsh": 12.0, "spec": (750, 10)},  # specs: (coma in nm, astig in nm)
+}
+
+krios3_k3 = {
+    "StageDrift": {"beam": 0.66, "spot": 5, "mag": 105000, "exp": 0.5, "binning": 2},
+    "Anisotropy": {"beam": 0.66, "spot": 5, "mag": 105000, "exp": 0.5, "binning": 2},
+    "InfoLimit": {"beam": 0.66, "spot": 5, "mag": 250000, "exp": 2, "binning": 1, "defocus": -0.5, "spec": 0.14},
+    "ThonRings": {"beam": 0.66, "spot": 5, "mag": 250000, "exp": 1, "binning": 2, "defocus": -0.5, "spec": 0.33},
+    "GoldDiffr": {"beam": 0.66, "spot": 5, "mag": 600000, "exp": 3, "binning": 2, "defocus": -0.2, "spec": 0.1},
+    "C2Fringes": {"beam": 0.66, "spot": 5, "mag": 105000, "exp": 0.5, "binning": 2, "defocus": -1.0},
+    "TiltAxis": {"beam": 0.66, "spot": 5, "mag": 105000, "exp": 0.5, "binning": 2},
+    "GainRef": {"beam": 0.66, "spot": 5, "mag": 105000, "exp": 1, "binning": 1},
+    "AFIS": {"beam": 0.66, "spot": 5, "mag": 105000, "exp": 1, "binning": 2, "defocus": -2, "max_imgsh": 12.0, "spec": (750, 10)},  # specs: (coma in nm, astig in nm)
 }
 
 glacios_falcon3 = {
-    "StageDrift": {"beam": 1.0, "spot": 3, "mag": 92000, "exp": 0.5, "binning": 2},  # For drift test you need an opened Navigator file with Acquire points
-    "Anisotropy": {"beam": 44.460, "spot": 3, "mag": 92000, "exp": 1, "binning": 2},  # Run this test for both pre-GIF and post-GIF cameras
-    "InfoLimit": {"beam": 0.6, "spot": 3, "mag": 250000, "exp": 2, "binning": 1, "defocus": -0.5},
-    "ThonRings": {"beam": 0.6, "spot": 3, "mag": 250000, "exp": 1, "binning": 2, "defocus": -0.5},  # Titan Krios G3i 195kx -2um defocus - spec is 0.33nm
-    "GoldDiffr": {"beam": 1.05, "spot": 3, "mag": 600000, "exp": 3, "binning": 2, "defocus": -0.5},  # For this test you need C2 150um and sample
-    "C2Fringes": {"beam": 39.701, "spot": 5, "mag": 92000, "exp": 0.1, "binning": 1},  # For this test you need to go to an empty area
-    "TiltAxis": {"beam": 1.0, "spot": 3, "mag": 92000, "exp": 0.5, "binning": 2},
-    "GainRef": {"beam": 44.460, "spot": 3, "mag": 92000, "exp": 1, "binning": 1},  # For this test you need to go to an empty area
-    "AFIS": {"beam": 44.460, "spot": 3, "mag": 92000, "exp": 1, "binning": 2, "defocus": -2, "max_imgsh": 6.0},
+    "StageDrift": {"beam": 44.46, "spot": 3, "mag": 92000, "exp": 0.5, "binning": 2},
+    "Anisotropy": {"beam": 44.46, "spot": 3, "mag": 92000, "exp": 1, "binning": 2},
+    "InfoLimit": {"beam": 44.46, "spot": 3, "mag": 250000, "exp": 2, "binning": 1, "defocus": -0.5},
+    "ThonRings": {"beam": 44.46, "spot": 3, "mag": 250000, "exp": 1, "binning": 2, "defocus": -0.5},
+    "GoldDiffr": {"beam": 44.46, "spot": 3, "mag": 600000, "exp": 3, "binning": 2, "defocus": -0.2},
+    "C2Fringes": {"beam": 39.701, "spot": 5, "mag": 92000, "exp": 0.1, "binning": 1},
+    "TiltAxis": {"beam": 44.46, "spot": 3, "mag": 92000, "exp": 0.5, "binning": 2},
+    "GainRef": {"beam": 44.460, "spot": 3, "mag": 92000, "exp": 1, "binning": 1},
+    "AFIS": {"beam": 44.460, "spot": 3, "mag": 92000, "exp": 1, "binning": 2, "defocus": -2, "max_imgsh": 6.0, "spec": (1200, 15)},
 }
 
 # Set which params dict to use
-params_dict = krios_falcon4
+params_dict = krios2_falcon4

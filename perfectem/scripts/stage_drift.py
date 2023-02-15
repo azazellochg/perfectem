@@ -186,7 +186,7 @@ class StageDrift(BaseSetup):
     def _run(self):
         self.setup_beam(self.mag, self.spot, self.beam_size)
         self.setup_area(self.exp, self.binning, preset="F")
-        self.autofocus(-2, 0.05, do_ast=False)
+        self.autofocus(-2, 0.1, do_ast=False)
 
         res, avg_res, position = self.measure_drift()
         position = sem.ReportStageXYZ()

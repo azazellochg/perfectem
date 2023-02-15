@@ -42,6 +42,7 @@ class Anisotropy(BaseSetup):
         Desc: Acquire a defocus series and plot astigmatism versus defocus.
               Calculate anisotropy by estimating deviation from linear behaviour.
         Notes: Calculation funcs are written by Greg McMullan @ MRC-LMB.
+               Run this test for both pre-GIF and post-GIF camera
         Specification: < 1%
     """
 

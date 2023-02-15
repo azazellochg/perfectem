@@ -32,16 +32,15 @@ from .config import params_dict
 __version__ = '0.8'
 
 test_dict = {
-    # num: [Func name, Name, Desc]
-    1: ["StageDrift", "Stage Drift", ""],
-    2: ["Anisotropy", "Magnification anisotropy", ""],
+    1: ["StageDrift", "Stage Drift"],
+    2: ["Anisotropy", "Magnification anisotropy"],
     3: ["InfoLimit", "Information limit (Young fringes)"],
-    4: ["ThonRings", "Thon Rings", ""],
-    5: ["GoldDiffr", "Gold diffraction", ""],
-    6: ["C2Fringes", "C2 Fresnel fringes", ""],
-    7: ["TiltAxis", "Tilt axis offset", ""],
-    8: ["GainRef", "Gain reference check", ""],
-    9: ["AFIS", "AFIS check", ""]
+    4: ["ThonRings", "Thon Rings"],
+    5: ["GoldDiffr", "Gold diffraction"],
+    6: ["C2Fringes", "C2 Fresnel fringes"],
+    7: ["TiltAxis", "Tilt axis offset"],
+    8: ["GainRef", "Gain reference check"],
+    9: ["AFIS", "AFIS check"]
 }
 
 
@@ -63,16 +62,15 @@ def main(argv=None):
 
     parser = argparse.ArgumentParser(description="This script launches selected TEM performance test")
     parser.add_argument("-l", "--list", default=False, action='store_true',
-                        help="List all available tests")
+                        help="List available tests")
     parser.add_argument("-d", "--desc", default=False, action='store_true',
-                        help="Show description for each test")
+                        help="Show detailed description for each test")
 
     args = parser.parse_args(argv)
 
     if args.list or args.desc:
         print("\nAvailable tests:")
         show(args.desc)
-        exit(0)
     else:
         print("\nChoose a performance test to run:")
         show()

@@ -27,7 +27,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import scipy.ndimage as ndimg
-from scipy.signal import savgol_filter
 import serialem as sem
 
 from ..common import BaseSetup
@@ -39,36 +38,42 @@ class C2Fringes(BaseSetup):
         Name: Source spatial coherence test
         Desc: Take a picture of a flood beam to see if the fringes
               from C2 aperture extend all the way to the center (non-FFI systems).
+              On FFI system there are should be only 1-2 fringes at low defocus
     """
 
     def __init__(self, log_fn="C2_fringes", **kwargs):
         super().__init__(log_fn, **kwargs)
+        self.defocus = kwargs.get("defocus", -1)  # relevant only for FFI
+        self.integrate = 200  # line profile width, px
 
     def _run(self):
         self.setup_beam(self.mag, self.spot, self.beam_size)
         self.setup_area(self.exp, self.binning, preset="R")
+        sem.SetEucentricFocus(1)
         sem.Pause("Please move stage to an empty area and center the beam such that it can fit into the FOV")
-
+        ffi = sem.YesNoBox("Does this system have Fringe-Free Illumination (FFI)?")
+        if ffi:
+            sem.SetDefocus(self.defocus)
         sem.Record()
+        sem.SetDefocus(0)
         params = sem.ImageProperties("A")
         dim_x, dim_y = params[0], params[1]
         data = np.asarray(sem.bufferImage("A")).astype("int16")
         if DEBUG:
             sem.SaveToOtherFile("A", "JPG", "NONE", self.logDir + f"/C2_fringes_{self.ts}.jpg")
 
-        # Extract the line
-        x1, y1 = dim_x/2, dim_y/2
-        num = int(np.sqrt((dim_x/2) ** 2 + (dim_y/2) ** 2))
-        x, y = np.linspace(0, x1, num), np.linspace(0, y1, num)
-
-        # Extract the values along the line, using cubic interpolation
-        line_profile = ndimg.map_coordinates(data, np.vstack((x, y)))
-        line_profile = savgol_filter(line_profile, 51, 3)  # window size 51, polynomial order 3
+        # Rotate img by -45 deg and extract a line profile of certain wodth
+        data = ndimg.rotate(data, -45)
+        num = int(np.sqrt((dim_x//2) ** 2 + (dim_y//2) ** 2))
+        half_width = self.integrate // 2
+        rect = data[num-half_width:num+half_width, num//4:num]
+        line_profile = np.average(rect, axis=0)
+        weights = np.kaiser(22, 14)
+        smooth_line_profile = np.convolve(weights / weights.sum(), line_profile)
 
         fig, axes = plt.subplots(nrows=2, figsize=(19.2, 14.4))
-        axes[0].imshow(data, cmap='gray')
-        axes[0].plot([0, x1], [0, y1], 'ro-')
-        axes[1].plot(line_profile)
+        axes[0].imshow(rect, cmap='gray')
+        axes[1].plot(smooth_line_profile)
         plt.ylabel('Counts')
         plt.minorticks_on()
         plt.xlim(0)
