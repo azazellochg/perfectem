@@ -34,8 +34,9 @@ SCOPE_NAME = "Krios2"
 krios2_falcon4 = {
     "StageDrift": {"beam": 1.1, "spot": 3, "mag": 96000, "exp": 0.5, "binning": 2},
     "Anisotropy": {"beam": 1.1, "spot": 3, "mag": 96000, "exp": 0.5, "binning": 2},
-    "InfoLimit": {"beam": 1.1, "spot": 3, "mag": 250000, "exp": 2, "binning": 1, "defocus": -0.5, "spec": 0.14},
+    "InfoLimit": {"beam": 1.1, "spot": 3, "mag": 550000, "exp": 1, "binning": 2, "defocus": -0.5, "spec": 0.14},  # use uProbe C2 150; Ceta bin 2 or other camera bin 1; use 2/3 saturation level
     "ThonRings": {"beam": 1.1, "spot": 3, "mag": 250000, "exp": 1, "binning": 2, "defocus": -0.5, "spec": 0.33},
+    "PointRes": {"beam": 1.1, "spot": 3, "mag": 380000, "exp": 1, "binning": 2, "defocus": -0.073, "spec": 0.20},
     "GoldDiffr": {"beam": 1.1, "spot": 4, "mag": 600000, "exp": 3, "binning": 2, "defocus": -0.2, "spec": 0.1},
     "C2Fringes": {"beam": 0.42, "spot": 6, "mag": 75000, "exp": 0.1, "binning": 1},
     "TiltAxis": {"beam": 1.1, "spot": 5, "mag": 75000, "exp": 0.5, "binning": 2},
@@ -48,6 +49,7 @@ krios3_k3 = {
     "Anisotropy": {"beam": 0.66, "spot": 5, "mag": 105000, "exp": 0.5, "binning": 2},
     "InfoLimit": {"beam": 0.66, "spot": 5, "mag": 250000, "exp": 2, "binning": 1, "defocus": -0.5, "spec": 0.14},
     "ThonRings": {"beam": 0.66, "spot": 5, "mag": 250000, "exp": 1, "binning": 2, "defocus": -0.5, "spec": 0.33},
+    "PointRes": {"beam": 0.66, "spot": 5, "mag": 380000, "exp": 1, "binning": 2, "defocus": -0.073, "spec": 0.20},
     "GoldDiffr": {"beam": 0.66, "spot": 5, "mag": 600000, "exp": 3, "binning": 2, "defocus": -0.2, "spec": 0.1},
     "C2Fringes": {"beam": 0.66, "spot": 5, "mag": 105000, "exp": 0.5, "binning": 2, "defocus": -1.0},
     "TiltAxis": {"beam": 0.66, "spot": 5, "mag": 105000, "exp": 0.5, "binning": 2},
@@ -60,6 +62,7 @@ glacios_falcon3 = {
     "Anisotropy": {"beam": 44.46, "spot": 3, "mag": 92000, "exp": 1, "binning": 2},
     "InfoLimit": {"beam": 44.46, "spot": 3, "mag": 250000, "exp": 2, "binning": 1, "defocus": -0.5},
     "ThonRings": {"beam": 44.46, "spot": 3, "mag": 250000, "exp": 1, "binning": 2, "defocus": -0.5},
+    "PointRes": {"beam": 44.46, "spot": 3, "mag": 380000, "exp": 1, "binning": 2, "defocus": -0.082, "spec": 0.24},
     "GoldDiffr": {"beam": 44.46, "spot": 3, "mag": 600000, "exp": 3, "binning": 2, "defocus": -0.2},
     "C2Fringes": {"beam": 39.701, "spot": 5, "mag": 92000, "exp": 0.1, "binning": 1},
     "TiltAxis": {"beam": 44.46, "spot": 3, "mag": 92000, "exp": 0.5, "binning": 2},

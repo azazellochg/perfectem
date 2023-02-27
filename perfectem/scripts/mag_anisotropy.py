@@ -204,7 +204,7 @@ class Anisotropy(BaseSetup):
         ax2.axis('off')
 
         fig.tight_layout()
-        fig.savefig(f"mag_anisotropy_test_{self.ts}.png")
+        fig.savefig(f"mag_anisotropy_{self.ts}.png")
 
     def _run(self):
         self.setup_beam(self.mag, self.spot, self.beam_size)

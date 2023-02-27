@@ -37,6 +37,14 @@ class GoldDiffr(BaseSetup):
         Name: Diffraction limit test.
         Desc: Take a high magnification image of Au-Pt and check the diffraction
               spots up to 1 A in all directions.
+
+        1) The information limit for HRTEMs is the inverse of the maximum spatial object frequency.
+        2) The information limit is often obtained from measurements of diffractogram or from Young's fringes.
+        The limit depends on the damping envelope incorporating partial temporal coherence due
+        to chromatic aberration, but not partial spatial coherence due to beam convergence.
+        3) The temporal coherency effects comes from the small instabilities in the accelerating
+        voltage and electron gun emission over time, which will give the illumination a small
+        energy spread, and from variations in the lens currents, which induces focus variation with time.
     """
 
     def __init__(self, log_fn="gold_diffr", **kwargs):

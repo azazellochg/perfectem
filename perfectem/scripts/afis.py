@@ -154,5 +154,4 @@ class AFIS(BaseSetup):
 
         #plt.ion()
         #plt.show()
-        #plt.pause(0.1)
         fig.savefig(f"afis_{self.ts}.png")

@@ -41,6 +41,14 @@ class InfoLimit(BaseSetup):
               to 1 A.
         Specification (Krios): 0.14 nm at 0 tilt, 0.23 nm at 70 deg. tilt.
         Specification (Glacios): 0.23 nm at 0 tilt, 0.34 nm at 70 deg. tilt.
+
+        1) The information limit for HRTEMs is the inverse of the maximum spatial object frequency.
+        2) The information limit is often obtained from measurements of diffractogram or from Young's fringes.
+        The limit depends on the damping envelope incorporating partial temporal coherence due
+        to chromatic aberration, but not partial spatial coherence due to beam convergence.
+        3) The temporal coherency effects comes from the small instabilities in the accelerating
+        voltage and electron gun emission over time, which will give the illumination a small
+        energy spread, and from variations in the lens currents, which induces focus variation with time.
     """
 
     def __init__(self, log_fn="info_limit_0-tilt", **kwargs):

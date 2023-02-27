@@ -33,27 +33,33 @@ from ..config import SCOPE_NAME, DEBUG
 from ..utils import radial_profile, plot_fft_and_text, invert_pixel_axis, pretty_date
 
 
-class ThonRings(BaseSetup):
+class PointRes(BaseSetup):
     """
-        Name: Thon rings limit test.
-        Desc: Take a high-resolution image on carbon and fit CTF rings as far as you can.
-              Calculate a radial average from one quadrant.
-        Specification (Krios): rings visible beyond 0.33 nm at -1 um defocus.
-        Specification (Glacios): rings visible beyond 0.37 nm at -2 um defocus.
+        Name: Point to point resolution test.
+        Desc: Take a high-resolution image on carbon at (extended) 1.2 Scherzer defocus.
+              The first CTF ring defines the point resolution.
+        Specification (Krios): 0.2 nm at 73 nm defocus.
+        Specification (Glacios): 0.24 nm at 82 nm defocus.
+
+        In case of an image corrected system, the point resolution is
+        equal to the information limit. The first zero crossing in the CTF
+        (first ring in the FFT) is now limited by the information limit.
+        The point to point test is not needed.
     """
 
-    def __init__(self, log_fn="thon_rings", **kwargs):
+    def __init__(self, log_fn="point_resolution", **kwargs):
         super().__init__(log_fn, **kwargs)
-        self.defocus = kwargs.get("defocus", -0.5)
-        self.specification = kwargs.get("spec", 0.33)  # for Krios, in nm
+        self.defocus = kwargs.get("defocus", -0.073)
+        self.specification = kwargs.get("spec", 0.2)  # for Krios, in nm
 
     def _run(self):
         self.setup_beam(self.mag, self.spot, self.beam_size)
         self.setup_area(self.exp, self.binning, preset="R")
         self.setup_area(exp=0.5, binning=2, preset="F")
-        self.autofocus(self.defocus, 0.05)
+        self.autofocus(-0.25, 0.05)
         self.check_drift()
         self.check_before_acquire()
+        sem.ChangeFocus(0.25-abs(self.defocus))
 
         if self.CAMERA_HAS_DIVIDEBY2:
             sem.SetDivideBy2(1)
@@ -61,7 +67,6 @@ class ThonRings(BaseSetup):
         params = sem.ImageProperties("A")
         dim, pix = params[0], params[4] * 10
         sem.FFT("A")
-        sem.CtfFind("A", -0.1, self.defocus-1, 0, 512)
 
         data = np.asarray(sem.bufferImage("AF")).astype("int16")
         # use only the top right quadrant
@@ -75,12 +80,12 @@ class ThonRings(BaseSetup):
             sem.SaveToOtherFile("AF", "JPG", "NONE", self.logDir + f"/thon_rings_{self.ts}.jpg")
 
         textstr = f"""
-                    THON RINGS
+                    POINT TO POINT RESOLUTION
 
                     Measurement performed       {pretty_date(get_time=True)}
                     Microscope name             {SCOPE_NAME}
                     Recorded at magnification   {self.mag // 1000} kx
-                    Defocus                     {self.defocus} um
+                    Defocus                     {self.defocus*100} nm
                     Camera used                 {sem.ReportCameraName(self.CAMERA_NUM)}
 
                     The Thon ring profile is calculated from the FFT
@@ -100,7 +105,7 @@ class ThonRings(BaseSetup):
         plt.minorticks_on()
         plt.xlim(0)
 
-        # mark 0.33 nm
+        # mark 0.2 nm
         mark = dim * pix / (self.specification * 10)
         value = rad[int(mark)]
         plt.annotate(f'{self.specification} nm', xy=(mark, value + 0.01),
@@ -110,4 +115,4 @@ class ThonRings(BaseSetup):
 
         fig.tight_layout()
         plt.grid()
-        fig.savefig(f"thon_rings_{self.ts}.png")
+        fig.savefig(f"point_resolution_{self.ts}.png")

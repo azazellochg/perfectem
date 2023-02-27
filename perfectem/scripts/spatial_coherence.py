@@ -39,6 +39,17 @@ class C2Fringes(BaseSetup):
         Desc: Take a picture of a flood beam to see if the fringes
               from C2 aperture extend all the way to the center (non-FFI systems).
               On FFI system there are should be only 1-2 fringes at low defocus
+
+              1) The spatial coherence is given by the size of the source.
+              Moreover, the illumination is never perfectly parallel and is actually
+              slightly convergent at the best imaging condition. With a Cs-corrector, the dependence
+              of spatial coherence on beam convergence may be eliminated completely at Cs = 0.
+              2) In EM the condenser aperture is used to exclude electrons emitted at high angles
+              from the electron gun, which will decrease the brightness but improve the quality
+              of the illumination because these peripheral electrons are less coherent.
+              3) When the C2 aperture is imaged out of focus, wave interference at the edge
+              of the condenser beam appears as Fresnel fringes
+
     """
 
     def __init__(self, log_fn="C2_fringes", **kwargs):

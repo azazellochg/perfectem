@@ -177,11 +177,10 @@ class StageDrift(BaseSetup):
         lines, labels = fig.axes[-1].get_legend_handles_labels()
         fig.legend(lines, labels, bbox_to_anchor=(1.25, 0.8))
         fig.tight_layout()
-        #fig.savefig(f"stage_drift_{self.ts}.png")
+        fig.savefig(f"stage_drift_{self.ts}.png")
 
-        plt.ion()
-        plt.show()
-        plt.pause(0.1)
+        #plt.ion()
+        #plt.show()
 
     def _run(self):
         self.setup_beam(self.mag, self.spot, self.beam_size)
