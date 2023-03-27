@@ -55,8 +55,8 @@ class GoldDiffr(BaseSetup):
     def _run(self):
         sem.Pause("Please change C2 aperture to 150um")
         self.setup_beam(self.mag, self.spot, self.beam_size)
-        self.setup_area(exp=3, binning=4, preset="F")
-        self.setup_area(exp=3, binning=4, preset="R")
+        self.setup_area(exp=2, binning=4, preset="F")
+        self.setup_area(exp=2, binning=4, preset="R")
         self.autofocus(self.defocus, 0.05, do_coma=True)
         self.check_drift()
         self.setup_area(self.exp, self.binning, preset="R")

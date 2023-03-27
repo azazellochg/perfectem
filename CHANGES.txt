@@ -1,10 +1,10 @@
 TODO:
     - check mag is in the table before setting
-    - redo stage drift test
     - check installation requirements
-    - add readme
-    - redo tilt axis and mag aniso plots
-    - test afis script
+0.8:
+    - redone stage drift test
+    - redone tilt axis and mag aniso plots
+    - tested afis script
 0.7:
     - add divide by 2 check
     - fix C3 lens presence check

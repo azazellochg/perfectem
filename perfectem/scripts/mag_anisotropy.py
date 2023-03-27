@@ -191,7 +191,8 @@ class Anisotropy(BaseSetup):
                     Defocus range               {self.def_min // 10000}-{self.def_max // 10000} um
                     Camera used                 {sem.ReportCameraName(self.CAMERA_NUM)}
 
-                    Anisotropy is measured as a deviation from linear dependence of astigmatism vs defocus.
+                    Anisotropy is measured as a deviation from linear
+                    dependence of astigmatism vs defocus.
 
                     {astig_str}
                     {angast_str}
@@ -213,6 +214,7 @@ class Anisotropy(BaseSetup):
         self.autofocus(0, 0.05)
         sem.ResetDefocus()
         sem.SaveFocus()
+        self.check_before_acquire()
 
         results = []
         step = (self.def_max - self.def_min) // self.num_img

@@ -71,6 +71,7 @@ class AFIS(BaseSetup):
         res = []
         
         sem.NoMessageBoxOnError()
+        self.check_before_acquire()
         for img in bis_positions:
             sem.SetImageShift(img[0], img[1], self.DELAY)  # units match microns in delphi adapter
             try:

@@ -89,6 +89,7 @@ class TiltAxis(BaseSetup):
         self.setup_area(self.exp, self.binning, preset="T")
         old_offset = sem.ReportTiltAxisOffset()[0]
         logging.info(f"Currently set tilt axis offset: {old_offset}")
+        self.check_before_acquire()
         self.euc_by_stage()
 
         # Autofocus

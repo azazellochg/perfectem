@@ -65,8 +65,7 @@ def plot_fft_and_text(data, spec=None, pix=1.0, text=None, add_bottom_plot=False
     :param add_bottom_plot: create an optional bottom plot (second row)
 
     """
-    height = 14.4 if add_bottom_plot else 7.2
-    fig = plt.figure(figsize=(19.2, height))
+    fig = plt.figure(figsize=(19.2, 14.4))
     gs = fig.add_gridspec(2, 2)
     ax1 = fig.add_subplot(gs[0, 0])
     ax2 = fig.add_subplot(gs[0, 1])

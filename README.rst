@@ -59,12 +59,13 @@ Available scripts
 * Tilt axis offset
 * Gain reference check
 * AFIS check
+* Point resolution
 
 Running scripts
 ---------------
 
-To start the program, simply type:
+First, have a look at `config.py`: edit *SCOPE_NAME*, *params_dict* value and individual parameters for each test. Make sure SerialEM is open. To start the program, simply type:
 
 .. code-block:: python
 
-    run_script
+    perfectem

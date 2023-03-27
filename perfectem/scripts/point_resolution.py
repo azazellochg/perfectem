@@ -49,17 +49,17 @@ class PointRes(BaseSetup):
 
     def __init__(self, log_fn="point_resolution", **kwargs):
         super().__init__(log_fn, **kwargs)
-        self.defocus = kwargs.get("defocus", -0.073)
+        self.defocus = kwargs.get("defocus", -0.087)  # 99nm at 200kV, 87nm at 300kV
         self.specification = kwargs.get("spec", 0.2)  # for Krios, in nm
 
     def _run(self):
         self.setup_beam(self.mag, self.spot, self.beam_size)
         self.setup_area(self.exp, self.binning, preset="R")
-        self.setup_area(exp=0.5, binning=2, preset="F")
-        self.autofocus(-0.25, 0.05)
+        self.setup_area(exp=1, binning=2, preset="F")
+        self.autofocus(-0.1, 0.05)
         self.check_drift()
         self.check_before_acquire()
-        sem.ChangeFocus(0.25-abs(self.defocus))
+        sem.ChangeFocus(0.1-abs(self.defocus))
 
         if self.CAMERA_HAS_DIVIDEBY2:
             sem.SetDivideBy2(1)

@@ -60,11 +60,12 @@ class C2Fringes(BaseSetup):
     def _run(self):
         self.setup_beam(self.mag, self.spot, self.beam_size)
         self.setup_area(self.exp, self.binning, preset="R")
-        sem.SetEucentricFocus(1)
-        sem.Pause("Please move stage to an empty area and center the beam such that it can fit into the FOV")
+        sem.Pause("Please move stage to an empty area")
+        sem.AutocenterBeam()
         ffi = sem.YesNoBox("Does this system have Fringe-Free Illumination (FFI)?")
         if ffi:
             sem.SetDefocus(self.defocus)
+        self.check_before_acquire()
         sem.Record()
         sem.SetDefocus(0)
         params = sem.ImageProperties("A")
@@ -73,7 +74,7 @@ class C2Fringes(BaseSetup):
         if DEBUG:
             sem.SaveToOtherFile("A", "JPG", "NONE", self.logDir + f"/C2_fringes_{self.ts}.jpg")
 
-        # Rotate img by -45 deg and extract a line profile of certain wodth
+        # Rotate img by -45 deg and extract a line profile of certain width
         data = ndimg.rotate(data, -45)
         num = int(np.sqrt((dim_x//2) ** 2 + (dim_y//2) ** 2))
         half_width = self.integrate // 2

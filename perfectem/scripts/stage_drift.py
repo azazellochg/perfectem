@@ -167,9 +167,9 @@ class StageDrift(BaseSetup):
 
                             1) From a starting position move {self.shift} um in each direction and 
                             measure drift until it is below threshold.
-                            2) Same test but instead tilting to +/- {self.tilt} deg.
+                            2) Measure drift after tilting to +/- {self.tilt} deg.
 
-                            Specification (Krios): < 0.5 nm/min
+                            Specification (Krios): < 0.5 nm/min ?
                 """
         ax0.text(0, 0, textstr, fontsize=20)
         ax0.axis('off')
@@ -186,6 +186,7 @@ class StageDrift(BaseSetup):
         self.setup_beam(self.mag, self.spot, self.beam_size)
         self.setup_area(self.exp, self.binning, preset="F")
         self.autofocus(-2, 0.1, do_ast=False)
+        self.check_before_acquire()
 
         res, avg_res, position = self.measure_drift()
         position = sem.ReportStageXYZ()

@@ -36,7 +36,7 @@ from ..config import SCOPE_NAME, DEBUG
 class InfoLimit(BaseSetup):
     """
         Name: Information limit test.
-        Desc: Take two images with a small image shift (2 nm), add them together
+        Desc: Take two images with a small image shift (0.12 nm), add them together
               and calculate FFT. You should observe Young fringes going up
               to 1 A.
         Specification (Krios): 0.14 nm at 0 tilt, 0.23 nm at 70 deg. tilt.
@@ -53,16 +53,18 @@ class InfoLimit(BaseSetup):
 
     def __init__(self, log_fn="info_limit_0-tilt", **kwargs):
         super().__init__(log_fn, **kwargs)
-        self.shift = 0.002  # image shift in um
+        self.shift = 0.00012  # image shift in um
         self.delay = 5  # in sec
-        self.defocus = kwargs.get("defocus", -0.5)
+        self.defocus = kwargs.get("defocus", -0.5)  # the 1st CTF ring is smaller than the 1st gold diffraction ring
         self.specification = kwargs.get("spec", 0.14)  # for Krios, in nm
 
     def _run(self):
-        sem.TiltTo(0)
+        sem.Pause("Please change C2 aperture to 150um")
         self.setup_beam(self.mag, self.spot, self.beam_size)
-        self.setup_area(exp=1, binning=2, preset="R")
-        self.setup_area(exp=0.5, binning=2, preset="F")
+        sem.Pause("Please center the beam, roughly focus the image, check beam tilt pp and rotation center")
+        self.setup_beam(self.mag, self.spot, self.beam_size)
+        self.setup_area(exp=2, binning=4, preset="R")
+        self.setup_area(exp=2, binning=4, preset="F")
         self.autofocus(self.defocus, 0.05, do_coma=True)
         self.check_drift()
         self.setup_area(self.exp, self.binning, preset="R")
@@ -95,7 +97,7 @@ class InfoLimit(BaseSetup):
 
                     The information limit is a measure of the highest frequency
                     that is transferred through the optical system. During exposure
-                    of the CCD the image is shifted ~2nm to produce Young's fringes
+                    of the CCD the image is shifted ~0.12nm to produce Young's fringes
                     in the FFT. The extent of the fringes is a measure of the information limit.
 
                     Specification: {self.specification} nm

@@ -40,7 +40,8 @@ test_dict = {
     6: ["C2Fringes", "C2 Fresnel fringes"],
     7: ["TiltAxis", "Tilt axis offset"],
     8: ["GainRef", "Gain reference check"],
-    9: ["AFIS", "AFIS check"]
+    9: ["AFIS", "AFIS check"],
+    10: ["PointRes", "Point resolution"]
 }
 
 
@@ -76,7 +77,7 @@ def main(argv=None):
         show()
         num = int(input("\nInput the test number: ").strip())
 
-        if num in range(1, 10):
+        if num in range(1, 11):
             funcname = test_dict[num][0]
             module = importlib.import_module("perfectem.scripts")
             func = getattr(module, funcname)

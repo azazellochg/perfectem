@@ -44,7 +44,7 @@ class ThonRings(BaseSetup):
 
     def __init__(self, log_fn="thon_rings", **kwargs):
         super().__init__(log_fn, **kwargs)
-        self.defocus = kwargs.get("defocus", -0.5)
+        self.defocus = kwargs.get("defocus", -1)
         self.specification = kwargs.get("spec", 0.33)  # for Krios, in nm
 
     def _run(self):

@@ -156,6 +156,8 @@ class BaseSetup:
         logging.info(f"Starting script {test_name} {_dt.strftime('%d/%m/%Y %H:%M:%S')}")
 
         try:
+            if abs(sem.ReportTiltAngle()) > 0.1:
+                sem.TiltTo(0)
             self._run()
         except Exception as e:
             logging.error(f"Script {test_name} has failed: {str(e)}")
@@ -172,7 +174,7 @@ class BaseSetup:
         old_exp, _ = sem.ReportExposure("F")
         old_bin = int(sem.ReportBinning("F"))
 
-        self.setup_area(exp=0.1, binning=1, preset="F")
+        self.setup_area(exp=0.25, binning=1, preset="F")
         sem.Focus()
         _, _, _, _, eps = sem.ElectronStats("A")
         logging.info(f"Dose rate: {eps} eps")
@@ -277,7 +279,10 @@ class BaseSetup:
                           f"{area} um < {min_FOV}, decrease the magnification!")
             sem.Exit()
         else:
+            sem.SaveFocus()
+            sem.SetDefocus(-50)
             sem.Eucentricity(2 if fine else 1)
+            sem.RestoreFocus()
 
     def euc_by_beamtilt(self):
         """ tbd. """

@@ -42,6 +42,7 @@ class GainRef(BaseSetup):
         sem.Pause("Please move stage to an empty area and spread the beam.")
         self.setup_beam(self.mag, self.spot, self.beam_size)
         self.setup_area(self.exp, self.binning, preset="R")
+        self.check_before_acquire()
 
         sem.Record()
         #get autocorrelation from sem or otherwise and save it

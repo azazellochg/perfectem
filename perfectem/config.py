@@ -32,12 +32,12 @@ SCOPE_NAME = "Krios2"
 # beam size in microns (Krios, 3-cond. lenses) or percents (2-cond. lenses)
 
 krios2_falcon4 = {
-    "StageDrift": {"beam": 1.1, "spot": 3, "mag": 96000, "exp": 0.5, "binning": 2},
-    "Anisotropy": {"beam": 1.1, "spot": 3, "mag": 96000, "exp": 0.5, "binning": 2},
-    "InfoLimit": {"beam": 1.1, "spot": 3, "mag": 550000, "exp": 1, "binning": 2, "defocus": -0.5, "spec": 0.14},  # use uProbe C2 150; Ceta bin 2 or other camera bin 1; use 2/3 saturation level
-    "ThonRings": {"beam": 1.1, "spot": 3, "mag": 250000, "exp": 1, "binning": 2, "defocus": -0.5, "spec": 0.33},
-    "PointRes": {"beam": 1.1, "spot": 3, "mag": 380000, "exp": 1, "binning": 2, "defocus": -0.073, "spec": 0.20},
-    "GoldDiffr": {"beam": 1.1, "spot": 4, "mag": 600000, "exp": 3, "binning": 2, "defocus": -0.2, "spec": 0.1},
+    "StageDrift": {"beam": 1.1, "spot": 4, "mag": 96000, "exp": 0.5, "binning": 2},
+    "Anisotropy": {"beam": 1.1, "spot": 4, "mag": 96000, "exp": 0.5, "binning": 2},
+    "InfoLimit": {"beam": 1.05, "spot": 4, "mag": 600000, "exp": 3, "binning": 2, "defocus": -0.1, "spec": 0.14},  # use nanoProbe C2 150
+    "ThonRings": {"beam": 1.1, "spot": 3, "mag": 250000, "exp": 1, "binning": 2, "defocus": -1, "spec": 0.33},
+    "PointRes": {"beam": 1.1, "spot": 3, "mag": 380000, "exp": 1, "binning": 2, "defocus": -0.087, "spec": 0.20},
+    "GoldDiffr": {"beam": 1.1, "spot": 4, "mag": 600000, "exp": 3, "binning": 2, "defocus": -0.1, "spec": 0.1},  # use nanoProbe C2 150
     "C2Fringes": {"beam": 0.42, "spot": 6, "mag": 75000, "exp": 0.1, "binning": 1},
     "TiltAxis": {"beam": 1.1, "spot": 5, "mag": 75000, "exp": 0.5, "binning": 2},
     "GainRef": {"beam": 1.1, "spot": 7, "mag": 96000, "exp": 1, "binning": 1},
