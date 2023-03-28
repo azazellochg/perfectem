@@ -39,7 +39,7 @@ class StageDrift(BaseSetup):
         Name: Stage drift test.
         Desc: 1) From a starting position move 1 um in each
               direction and measure drift until it is below threshold.
-              2) Repeat the same test by tilting to +/- 45 deg instead of shift
+              2) Repeat the same test by tilting the stage to +/- 45 deg
         Specification: < 0.5 nm/min
     """
 

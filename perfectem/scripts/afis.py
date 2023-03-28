@@ -73,7 +73,7 @@ class AFIS(BaseSetup):
         sem.NoMessageBoxOnError()
         self.check_before_acquire()
         for img in bis_positions:
-            sem.SetImageShift(img[0], img[1], self.DELAY)  # units match microns in delphi adapter
+            sem.SetImageShift(img[0], img[1], self.DELAY)  # units match microns in delphi scripting exampler
             try:
                 sem.FixAstignatismByCTF(1, 1, 0)
                 sem.FixComaByCTF(1, 1, 0)
