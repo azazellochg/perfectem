@@ -40,14 +40,17 @@ class BaseSetup:
     def __init__(self, log_fn, **kwargs):
         """ Setup logger, camera settings and set common SerialEM params. """
 
-        self.SCOPE_HAS_C3 = False
-        self.SCOPE_HAS_AUTOFILL = False
+        sem.NoMessageBoxOnError()
+        self.SCOPE_HAS_C3 = self.check_C3()
+        self.SCOPE_HAS_AUTOFILL = self.check_autofill()
         self.CAMERA_NUM = 1
-        self.CAMERA_HAS_DIVIDEBY2 = True
+        self.CAMERA_HAS_DIVIDEBY2 = False
         self.DELAY = 3
+        sem.NoMessageBoxOnError(0)
+
+        logging.info(f"Microscope type detected: hasC3={self.SCOPE_HAS_C3}, hasAutofill={self.SCOPE_HAS_AUTOFILL}")
 
         self.setup_log(log_fn)
-        self.get_scope_type()
         self.select_camera()
 
         sem.SetUserSetting("DriftProtection", 1, 1)
@@ -87,7 +90,6 @@ class BaseSetup:
                                 logging.StreamHandler()])
 
         sem.SuppressReports()
-        #sem.NoMessageBoxOnError()
         sem.ErrorsToLog()
 
     def select_camera(self):
@@ -113,8 +115,8 @@ class BaseSetup:
         else:
             sem.SelectCamera(camera_num)
             self.CAMERA_NUM = camera_num
-            if sem.ReportCameraName(self.CAMERA_NUM) == "Falcon 4EC":
-                self.CAMERA_HAS_DIVIDEBY2 = False
+            if "Falcon" not in sem.ReportCameraName(self.CAMERA_NUM):  # TODO: check this
+                self.CAMERA_HAS_DIVIDEBY2 = True
             _, _, mode = sem.ReportMag()
             if mode == 1:  # EFTEM
                 sem.SetSlitIn(0)  # retract slit
@@ -124,24 +126,23 @@ class BaseSetup:
             sem.SetColumnOrGunValve(1)
         sem.SetLowDoseMode(0)
 
-    def get_scope_type(self):
-        """ Get some global microscope-type related params. """
-        sem.NoMessageBoxOnError()
+    def check_C3(self):
+        """ Check if we have a C3 lens. """
 
         try:
             sem.ReportIlluminatedArea()
-            self.SCOPE_HAS_C3 = True
-        except sem.SEMerror or sem.SEMmoduleError:
-            pass
+            return True
+        except:
+            return False
+
+    def check_autofill(self):
+        """ Check for LN autofilling system. """
 
         try:
             sem.AreDewarsFilling()
-            self.SCOPE_HAS_AUTOFILL = True
-        except sem.SEMerror or sem.SEMmoduleError:
-            pass
-
-        sem.NoMessageBoxOnError(0)
-        logging.info(f"Microscope type detected: hasC3={self.SCOPE_HAS_C3}, hasAutofill={self.SCOPE_HAS_AUTOFILL}")
+            return True
+        except:
+            return False
 
     def _run(self):
         """ Should be implemented in a script. """
@@ -207,7 +208,7 @@ class BaseSetup:
             logging.info(f"Waiting for drift to get below {crit} A/sec...")
             sem.DriftWaitTask(crit, "A", timeout, interval, 1, "A")
 
-    def setup_beam(self, mag, spot, beamsize, mode="nano"):
+    def setup_beam(self, mag, spot, beamsize, mode="nano", check_dose=True):
         """ Set illumination params. """
 
         logging.info(f"Setting illumination: probe={mode}, mag={mag}, spot={spot}, beam={beamsize}")
@@ -245,7 +246,8 @@ class BaseSetup:
         sem.Delay(self.DELAY)
 
         logging.info("Setting illumination: done!")
-        self.check_eps()
+        if check_dose:
+            self.check_eps()
 
     def setup_area(self, exp, binning, area="F", preset="F"):
         """ Setup camera settings for a certain preset. """

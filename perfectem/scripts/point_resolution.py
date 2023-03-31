@@ -85,7 +85,7 @@ class PointRes(BaseSetup):
                     Measurement performed       {pretty_date(get_time=True)}
                     Microscope name             {SCOPE_NAME}
                     Recorded at magnification   {self.mag // 1000} kx
-                    Defocus                     {self.defocus*100} nm
+                    Defocus                     {int(self.defocus*1000)} nm
                     Camera used                 {sem.ReportCameraName(self.CAMERA_NUM)}
 
                     The Thon ring profile is calculated from the FFT

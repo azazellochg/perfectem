@@ -55,12 +55,12 @@ class InfoLimit(BaseSetup):
         super().__init__(log_fn, **kwargs)
         self.shift = 0.00012  # image shift in um
         self.delay = 5  # in sec
-        self.defocus = kwargs.get("defocus", -0.5)  # the 1st CTF ring is smaller than the 1st gold diffraction ring
+        self.defocus = kwargs.get("defocus", -0.3)  # the 1st CTF ring is smaller than the 1st gold diffraction ring; 3-4x Scherzer defocus
         self.specification = kwargs.get("spec", 0.14)  # for Krios, in nm
 
     def _run(self):
         sem.Pause("Please change C2 aperture to 150um")
-        self.setup_beam(self.mag, self.spot, self.beam_size)
+        self.setup_beam(self.mag, self.spot, self.beam_size, check_dose=False)
         sem.Pause("Please center the beam, roughly focus the image, check beam tilt pp and rotation center")
         self.setup_beam(self.mag, self.spot, self.beam_size)
         self.setup_area(exp=2, binning=4, preset="R")

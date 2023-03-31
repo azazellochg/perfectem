@@ -49,8 +49,8 @@ class Anisotropy(BaseSetup):
     def __init__(self, log_fn="mag_anisotropy", **kwargs):
         super().__init__(log_fn, **kwargs)
         self.num_img = 10  # number of images
-        self.def_min = 2500  # min def in Angstroms
-        self.def_max = 30000  # max def in Angstroms
+        self.def_min = 5000  # min def in Angstroms
+        self.def_max = 50000  # max def in Angstroms
 
     def _find_limits(self, defocus, var):
         """ The analytic expressions are very ugly and

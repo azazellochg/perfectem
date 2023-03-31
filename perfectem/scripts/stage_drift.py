@@ -124,7 +124,7 @@ class StageDrift(BaseSetup):
                 logging.info(f"{move} drift reached {self.drift_crit} A/s in {avg_time:0.2f}s")
                 avg_res[move] = avg_time
             else:
-                logging.error(f"Target {self.drift_crit} A/s never reached.")
+                logging.info(f"Target {self.drift_crit} A/s never reached.")
 
         return res, avg_res, stage
 
@@ -186,8 +186,10 @@ class StageDrift(BaseSetup):
         self.setup_beam(self.mag, self.spot, self.beam_size)
         self.setup_area(self.exp, self.binning, preset="F")
         self.autofocus(-2, 0.1, do_ast=False)
+        sem.SetUserSetting("DriftProtection", 0)  # to speed up
         self.check_before_acquire()
 
         res, avg_res, position = self.measure_drift()
         position = sem.ReportStageXYZ()
+        sem.SetUserSetting("DriftProtection", 1, 1)
         self.plot_results(res, avg_res, position)

@@ -85,7 +85,11 @@ class TiltAxis(BaseSetup):
 
     def _run(self):
         # Rough eucentricity first
-        self.setup_beam(mag=6500, spot=7, beamsize=11)
+        if not self.SCOPE_HAS_C3:
+            self.setup_beam(mag=6700, spot=3, beamsize=58.329, mode="micro")
+        else:
+            self.setup_beam(mag=6500, spot=7, beamsize=11)
+
         self.setup_area(self.exp, self.binning, preset="T")
         old_offset = sem.ReportTiltAxisOffset()[0]
         logging.info(f"Currently set tilt axis offset: {old_offset}")
