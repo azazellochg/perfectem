@@ -43,12 +43,16 @@ class BaseSetup:
         sem.NoMessageBoxOnError()
         self.SCOPE_HAS_C3 = self.check_C3()
         self.SCOPE_HAS_AUTOFILL = self.check_autofill()
+        self.SCOPE_HAS_APER_CTRL = self.check_apertures()
         self.CAMERA_NUM = 1
         self.CAMERA_HAS_DIVIDEBY2 = False
         self.DELAY = 3
         sem.NoMessageBoxOnError(0)
 
-        logging.info(f"Microscope type detected: hasC3={self.SCOPE_HAS_C3}, hasAutofill={self.SCOPE_HAS_AUTOFILL}")
+        logging.info(f"Microscope type detected: "
+                     f"hasC3={self.SCOPE_HAS_C3}, "
+                     f"hasAutofill={self.SCOPE_HAS_AUTOFILL}, "
+                     f"hasApertureControl={self.SCOPE_HAS_APER_CTRL}")
 
         self.setup_log(log_fn)
         self.select_camera()
@@ -70,7 +74,7 @@ class BaseSetup:
         self.exp = kwargs.get("exp", 1.0)
         self.binning = kwargs.get("binning", 1)
         self.mag = kwargs.get("mag", 75000)
-        self.beam_size = kwargs.get("beam", 1.0)
+        self.beam_size = kwargs.get("beam", 1.1 if self.SCOPE_HAS_C3 else 44.46)
         self.spot = kwargs.get("spot", 3)
 
     def setup_log(self, log_fn):
@@ -127,7 +131,6 @@ class BaseSetup:
         sem.SetLowDoseMode(0)
 
     def check_C3(self):
-        """ Check if we have a C3 lens. """
 
         try:
             sem.ReportIlluminatedArea()
@@ -136,10 +139,17 @@ class BaseSetup:
             return False
 
     def check_autofill(self):
-        """ Check for LN autofilling system. """
 
         try:
             sem.AreDewarsFilling()
+            return True
+        except:
+            return False
+
+    def check_apertures(self):
+
+        try:
+            sem.ReportApertureSize(1)
             return True
         except:
             return False

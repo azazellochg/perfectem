@@ -32,16 +32,16 @@ from .config import params_dict
 __version__ = '0.8'
 
 test_dict = {
-    1: ["StageDrift", "Stage Drift"],
+    1: ["AFIS", "AFIS validation"],
     2: ["Anisotropy", "Magnification anisotropy"],
-    3: ["InfoLimit", "Information limit (Young fringes)"],
-    4: ["ThonRings", "Thon Rings"],
+    3: ["C2Fringes", "C2 Fresnel fringes"],
+    4: ["GainRef", "Gain reference check"],
     5: ["GoldDiffr", "Gold diffraction"],
-    6: ["C2Fringes", "C2 Fresnel fringes"],
-    7: ["TiltAxis", "Tilt axis offset"],
-    8: ["GainRef", "Gain reference check"],
-    9: ["AFIS", "AFIS check"],
-    10: ["PointRes", "Point resolution"]
+    6: ["InfoLimit", "Information limit (Young fringes)"],
+    7: ["PointRes", "Point resolution"],
+    8: ["StageDrift", "Stage drift"],
+    9: ["ThonRings", "Thon rings"],
+    10: ["TiltAxis", "Tilt axis offset"],
 }
 
 
