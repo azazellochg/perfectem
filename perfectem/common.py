@@ -271,6 +271,7 @@ class BaseSetup:
 
     def euc_by_stage(self, fine=False):
         """ Check FOV before running eucentricity by stage. """
+
         min_FOV = sem.ReportProperty("EucentricityCoarseMinField")  # um
         pix = sem.ReportCurrentPixelSize("T")  # nm
         binning = sem.ReportBinning("T")
@@ -281,34 +282,37 @@ class BaseSetup:
                           f"{area} um < {min_FOV}, decrease the magnification!")
             sem.Exit()
         else:
-            sem.SaveFocus()
+            sem.SetAbsoluteFocus(0)
             sem.SetDefocus(-50)
             sem.Eucentricity(2 if fine else 1)
-            sem.RestoreFocus()
 
     def euc_by_beamtilt(self):
-        """ tbd. """
+        """ Adapted from https://sphinx-emdocs.readthedocs.io/en/latest/serialEM-note-more-about-z-height.html#z-byv2-function """
+
         old_mag, _, _ = sem.ReportMag()
         old_spot = sem.ReportSpotSize()
         old_beam = sem.ReportIlluminatedArea()
-        self.setup_beam(mag=6500, spot=3, beamsize=11)
+
+        if not self.SCOPE_HAS_C3:
+            self.setup_beam(mag=6700, spot=3, beamsize=58.329, mode="micro")
+        else:
+            self.setup_beam(mag=6500, spot=7, beamsize=11)
         self.setup_area(exp=0.5, binning=2, preset="F")
 
         sem.SaveFocus()
-        old_offset = sem.ReportAutofocusOffset()
-        sem.SetEucentricFocus()
-        sem.SetAutofocusOffset(-30)
-        sem.AutoFocus(-1)
-        res = sem.ReportAutofocus()[0]
+        sem.SetAbsoluteFocus(0)
+        sem.ChangeFocus(-30)
 
-        while abs(res + 30) >= 0.7:
-            sem.MoveStage(0, 0, -1 * (res + 30))
-            print(f"Z changed by {-1 * (res + 30):0.2f} um")
+        for i in range(2):
             sem.AutoFocus(-1)
             res = sem.ReportAutofocus()[0]
+            if abs(res) < 0.3:
+                break
+            z = round(-1 * 0.72 * res, 2)  # 0.72 is to compensate the non-linear behavior of autofocus measurement
+            sem.MoveStage(0, 0, z)
+            print(f"Z changed by {z} um")
 
         sem.RestoreFocus()
-        sem.SetAutofocusOffset(old_offset)
         sem.SetMag(old_mag)
         sem.SetSpotSize(old_spot)
         sem.SetIlluminatedArea(old_beam)

@@ -147,7 +147,6 @@ class AFIS(BaseSetup):
 
                     Specification (Krios): coma < 750 nm, astigmatism < 10 nm for 5 um shift
                     Specification (Talos): coma < 1200 nm, astigmatism < 15 nm for 6 um shift
-                    Specification (Tundra): coma < 1300 nm, astigmatism < 30 nm for 6 um shift
         """
         ax0.text(0, 0, textstr, fontsize=20)
         ax0.axis('off')

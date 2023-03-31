@@ -34,10 +34,10 @@ SCOPE_NAME = "Glacios"
 krios2_falcon4 = {
     "StageDrift": {"beam": 1.1, "spot": 4, "mag": 96000, "exp": 0.5, "binning": 2},
     "Anisotropy": {"beam": 1.1, "spot": 4, "mag": 96000, "exp": 0.5, "binning": 2},
-    "InfoLimit": {"beam": 1.05, "spot": 4, "mag": 600000, "exp": 3, "binning": 2, "defocus": -0.35, "spec": 0.14},  # use nanoProbe C2 150
+    "InfoLimit": {"beam": 1.05, "spot": 4, "mag": 600000, "exp": 3, "binning": 2, "defocus": -0.5, "spec": 0.14},  # use C2 150
     "ThonRings": {"beam": 1.1, "spot": 3, "mag": 250000, "exp": 1, "binning": 2, "defocus": -1, "spec": 0.33},
     "PointRes": {"beam": 1.1, "spot": 3, "mag": 380000, "exp": 1, "binning": 2, "defocus": -0.087, "spec": 0.20},
-    "GoldDiffr": {"beam": 1.1, "spot": 4, "mag": 600000, "exp": 3, "binning": 2, "defocus": -0.1, "spec": 0.1},  # use nanoProbe C2 150
+    "GoldDiffr": {"beam": 1.1, "spot": 4, "mag": 600000, "exp": 3, "binning": 2, "defocus": -0.1, "spec": 0.1},  # C2 150
     "C2Fringes": {"beam": 0.42, "spot": 6, "mag": 75000, "exp": 0.1, "binning": 1},
     "TiltAxis": {"beam": 1.1, "spot": 5, "mag": 75000, "exp": 0.5, "binning": 2},
     "GainRef": {"beam": 1.1, "spot": 7, "mag": 96000, "exp": 1, "binning": 1},
@@ -47,7 +47,7 @@ krios2_falcon4 = {
 krios3_k3 = {
     "StageDrift": {"beam": 0.66, "spot": 5, "mag": 105000, "exp": 0.5, "binning": 2},
     "Anisotropy": {"beam": 0.66, "spot": 5, "mag": 105000, "exp": 0.5, "binning": 2},
-    "InfoLimit": {"beam": 0.66, "spot": 5, "mag": 600000, "exp": 2, "binning": 1, "defocus": -0.35, "spec": 0.14},
+    "InfoLimit": {"beam": 0.66, "spot": 5, "mag": 600000, "exp": 2, "binning": 1, "defocus": -0.5, "spec": 0.14},
     "ThonRings": {"beam": 0.66, "spot": 5, "mag": 250000, "exp": 1, "binning": 2, "defocus": -1, "spec": 0.33},
     "PointRes": {"beam": 0.66, "spot": 5, "mag": 380000, "exp": 1, "binning": 2, "defocus": -0.087, "spec": 0.20},
     "GoldDiffr": {"beam": 0.66, "spot": 5, "mag": 600000, "exp": 3, "binning": 2, "defocus": -0.1, "spec": 0.1},
