@@ -1,4 +1,4 @@
-The ``perfectem`` package provides a set of scripts designed to test TEM performance. Some tests are adapted from SAT procedures.
+The ``perfectem`` package provides a set of scripts designed to test TEM performance. Some tests have been adapted from TFS SAT procedures.
 The scripts are using SerialEM's Python module.
 
 Installation
@@ -8,9 +8,9 @@ Installation
 
 Requirements:
 
-    * python >= 3.6
+    * python >= 3.6 (Windows XP is NOT supported)
     * matplotlib, mrcfile, numpy, scipy
-    * network connection to PC with SerialEM that controls the microscope
+    * network connection to PC with SerialEM that controls the microscope (if SerialEM runs on a different PC)
 
 Installation from PyPI on Windows
 #################################
@@ -79,7 +79,7 @@ Available scripts
     - Description: Measure residual beam tilt and astigmatism at different image shift positions.
 - Point resolution
     - Specification (Krios): 0.2 nm at 73 nm defocus. Glacios: 0.24 nm at 82 nm defocus.
-    - Description: Take a high-resolution image on carbon at extended 1.2 Scherzer defocus. The first CTF ring defines the point resolution.
+    - Description: Take a high-resolution image on carbon (Pt-Ir grid recommended) at extended 1.2 Scherzer defocus. The first CTF ring defines the point resolution.
 
 Running scripts
 ---------------

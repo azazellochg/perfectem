@@ -283,8 +283,9 @@ class BaseSetup:
             sem.Exit()
         else:
             sem.SetAbsoluteFocus(0)
-            sem.SetDefocus(-50)
+            sem.ChangeFocus(-50)
             sem.Eucentricity(2 if fine else 1)
+            sem.ChangeFocus(50)
 
     def euc_by_beamtilt(self):
         """ Adapted from https://sphinx-emdocs.readthedocs.io/en/latest/serialEM-note-more-about-z-height.html#z-byv2-function """

@@ -61,13 +61,13 @@ class C2Fringes(BaseSetup):
         self.setup_beam(self.mag, self.spot, self.beam_size)
         self.setup_area(self.exp, self.binning, preset="R")
         sem.Pause("Please move stage to an empty area")
+        sem.SetAbsoluteFocus(0)
         sem.AutocenterBeam()
         ffi = sem.YesNoBox("Does this system have Fringe-Free Illumination (FFI)?")
         if ffi:
-            sem.SetDefocus(self.defocus)
+            sem.ChangeFocus(self.defocus)
         self.check_before_acquire()
         sem.Record()
-        sem.SetDefocus(0)
         params = sem.ImageProperties("A")
         dim_x, dim_y = params[0], params[1]
         data = np.asarray(sem.bufferImage("A")).astype("int16")

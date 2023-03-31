@@ -53,6 +53,7 @@ setup(
     keywords='cryo-em python serialem',
     packages=find_packages(),
     install_requires=['mrcfile', 'numpy', 'scipy', 'matplotlib'],
+    python_requires='>=3.6',
     entry_points={'console_scripts': ['perfectem=perfectem:main']},
     project_urls={
         'Bug Reports': 'https://github.com/azazellochg/perfectem/issues',
