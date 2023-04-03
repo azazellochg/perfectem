@@ -83,7 +83,7 @@ class BaseSetup:
 
         self.ts = pretty_date()
         cwd = os.path.dirname(os.path.realpath(__file__))
-        self.logDir = os.path.join(cwd, f"{self.scope_name} {self.ts}")
+        self.logDir = os.path.join(cwd, f"{self.scope_name}_{self.ts}")
         os.makedirs(self.logDir, exist_ok=True)
         os.chdir(self.logDir)
         logging.basicConfig(level=logging.INFO,

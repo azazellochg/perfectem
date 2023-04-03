@@ -1,6 +1,10 @@
-TODO:
-    - check mag is in the table before setting
-    - check installation requirements
+0.9:
+    - use linear for Falcon, counting for K2/K3
+    - redo SEM commands check
+    - change Young fringes img shift back to 2nm to have enough fringes in the FOV
+    - disable dose rate check for now
+    - add more Pauses for user to recenter the beam
+    - add input arg for the microscope
 0.8:
     - redone stage drift test
     - redone tilt axis and mag aniso plots
