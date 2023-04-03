@@ -46,6 +46,7 @@ class BaseSetup:
         self.SCOPE_HAS_APER_CTRL = self.func_is_implemented("ReportApertureSize", 1)
         self.CAMERA_NUM = 1
         self.CAMERA_HAS_DIVIDEBY2 = False
+        self.CAMERA_MODE = 0  # linear
         self.DELAY = 3
         sem.NoMessageBoxOnError(0)
 
@@ -118,7 +119,12 @@ class BaseSetup:
         else:
             sem.SelectCamera(camera_num)
             self.CAMERA_NUM = camera_num
-            if "Falcon" not in sem.ReportCameraName(self.CAMERA_NUM):  # TODO: check this
+            cam_name = sem.ReportCameraName(self.CAMERA_NUM)
+            if "Falcon" in cam_name:
+                self.CAMERA_MODE = 0
+                self.CAMERA_HAS_DIVIDEBY2 = False
+            elif "K2" or "K3" in cam_name:
+                self.CAMERA_MODE = 1  # always counting
                 self.CAMERA_HAS_DIVIDEBY2 = True
             _, _, mode = sem.ReportMag()
             if mode == 1:  # EFTEM
@@ -252,15 +258,15 @@ class BaseSetup:
         sem.SetBinning(preset, binning)
         sem.SetCameraArea(preset, area)  # full area
         sem.SetProcessing(preset, 2)  # gain-normalized
+        mode = self.CAMERA_MODE
 
-        if sem.ReportReadMode(preset) != 0:
-            sem.NoMessageBoxOnError()
-            try:
-                sem.SetK2ReadMode(preset, 0)  # linear mode
-                sem.SetDoseFracParams(preset, 0, 0, 0)  # no frames
-            except sem.SEMerror or sem.SEMmoduleError:
-                pass
-            sem.NoMessageBoxOnError(0)
+        sem.NoMessageBoxOnError()
+        try:
+            sem.SetK2ReadMode(preset, mode)  # linear=0, counting=1
+            sem.SetDoseFracParams(preset, 0, 0, 0)  # no frames
+        except sem.SEMerror or sem.SEMmoduleError:
+            pass
+        sem.NoMessageBoxOnError(0)
 
         logging.info("Setting camera: done!")
 
@@ -335,6 +341,11 @@ class BaseSetup:
         sem.SetAutofocusOffset(target / 2)
         logging.info(f"Autofocusing to {target} um...")
         sem.AutoFocus()
+
+        if high_mag:
+            # fix astigmatism again, closer to focus
+            sem.FixAstigmatismByCTF()
+
         v = sem.ReportAutoFocus()[0]
         while abs(v - target) > precision:
             sem.AutoFocus()
