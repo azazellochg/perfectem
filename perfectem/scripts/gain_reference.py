@@ -39,7 +39,9 @@ class GainRef(BaseSetup):
         super().__init__(log_fn, **kwargs)
 
     def _run(self):
-        sem.Pause("Please move stage to an empty area and spread the beam.")
+        sem.Pause("Please move stage to an empty area")
+        self.setup_beam(self.mag, self.spot, self.beam_size)
+        sem.Pause("Please center the beam")
         self.setup_beam(self.mag, self.spot, self.beam_size)
         self.setup_area(self.exp, self.binning, preset="R")
         self.check_before_acquire()

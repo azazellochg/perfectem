@@ -33,7 +33,7 @@ import serialem as sem
 
 from ..common import BaseSetup
 from ..utils import pretty_date
-from ..config import SCOPE_NAME, DEBUG
+from ..config import DEBUG
 
 
 class Anisotropy(BaseSetup):
@@ -186,7 +186,7 @@ class Anisotropy(BaseSetup):
                     Linear magnification anisotropy
 
                     Measurement performed       {pretty_date(get_time=True)}
-                    Microscope type             {SCOPE_NAME}
+                    Microscope type             {self.scope_name}
                     Recorded at magnification   {self.mag // 1000} kx
                     Defocus range               {self.def_min // 10000}-{self.def_max // 10000} um
                     Camera used                 {sem.ReportCameraName(self.CAMERA_NUM)}
@@ -208,6 +208,9 @@ class Anisotropy(BaseSetup):
         fig.savefig(f"mag_anisotropy_{self.ts}.png")
 
     def _run(self):
+        sem.Pause("Please change C2 aperture to 50 um")
+        self.setup_beam(self.mag, self.spot, self.beam_size, check_dose=False)
+        sem.Pause("Please center the beam, roughly focus the image, check beam tilt pp and rotation center")
         self.setup_beam(self.mag, self.spot, self.beam_size)
         self.setup_area(self.exp, self.binning, preset="R")
         self.setup_area(self.exp, self.binning, preset="F")

@@ -27,9 +27,9 @@
 import importlib
 import argparse
 
-from .config import params_dict
+from .config import microscopes
 
-__version__ = '0.8'
+__version__ = '0.9'
 
 test_dict = {
     1: ["AFIS", "AFIS validation"],
@@ -73,15 +73,25 @@ def main(argv=None):
         print("\nAvailable tests:")
         show(args.desc)
     else:
-        print("\nChoose a performance test to run:")
-        show()
-        num = int(input("\nInput the test number: ").strip())
+        print("\nAvailable microscopes:")
+        for scope in microscopes:
+            print(f"\t[{scope}] {microscopes[scope][0]}")
 
-        if num in range(1, 11):
-            funcname = test_dict[num][0]
-            module = importlib.import_module("perfectem.scripts")
-            func = getattr(module, funcname)
-            print(func.__doc__)
-            func(**params_dict[funcname]).run()
+        scope = int(input("\nInput the microscope number: ").strip())
+        scope_name = microscopes[scope][0]
+        if scope in range(1, len(microscopes)):
+            print("\nChoose a performance test to run:")
+            show()
+            num = int(input("\nInput the test number: ").strip())
+
+            if num in range(1, 11):
+                funcname = test_dict[num][0]
+                module = importlib.import_module("perfectem.scripts")
+                func = getattr(module, funcname)
+                print(func.__doc__)
+                func(scope_name=scope_name, **microscopes[scope][1][funcname]).run()
+            else:
+                raise IndexError("Wrong test number!")
+
         else:
-            raise IndexError("Wrong test number!")
+            raise IndexError("Wrong microscope number!")

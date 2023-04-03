@@ -84,7 +84,7 @@ Available scripts
 Running scripts
 ---------------
 
-First, have a look at **config.py**: edit *SCOPE_NAME*, *params_dict* and individual parameters for each test. Make sure SerialEM is open. To start the program, simply type in CMD:
+First, have a look at **config.py**: edit *microscopes* dictionary and individual parameters for each test. Make sure SerialEM is open. To start the program, simply type in CMD:
 
 .. code-block:: python
 

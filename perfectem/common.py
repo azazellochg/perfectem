@@ -30,31 +30,31 @@ import logging
 import serialem as sem
 from datetime import datetime
 
-from .config import SCOPE_NAME
 from .utils import pretty_date
 
 
 class BaseSetup:
     """ Initialization and common functions. """
 
-    def __init__(self, log_fn, **kwargs):
+    def __init__(self, log_fn, scope_name, **kwargs):
         """ Setup logger, camera settings and set common SerialEM params. """
 
+        self.scope_name = scope_name
         sem.NoMessageBoxOnError()
-        self.SCOPE_HAS_C3 = self.check_C3()
-        self.SCOPE_HAS_AUTOFILL = self.check_autofill()
-        self.SCOPE_HAS_APER_CTRL = self.check_apertures()
+        self.SCOPE_HAS_C3 = self.func_is_implemented("ReportIlluminatedArea")
+        self.SCOPE_HAS_AUTOFILL = self.func_is_implemented("AreDewarsFilling")
+        self.SCOPE_HAS_APER_CTRL = self.func_is_implemented("ReportApertureSize", 1)
         self.CAMERA_NUM = 1
         self.CAMERA_HAS_DIVIDEBY2 = False
         self.DELAY = 3
         sem.NoMessageBoxOnError(0)
 
+        self.setup_log(log_fn)
         logging.info(f"Microscope type detected: "
                      f"hasC3={self.SCOPE_HAS_C3}, "
                      f"hasAutofill={self.SCOPE_HAS_AUTOFILL}, "
                      f"hasApertureControl={self.SCOPE_HAS_APER_CTRL}")
 
-        self.setup_log(log_fn)
         self.select_camera()
 
         sem.SetUserSetting("DriftProtection", 1, 1)
@@ -82,10 +82,9 @@ class BaseSetup:
 
         self.ts = pretty_date()
         cwd = os.path.dirname(os.path.realpath(__file__))
-        self.logDir = os.path.join(cwd, f"{SCOPE_NAME}-{self.ts}")
+        self.logDir = os.path.join(cwd, f"{self.scope_name} {self.ts}")
         os.makedirs(self.logDir, exist_ok=True)
         os.chdir(self.logDir)
-        #level = logging.INFO if not DEBUG else logging.DEBUG
         logging.basicConfig(level=logging.INFO,
                             datefmt='%d-%m-%Y %H:%M:%S',
                             format='%(asctime)s %(message)s',
@@ -130,26 +129,12 @@ class BaseSetup:
             sem.SetColumnOrGunValve(1)
         sem.SetLowDoseMode(0)
 
-    def check_C3(self):
+    def func_is_implemented(self, func, arg=None):
+        """ Check is SerialEM supports a certain command. """
 
         try:
-            sem.ReportIlluminatedArea()
-            return True
-        except:
-            return False
-
-    def check_autofill(self):
-
-        try:
-            sem.AreDewarsFilling()
-            return True
-        except:
-            return False
-
-    def check_apertures(self):
-
-        try:
-            sem.ReportApertureSize(1)
+            func = f"sem.{func}({arg if arg else ''})"
+            eval(func)
             return True
         except:
             return False
@@ -218,7 +203,7 @@ class BaseSetup:
             logging.info(f"Waiting for drift to get below {crit} A/sec...")
             sem.DriftWaitTask(crit, "A", timeout, interval, 1, "A")
 
-    def setup_beam(self, mag, spot, beamsize, mode="nano", check_dose=True):
+    def setup_beam(self, mag, spot, beamsize, mode="nano", check_dose=False):
         """ Set illumination params. """
 
         logging.info(f"Setting illumination: probe={mode}, mag={mag}, spot={spot}, beam={beamsize}")
@@ -328,12 +313,12 @@ class BaseSetup:
         sem.SetSpotSize(old_spot)
         sem.SetIlluminatedArea(old_beam)
 
-    def autofocus(self, target, precision=0.05, do_ast=True, do_coma=False):
+    def autofocus(self, target, precision=0.05, do_ast=True, do_coma=False, high_mag=False):
         """ Autofocus until the result is within precision (um) from a target. """
 
         if do_ast:
             sem.SetAutofocusOffset(0)
-            sem.SetTargetDefocus(-1)
+            sem.SetTargetDefocus(-0.75 if high_mag else -2)
             sem.AutoFocus()
 
             try:

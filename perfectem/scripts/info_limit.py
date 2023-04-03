@@ -30,13 +30,13 @@ import serialem as sem
 
 from ..common import BaseSetup
 from ..utils import plot_fft_and_text, pretty_date
-from ..config import SCOPE_NAME, DEBUG
+from ..config import DEBUG
 
 
 class InfoLimit(BaseSetup):
     """
         Name: Information limit test.
-        Desc: Take two images with a small image shift (0.12 nm), add them together
+        Desc: Take two images with a small image shift (2 nm), add them together
               and calculate FFT. You should observe Young fringes going up
               to 1 A.
         Specification (Krios): 0.14 nm at 0 tilt, 0.23 nm at 70 deg. tilt.
@@ -53,19 +53,19 @@ class InfoLimit(BaseSetup):
 
     def __init__(self, log_fn="info_limit_0-tilt", **kwargs):
         super().__init__(log_fn, **kwargs)
-        self.shift = 0.00012  # image shift in um
+        self.shift = 0.002  # image shift in um
         self.delay = 5  # in sec
         self.defocus = kwargs.get("defocus", -0.3)  # the 1st CTF ring is smaller than the 1st gold diffraction ring; 3-4x Scherzer defocus
         self.specification = kwargs.get("spec", 0.14)  # for Krios, in nm
 
     def _run(self):
-        sem.Pause("Please change C2 aperture to 150um")
+        sem.Pause("Please change C2 aperture to 150 um")
         self.setup_beam(self.mag, self.spot, self.beam_size, check_dose=False)
         sem.Pause("Please center the beam, roughly focus the image, check beam tilt pp and rotation center")
         self.setup_beam(self.mag, self.spot, self.beam_size)
-        self.setup_area(exp=2, binning=4, preset="R")
-        self.setup_area(exp=2, binning=4, preset="F")
-        self.autofocus(self.defocus, 0.05, do_coma=True)
+        self.setup_area(exp=0.5, binning=4, preset="R")
+        self.setup_area(exp=0.5, binning=4, preset="F")
+        self.autofocus(self.defocus, 0.05, do_coma=True, high_mag=True)
         self.check_drift()
         self.setup_area(self.exp, self.binning, preset="R")
         self.check_before_acquire()
@@ -90,7 +90,7 @@ class InfoLimit(BaseSetup):
                     INFORMATION LIMIT at 0 degrees tilt
 
                     Measurement performed       {pretty_date(get_time=True)}
-                    Microscope name             {SCOPE_NAME}
+                    Microscope name             {self.scope_name}
                     Recorded at magnification   {self.mag // 1000} kx
                     Defocus                     {self.defocus} um
                     Camera used                 {sem.ReportCameraName(self.CAMERA_NUM)}

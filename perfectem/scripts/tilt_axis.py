@@ -85,6 +85,7 @@ class TiltAxis(BaseSetup):
 
     def _run(self):
         # Rough eucentricity first
+        sem.Pause("Please change C2 aperture to 50 um")
         if not self.SCOPE_HAS_C3:
             self.setup_beam(mag=6700, spot=3, beamsize=58.329, mode="micro")
         else:

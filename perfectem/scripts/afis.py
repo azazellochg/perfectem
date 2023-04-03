@@ -31,7 +31,6 @@ import serialem as sem
 
 from ..common import BaseSetup
 from ..utils import pretty_date
-from ..config import SCOPE_NAME
 
 
 class AFIS(BaseSetup):
@@ -54,10 +53,12 @@ class AFIS(BaseSetup):
         self.specification = kwargs.get("spec", (750, 100))  # for Krios (coma in nm, astig in nm)
 
     def _run(self):
-        sem.Pause("Open EPU and set Acquisition mode = Faster in the Session Setup")
+        sem.Pause("Open EPU and set Acquisition mode = Faster in the Session Setup. Also change C2 aperture to 50 um")
+        self.setup_beam(self.mag, self.spot, self.beam_size, check_dose=False)
+        sem.Pause("Please center the beam, roughly focus the image, check beam tilt pp and rotation center")
         self.setup_beam(self.mag, self.spot, self.beam_size)
         self.setup_area(self.exp, self.binning, preset="R")
-        self.setup_area(exp=0.5, binning=2, preset="F")
+        self.setup_area(exp=1, binning=2, preset="F")
         sem.SetImageShift(0, 0)
         sem.SetUserSetting("DriftProtection", 0)  # to speed up
         self.autofocus(self.defocus, 0.05, do_ast=True, do_coma=True)
@@ -75,6 +76,7 @@ class AFIS(BaseSetup):
         for img in bis_positions:
             sem.SetImageShift(img[0], img[1], self.DELAY)  # units match microns in delphi scripting exampler
             try:
+                sem.AutoFocus(-2)
                 sem.FixAstigmatismByCTF(1, 1, 0)
                 sem.FixComaByCTF(1, 1, 0)
             except sem.SEMerror as e:
@@ -138,7 +140,7 @@ class AFIS(BaseSetup):
                     AFIS calibration check
 
                     Measurement performed       {pretty_date(get_time=True)}
-                    Microscope type             {SCOPE_NAME}
+                    Microscope type             {self.scope_name}
                     Recorded at magnification   {self.mag // 1000} kx
                     Defocus                     {self.defocus} um
                     Camera used                 {sem.ReportCameraName(self.CAMERA_NUM)}

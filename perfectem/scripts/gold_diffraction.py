@@ -29,7 +29,7 @@ import serialem as sem
 
 from ..common import BaseSetup
 from ..utils import plot_fft_and_text, pretty_date
-from ..config import SCOPE_NAME, DEBUG
+from ..config import DEBUG
 
 
 class GoldDiffr(BaseSetup):
@@ -49,15 +49,17 @@ class GoldDiffr(BaseSetup):
 
     def __init__(self, log_fn="gold_diffr", **kwargs):
         super().__init__(log_fn, **kwargs)
-        self.defocus = kwargs.get("defocus", -0.5)
+        self.defocus = kwargs.get("defocus", -0.25)
         self.specification = kwargs.get("spec", 0.1)  # nm
 
     def _run(self):
-        sem.Pause("Please change C2 aperture to 150um")
+        sem.Pause("Please change C2 aperture to 150 um")
         self.setup_beam(self.mag, self.spot, self.beam_size)
-        self.setup_area(exp=2, binning=4, preset="F")
-        self.setup_area(exp=2, binning=4, preset="R")
-        self.autofocus(self.defocus, 0.05, do_coma=True)
+        sem.Pause("Please center the beam, roughly focus the image, check beam tilt pp and rotation center")
+        self.setup_beam(self.mag, self.spot, self.beam_size)
+        self.setup_area(exp=0.5, binning=4, preset="F")
+        self.setup_area(exp=0.5, binning=4, preset="R")
+        self.autofocus(self.defocus, 0.05, do_coma=True, high_mag=True)
         self.check_drift()
         self.setup_area(self.exp, self.binning, preset="R")
         self.check_before_acquire()
@@ -76,7 +78,7 @@ class GoldDiffr(BaseSetup):
                     DIFFRACTION LIMIT at 0 degrees tilt
 
                     Measurement performed       {pretty_date(get_time=True)}
-                    Microscope type             {SCOPE_NAME}
+                    Microscope type             {self.scope_name}
                     Recorded at magnification   {self.mag // 1000} kx
                     Defocus                     {self.defocus} um
                     Camera used                 {sem.ReportCameraName(self.CAMERA_NUM)}

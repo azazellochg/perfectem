@@ -58,11 +58,13 @@ class C2Fringes(BaseSetup):
         self.integrate = 200  # line profile width, px
 
     def _run(self):
+        sem.Pause("Please change C2 aperture to 50 um and move stage to an empty area")
+        self.setup_beam(self.mag, self.spot, self.beam_size, check_dose=False)
+        sem.Pause("Please center the beam")
         self.setup_beam(self.mag, self.spot, self.beam_size)
         self.setup_area(self.exp, self.binning, preset="R")
-        sem.Pause("Please move stage to an empty area")
         sem.SetAbsoluteFocus(0)
-        sem.AutocenterBeam()
+        #sem.AutoCenterBeam()
         ffi = sem.YesNoBox("Does this system have Fringe-Free Illumination (FFI)?")
         if ffi:
             sem.ChangeFocus(self.defocus)

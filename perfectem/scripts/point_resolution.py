@@ -29,7 +29,7 @@ import matplotlib.pyplot as plt
 import serialem as sem
 
 from ..common import BaseSetup
-from ..config import SCOPE_NAME, DEBUG
+from ..config import DEBUG
 from ..utils import radial_profile, plot_fft_and_text, invert_pixel_axis, pretty_date
 
 
@@ -53,10 +53,13 @@ class PointRes(BaseSetup):
         self.specification = kwargs.get("spec", 0.2)  # for Krios, in nm
 
     def _run(self):
+        sem.Pause("Please change C2 aperture to 50 um")
+        self.setup_beam(self.mag, self.spot, self.beam_size, check_dose=False)
+        sem.Pause("Please center the beam, roughly focus the image, check beam tilt pp and rotation center")
         self.setup_beam(self.mag, self.spot, self.beam_size)
         self.setup_area(self.exp, self.binning, preset="R")
-        self.setup_area(exp=1, binning=2, preset="F")
-        self.autofocus(-0.1, 0.05)
+        self.setup_area(exp=0.5, binning=2, preset="F")
+        self.autofocus(-0.1, 0.05, high_mag=True)
         self.check_drift()
         self.check_before_acquire()
         sem.ChangeFocus(0.1-abs(self.defocus))
@@ -83,7 +86,7 @@ class PointRes(BaseSetup):
                     POINT TO POINT RESOLUTION
 
                     Measurement performed       {pretty_date(get_time=True)}
-                    Microscope name             {SCOPE_NAME}
+                    Microscope name             {self.scope_name}
                     Recorded at magnification   {self.mag // 1000} kx
                     Defocus                     {int(self.defocus*1000)} nm
                     Camera used                 {sem.ReportCameraName(self.CAMERA_NUM)}

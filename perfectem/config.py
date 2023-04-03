@@ -25,23 +25,34 @@
 # **************************************************************************
 
 # set to 1 for more diagnostic output
-DEBUG = 1
-
-SCOPE_NAME = "Glacios"
+DEBUG = 0
 
 # beam size in microns (Krios, 3-cond. lenses) or percents (2-cond. lenses)
 
 krios2_falcon4 = {
     "StageDrift": {"beam": 1.1, "spot": 4, "mag": 96000, "exp": 0.5, "binning": 2},
     "Anisotropy": {"beam": 1.1, "spot": 4, "mag": 96000, "exp": 0.5, "binning": 2},
-    "InfoLimit": {"beam": 1.05, "spot": 4, "mag": 600000, "exp": 3, "binning": 2, "defocus": -0.5, "spec": 0.14},  # use C2 150
-    "ThonRings": {"beam": 1.1, "spot": 3, "mag": 250000, "exp": 1, "binning": 2, "defocus": -1, "spec": 0.33},
-    "PointRes": {"beam": 1.1, "spot": 3, "mag": 380000, "exp": 1, "binning": 2, "defocus": -0.087, "spec": 0.20},
-    "GoldDiffr": {"beam": 1.1, "spot": 4, "mag": 600000, "exp": 3, "binning": 2, "defocus": -0.1, "spec": 0.1},  # C2 150
-    "C2Fringes": {"beam": 0.42, "spot": 6, "mag": 96000, "exp": 0.1, "binning": 1},
+    "InfoLimit": {"beam": 1.1, "spot": 3, "mag": 600000, "exp": 1, "binning": 2, "defocus": -0.5, "spec": 0.14},  # C2 150
+    "ThonRings": {"beam": 0.7, "spot": 2, "mag": 250000, "exp": 1, "binning": 2, "defocus": -1, "spec": 0.33},
+    "PointRes": {"beam": 0.7, "spot": 2, "mag": 380000, "exp": 2, "binning": 2, "defocus": -0.087, "spec": 0.20},
+    "GoldDiffr": {"beam": 1.1, "spot": 3, "mag": 600000, "exp": 1, "binning": 2, "defocus": -0.5, "spec": 0.1},  # C2 150
+    "C2Fringes": {"beam": 0.42, "spot": 6, "mag": 96000, "exp": 0.5, "binning": 1},
     "TiltAxis": {"beam": 1.1, "spot": 5, "mag": 75000, "exp": 0.5, "binning": 2},
     "GainRef": {"beam": 1.1, "spot": 7, "mag": 96000, "exp": 1, "binning": 1},
     "AFIS": {"beam": 1.1, "spot": 7, "mag": 96000, "exp": 1, "binning": 2, "defocus": -2, "max_imgsh": 12.0, "spec": (750, 10)},  # specs: (coma in nm, astig in nm)
+}
+
+krios1_k3 = {
+    "StageDrift": {"beam": 1.1, "spot": 5, "mag": 105000, "exp": 0.5, "binning": 2},
+    "Anisotropy": {"beam": 1.1, "spot": 5, "mag": 105000, "exp": 0.5, "binning": 2},
+    "InfoLimit": {"beam": 1.1, "spot": 5, "mag": 600000, "exp": 2, "binning": 1, "defocus": -0.5, "spec": 0.14},
+    "ThonRings": {"beam": 1.1, "spot": 5, "mag": 250000, "exp": 1, "binning": 2, "defocus": -1, "spec": 0.33},
+    "PointRes": {"beam": 1.1, "spot": 5, "mag": 380000, "exp": 1, "binning": 2, "defocus": -0.087, "spec": 0.20},
+    "GoldDiffr": {"beam": 1.1, "spot": 5, "mag": 600000, "exp": 1, "binning": 2, "defocus": -0.1, "spec": 0.1},
+    "C2Fringes": {"beam": 0.42, "spot": 5, "mag": 105000, "exp": 0.1, "binning": 1, "defocus": -1.0},
+    "TiltAxis": {"beam": 1.1, "spot": 5, "mag": 105000, "exp": 0.5, "binning": 2},
+    "GainRef": {"beam": 1.1, "spot": 5, "mag": 105000, "exp": 1, "binning": 1},
+    "AFIS": {"beam": 1.1, "spot": 5, "mag": 105000, "exp": 1, "binning": 2, "defocus": -2, "max_imgsh": 12.0, "spec": (750, 10)},
 }
 
 krios3_k3 = {
@@ -70,5 +81,9 @@ glacios_falcon3 = {
     "AFIS": {"beam": 44.46, "spot": 3, "mag": 92000, "exp": 1, "binning": 2, "defocus": -2, "max_imgsh": 12.0, "spec": (1200, 15)},
 }
 
-# Set which params dict to use
-params_dict = glacios_falcon3
+microscopes = {
+    1: ["Krios 1", krios1_k3],
+    2: ["Krios 2", krios2_falcon4],
+    3: ["Krios 3", krios3_k3],
+    4: ["Glacios", glacios_falcon3],
+}
