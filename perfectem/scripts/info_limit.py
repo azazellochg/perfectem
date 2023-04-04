@@ -63,6 +63,7 @@ class InfoLimit(BaseSetup):
         self.setup_beam(self.mag, self.spot, self.beam_size, check_dose=False)
         sem.Pause("Please center the beam, roughly focus the image, check beam tilt pp and rotation center")
         self.setup_beam(self.mag, self.spot, self.beam_size)
+        sem.SetImageShift(0, 0)
         self.setup_area(exp=0.5, binning=4, preset="R")
         self.setup_area(exp=0.5, binning=4, preset="F")
         self.autofocus(self.defocus, 0.05, do_coma=True, high_mag=True)

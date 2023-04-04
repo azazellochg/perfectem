@@ -82,8 +82,7 @@ class BaseSetup:
         """ Create a log file for the script run. """
 
         self.ts = pretty_date()
-        cwd = os.path.dirname(os.path.realpath(__file__))
-        self.logDir = os.path.join(cwd, f"{self.scope_name}_{self.ts}")
+        self.logDir = f"{self.scope_name}_{self.ts}"
         os.makedirs(self.logDir, exist_ok=True)
         os.chdir(self.logDir)
         logging.basicConfig(level=logging.INFO,
@@ -203,6 +202,7 @@ class BaseSetup:
         :param interval: repeat every N seconds
         :param timeout: give up and raise error after N seconds
         """
+
         x, y = sem.ReportFocusDrift()[0], sem.ReportFocusDrift()[1]
         drift = math.sqrt(x**2 + y**2)
         if (10 * drift - crit) > 0.01:
@@ -236,8 +236,8 @@ class BaseSetup:
 
         norm = sum(normalize.values())
         if norm != 0:
-            logging.info(f"Normalizing lenses... ({norm})")
-            sem.NormalizeLenses(norm)
+            logging.info(f"Normalizing lenses... ({norm}: {normalize.keys()})")
+            sem.NormalizeLenses(norm) if norm < 7 else sem.NormalizeAllLenses()
 
         if not self.SCOPE_HAS_C3:
             sem.SetPercentC2(beamsize)
@@ -250,7 +250,7 @@ class BaseSetup:
         if check_dose:
             self.check_eps()
 
-    def setup_area(self, exp, binning, area="F", preset="F"):
+    def setup_area(self, exp, binning, area="F", preset="F", mode=None):
         """ Setup camera settings for a certain preset. """
 
         logging.info(f"Setting camera: preset={preset}, exp={exp}, binning={binning}, area={area}")
@@ -258,11 +258,11 @@ class BaseSetup:
         sem.SetBinning(preset, binning)
         sem.SetCameraArea(preset, area)  # full area
         sem.SetProcessing(preset, 2)  # gain-normalized
-        mode = self.CAMERA_MODE
+        camera_mode = mode if mode is not None else self.CAMERA_MODE
 
         sem.NoMessageBoxOnError()
         try:
-            sem.SetK2ReadMode(preset, mode)  # linear=0, counting=1
+            sem.SetK2ReadMode(preset, camera_mode)  # linear=0, counting=1
             sem.SetDoseFracParams(preset, 0, 0, 0)  # no frames
         except sem.SEMerror or sem.SEMmoduleError:
             pass
@@ -274,19 +274,17 @@ class BaseSetup:
         """ Check FOV before running eucentricity by stage. """
 
         min_FOV = sem.ReportProperty("EucentricityCoarseMinField")  # um
-        pix = sem.ReportCurrentPixelSize("T")  # nm
-        binning = sem.ReportBinning("T")
+        pix = sem.ReportCurrentPixelSize("T")  # nm, with binning
         area_x, area_y, _, _, _, _ = sem.ReportCameraSetArea("T")  # binned pix
-        area = area_x * binning * pix / 1000  # um
+        area = area_x * pix / 1000  # um
         if area < min_FOV:
-            logging.error(f"With current View settings, the FOV is "
-                          f"{area} um < {min_FOV}, decrease the magnification!")
-            sem.Exit()
-        else:
-            sem.SetAbsoluteFocus(0)
-            sem.ChangeFocus(-50)
-            sem.Eucentricity(2 if fine else 1)
-            sem.ChangeFocus(50)
+            logging.warning(f"With current View settings, the FOV is "
+                            f"{area} um < EucentricityCoarseMinField={min_FOV}, "
+                            "SerialEM will decrease the magnification automatically")
+        sem.SetAbsoluteFocus(0)
+        sem.ChangeFocus(-50)
+        sem.Eucentricity(2 if fine else 1)
+        sem.ChangeFocus(50)
 
     def euc_by_beamtilt(self):
         """ Adapted from https://sphinx-emdocs.readthedocs.io/en/latest/serialEM-note-more-about-z-height.html#z-byv2-function """
@@ -371,3 +369,17 @@ class BaseSetup:
                 logging.info("Dewars are filling or PVP running, waiting for 60 sec..")
                 sem.Delay(60)
                 i += 1
+
+    def change_aperture(self, name="c2", size=50):
+        """ Change apertures.
+
+        :param name: Name, "c2" or "obj"
+        :param size: in um, 0 to retract, 1 to reinsert
+        """
+        aper = 1 if name == "c2" else 2
+
+        if self.SCOPE_HAS_APER_CTRL:
+            logging.info(f"Changing {name.upper()} aperture to: {size}")
+            sem.SetApertureSize(aper, size)
+        else:
+            raise NotImplementedError("Aperture control is not available.")

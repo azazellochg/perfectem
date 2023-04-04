@@ -183,6 +183,9 @@ class StageDrift(BaseSetup):
         #plt.show()
 
     def _run(self):
+        if self.SCOPE_HAS_AUTOFILL and sem.DewarsRemainingTime() < 600:
+            raise RuntimeError("<10 min left before the next LN autofill cycle, this test is cancelled.")
+            sem.Exit()
         sem.Pause("Please change C2 aperture to 50 um")
         self.setup_beam(self.mag, self.spot, self.beam_size, check_dose=False)
         sem.Pause("Please center the beam, roughly focus the image, check beam tilt pp and rotation center")
