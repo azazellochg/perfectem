@@ -24,6 +24,7 @@
 # *
 # **************************************************************************
 
+from typing import Any
 import serialem as sem
 
 from ..common import BaseSetup
@@ -35,10 +36,10 @@ class GainRef(BaseSetup):
         Desc: Take a picture of a flood beam and check the auto-correlation.
     """
 
-    def __init__(self, log_fn="gain_ref", **kwargs):
+    def __init__(self, log_fn: str = "gain_ref", **kwargs: Any) -> None:
         super().__init__(log_fn, **kwargs)
 
-    def _run(self):
+    def _run(self) -> None:
         sem.Pause("Please move stage to an empty area")
         self.setup_beam(self.mag, self.spot, self.beam_size)
         sem.Pause("Please center the beam")

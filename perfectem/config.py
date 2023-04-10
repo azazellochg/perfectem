@@ -24,8 +24,9 @@
 # *
 # **************************************************************************
 
-# set to 1 for more diagnostic output
-DEBUG = 1
+SERIALEM_IP = "127.0.0.1"
+SERIALEM_PORT = 48888
+DEBUG = 1  # set to 1 for more diagnostic output
 
 # beam size in microns (Krios, 3-cond. lenses) or percents (2-cond. lenses)
 
@@ -81,9 +82,9 @@ glacios_falcon3 = {
     "AFIS": {"beam": 44.46, "spot": 3, "mag": 92000, "exp": 1, "binning": 2, "defocus": -2, "max_imgsh": 12.0, "spec": (1200, 15)},
 }
 
-microscopes = {
-    1: ["Krios_1", krios1_k3],
-    2: ["Krios_2", krios2_falcon4],
-    3: ["Krios_3", krios3_k3],
-    4: ["Glacios", glacios_falcon3],
-}
+microscopes = (
+    ("Krios_1", krios1_k3),
+    ("Krios_2", krios2_falcon4),
+    ("Krios_3", krios3_k3),
+    ("Glacios", glacios_falcon3),
+)

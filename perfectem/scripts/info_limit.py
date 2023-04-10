@@ -25,6 +25,7 @@
 # **************************************************************************
 
 import logging
+from typing import Any
 import numpy as np
 import serialem as sem
 
@@ -51,15 +52,15 @@ class InfoLimit(BaseSetup):
         energy spread, and from variations in the lens currents, which induces focus variation with time.
     """
 
-    def __init__(self, log_fn="info_limit_0-tilt", **kwargs):
+    def __init__(self, log_fn: str = "info_limit_0-tilt", **kwargs: Any):
         super().__init__(log_fn, **kwargs)
         self.shift = 0.002  # image shift in um
         self.delay = 5  # in sec
         self.defocus = kwargs.get("defocus", -0.3)  # the 1st CTF ring is smaller than the 1st gold diffraction ring; 3-4x Scherzer defocus
         self.specification = kwargs.get("spec", 0.14)  # for Krios, in nm
 
-    def _run(self):
-        sem.Pause("Please change C2 aperture to 150 um")
+    def _run(self) -> None:
+        self.change_aperture("c2", 150)
         self.setup_beam(self.mag, self.spot, self.beam_size, check_dose=False)
         sem.Pause("Please center the beam, roughly focus the image, check beam tilt pp and rotation center")
         self.setup_beam(self.mag, self.spot, self.beam_size)

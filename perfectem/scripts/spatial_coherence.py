@@ -25,6 +25,7 @@
 # **************************************************************************
 
 import numpy as np
+from typing import Any
 import matplotlib.pyplot as plt
 import scipy.ndimage as ndimg
 import serialem as sem
@@ -52,15 +53,15 @@ class C2Fringes(BaseSetup):
 
     """
 
-    def __init__(self, log_fn="C2_fringes", **kwargs):
+    def __init__(self, log_fn: str = "C2_fringes", **kwargs: Any) -> None:
         super().__init__(log_fn, **kwargs)
         self.defocus = kwargs.get("defocus", -1)  # relevant only for FFI
         self.integrate = 200  # line profile width, px
 
-    def _run(self):
-        sem.Pause("Please change C2 aperture to 50 um and move stage to an empty area")
+    def _run(self) -> None:
+        self.change_aperture("c2", 50)
         self.setup_beam(self.mag, self.spot, self.beam_size, check_dose=False)
-        sem.Pause("Please center the beam")
+        sem.Pause("Please go to an empty area and center the beam")
         self.setup_beam(self.mag, self.spot, self.beam_size)
         self.setup_area(self.exp, self.binning, preset="R")
         sem.SetAbsoluteFocus(0)

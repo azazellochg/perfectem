@@ -28,9 +28,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 import logging
 from datetime import datetime
+from typing import Tuple, Optional, List, Any
 
 
-def pretty_date(get_time=False):
+def pretty_date(get_time: bool = False) -> str:
     date_str = '%d-%m-%Y'
     if get_time:
         date_str += ' %H:%M:%S'
@@ -38,16 +39,16 @@ def pretty_date(get_time=False):
     return datetime.now().strftime(date_str)
 
 
-def moving_average(x, window):
+def moving_average(x: np.ndarray, window: int) -> np.ndarray:
     """ Calculate moving avg. Return a numpy array. """
     return np.convolve(x, np.ones(window), 'valid') / window
 
 
-def radial_profile(data):
+def radial_profile(data: np.ndarray) -> np.ndarray:
     """ https://stackoverflow.com/a/21242776/2641718 """
     y, x = np.indices(data.shape)
     center = np.array([(x.max() - x.min()) / 2.0, (y.max() - y.min()) / 2.0])
-    r = np.sqrt((x - center[0]) ** 2 + (y - center[1]) ** 2)
+    r = np.sqrt((x-center[0])**2 + (y-center[1])**2)
     r = r.astype(int)
     tbin = np.bincount(r.ravel(), data.ravel())
     nr = np.bincount(r.ravel())
@@ -56,7 +57,9 @@ def radial_profile(data):
     return radialprofile[2:int(center[0])]
 
 
-def plot_fft_and_text(data, spec=None, pix=1.0, text=None, add_bottom_plot=False):
+def plot_fft_and_text(data: np.ndarray, spec: Optional[float] = None,
+                      pix: float = 1.0, text: Optional[str] = None,
+                      add_bottom_plot: bool = False) -> Tuple[Any, List[Any]]:
     """ Two subplots arranged horizontally: FFT (with an optional ring) and some text.
     :param data: fft data
     :param spec: specification in nm for plotting a circle onto fft
@@ -80,10 +83,10 @@ def plot_fft_and_text(data, spec=None, pix=1.0, text=None, add_bottom_plot=False
     if spec is not None:
         # mark specification
         dim = data.shape[0]  # fft should be squared already
-        if 2 * pix >= spec * 10:
+        if 2*pix >= spec*10:
             logging.error(f"At this mag the Nyquist is at {2*pix}, cannot plot {spec*10}A ring!")
         else:
-            rad = dim * pix / (spec * 10)
+            rad = dim*pix / (spec * 10)
             ring = plt.Circle((dim/2, dim/2), rad, color='w', fill=False, linestyle='--')
             ax1.add_patch(ring)
 
@@ -97,7 +100,7 @@ def plot_fft_and_text(data, spec=None, pix=1.0, text=None, add_bottom_plot=False
     return fig, axes
 
 
-def invert_pixel_axis(dims=1024, pixsize=1.0):
+def invert_pixel_axis(dims: int = 1024, pixsize: float = 1.0) -> Tuple[Any, List]:
     """ Convert X axis from pixel values to resolution (nm).
         To be used in FFT plots. Returns new X axis ticks and labels.
 
@@ -105,8 +108,8 @@ def invert_pixel_axis(dims=1024, pixsize=1.0):
         :param pixsize: pixel size in Angstroms
     """
     step = dims // 20
-    x_ticks = np.arange(0, dims // 2, step)
-    x_labels = np.round(np.array([dims * pixsize / (i + 1e-5) for i in x_ticks]) / 10, 2)
+    x_ticks = np.arange(0, dims//2, step)
+    x_labels = np.round(np.ndarray([dims*pixsize / (i + 1e-5) for i in x_ticks]) / 10, 2)
     x_labels[0] = np.inf
 
     return x_ticks.tolist(), x_labels.tolist()
