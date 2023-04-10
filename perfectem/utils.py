@@ -32,6 +32,7 @@ from typing import Tuple, Optional, List, Any
 
 
 def pretty_date(get_time: bool = False) -> str:
+    """ Return current datetime in a pretty format. """
     date_str = '%d-%m-%Y'
     if get_time:
         date_str += ' %H:%M:%S'
@@ -45,7 +46,7 @@ def moving_average(x: np.ndarray, window: int) -> np.ndarray:
 
 
 def radial_profile(data: np.ndarray) -> np.ndarray:
-    """ https://stackoverflow.com/a/21242776/2641718 """
+    """ Calculate rotational average, as in https://stackoverflow.com/a/21242776/2641718 """
     y, x = np.indices(data.shape)
     center = np.array([(x.max() - x.min()) / 2.0, (y.max() - y.min()) / 2.0])
     r = np.sqrt((x-center[0])**2 + (y-center[1])**2)

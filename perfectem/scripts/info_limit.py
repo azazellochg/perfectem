@@ -84,7 +84,7 @@ class InfoLimit(BaseSetup):
         sem.AddImages("A", "B")
         sem.FFT("A")
         if DEBUG:
-            sem.SaveToOtherFile("AF", "JPG", "NONE", self.logDir + f"/info_limit_0-tilt_{self.ts}.jpg")
+            sem.SaveToOtherFile("AF", "JPG", "NONE", self.log_dir + f"/info_limit_0-tilt_{self.timestamp}.jpg")
         sem.ImageShiftByMicrons(-self.shift, 0.)
         data = np.asarray(sem.bufferImage("AF")).astype("int16")
 
@@ -106,4 +106,4 @@ class InfoLimit(BaseSetup):
         """
 
         fig, axes = plot_fft_and_text(data, spec=self.specification, pix=pix, text=textstr)
-        fig.savefig(f"info_limit_0-tilt_{self.ts}.png")
+        fig.savefig(f"info_limit_0-tilt_{self.timestamp}.png")

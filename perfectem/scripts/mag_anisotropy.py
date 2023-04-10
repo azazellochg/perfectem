@@ -206,7 +206,7 @@ class Anisotropy(BaseSetup):
         ax2.axis('off')
 
         fig.tight_layout()
-        fig.savefig(f"mag_anisotropy_{self.ts}.png")
+        fig.savefig(f"mag_anisotropy_{self.timestamp}.png")
 
     def _run(self) -> None:
         self.change_aperture("c2", 50)
@@ -230,7 +230,7 @@ class Anisotropy(BaseSetup):
             sem.SetDefocus(-def_set / 10000)
             sem.Record()
             if DEBUG:
-                sem.SaveToOtherFile("A", "JPG", "NONE", self.logDir + f"/def_{def_set}.jpg")
+                sem.SaveToOtherFile("A", "JPG", "NONE", self.log_dir + f"/def_{def_set}.jpg")
             sem.FFT("A")
             try:
                 min_limit = -def_set/10000+2

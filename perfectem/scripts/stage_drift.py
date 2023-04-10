@@ -183,7 +183,7 @@ class StageDrift(BaseSetup):
         lines, labels = fig.axes[-1].get_legend_handles_labels()
         fig.legend(lines, labels, bbox_to_anchor=(1.25, 0.8))
         fig.tight_layout()
-        fig.savefig(f"stage_drift_{self.ts}.png")
+        fig.savefig(f"stage_drift_{self.timestamp}.png")
 
         #plt.ion()
         #plt.show()

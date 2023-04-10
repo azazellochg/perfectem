@@ -86,7 +86,7 @@ class TiltAxis(BaseSetup):
 
         ax.legend()
         fig.tight_layout()
-        fig.savefig(f"tilt_axis_offset_{self.ts}.png")
+        fig.savefig(f"tilt_axis_offset_{self.timestamp}.png")
 
     def _run(self) -> None:
         # Rough eucentricity first

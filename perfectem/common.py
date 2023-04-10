@@ -28,7 +28,6 @@ import os
 import math
 import logging
 import time
-
 import serialem as sem
 from datetime import datetime
 from typing import Optional, Any
@@ -41,11 +40,11 @@ class BaseSetup:
     """ Initialization and common functions. """
 
     def __init__(self, log_fn: str, scope_name: str, **kwargs: Any) -> None:
-        """ Setup logger, camera settings and set common SerialEM params. """
+        """ Setup logger, camera settings and common SerialEM params. """
 
-        self.scope_name = scope_name
         sem.ConnectToSEM(SERIALEM_PORT, SERIALEM_IP)
         sem.NoMessageBoxOnError()
+        self.scope_name = scope_name
         self.SCOPE_HAS_C3 = self.func_is_implemented("ReportIlluminatedArea")
         self.SCOPE_HAS_AUTOFILL = self.func_is_implemented("AreDewarsFilling")
         self.SCOPE_HAS_APER_CTRL = self.func_is_implemented("ReportApertureSize", 1)
@@ -62,6 +61,7 @@ class BaseSetup:
                      f"hasApertureControl={self.SCOPE_HAS_APER_CTRL}")
 
         self.select_camera()
+
         sem.ClearPersistentVars()
         sem.SetUserSetting("DriftProtection", 1, 1)
 
@@ -76,7 +76,7 @@ class BaseSetup:
         sem.SetUserSetting("CtfUseFullField", 0)
         sem.SetUserSetting("UsersComaTilt", 5)
 
-        # set common params for linear mode
+        # set default kwargs
         self.exp = kwargs.get("exp", 1.0)
         self.binning = kwargs.get("binning", 1)
         self.mag = kwargs.get("mag", 75000)
@@ -86,15 +86,15 @@ class BaseSetup:
     def setup_log(self, log_fn: str) -> None:
         """ Create a log file for the script run. """
 
-        self.ts = pretty_date()
-        self.logDir = f"{self.scope_name}_{self.ts}"
-        os.makedirs(self.logDir, exist_ok=True)
-        os.chdir(self.logDir)
+        self.timestamp = pretty_date()
+        self.log_dir = f"{self.scope_name}_{self.timestamp}"
+        os.makedirs(self.log_dir, exist_ok=True)
+        os.chdir(self.log_dir)
         logging.basicConfig(level=logging.INFO,
                             datefmt='%d-%m-%Y %H:%M:%S',
                             format='%(asctime)s %(message)s',
                             handlers=[
-                                logging.FileHandler(f"{log_fn}_{self.ts}.log", "w", "utf-8"),
+                                logging.FileHandler(f"{log_fn}_{self.timestamp}.log", "w", "utf-8"),
                                 logging.StreamHandler()])
 
         sem.SuppressReports()
@@ -130,6 +130,7 @@ class BaseSetup:
             elif "K2" or "K3" in cam_name:
                 self.CAMERA_MODE = 1  # always counting
                 self.CAMERA_HAS_DIVIDEBY2 = True
+
             _, _, mode = sem.ReportMag()
             if mode == 1:  # EFTEM
                 sem.SetSlitIn(0)  # retract slit
@@ -137,6 +138,7 @@ class BaseSetup:
         if not sem.ReportColumnOrGunValve():
             print("Opening col. valves...")
             sem.SetColumnOrGunValve(1)
+
         sem.SetLowDoseMode(0)
 
         if self.SCOPE_HAS_APER_CTRL:
@@ -162,8 +164,8 @@ class BaseSetup:
         """ Main function to execute a script. """
 
         test_name = type(self).__name__
-        _dt = datetime.now()
-        logging.info(f"Starting script {test_name} {_dt.strftime('%d/%m/%Y %H:%M:%S')}")
+        start_time = datetime.now()
+        logging.info(f"Starting script {test_name} {start_time.strftime('%d/%m/%Y %H:%M:%S')}")
 
         try:
             if abs(sem.ReportTiltAngle()) > 0.1:
@@ -172,7 +174,7 @@ class BaseSetup:
         except Exception as e:
             logging.error(f"Script {test_name} has failed: {str(e)}")
 
-        elapsed = datetime.now() - _dt
+        elapsed = datetime.now() - start_time
         logging.info(f"Completed script {test_name}, elapsed time: {elapsed}")
 
         sem.Exit(1)
@@ -226,7 +228,6 @@ class BaseSetup:
         """ Set illumination params. """
 
         logging.info(f"Setting illumination: probe={mode}, mag={mag}, spot={spot}, beam={beamsize}")
-
         new_probe = 0 if mode == "nano" else 1
         probe_changed = sem.ReportProbeMode() != new_probe
         old_mag, old_lm, _ = sem.ReportMag()

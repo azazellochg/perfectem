@@ -158,4 +158,4 @@ class AFIS(BaseSetup):
 
         #plt.ion()
         #plt.show()
-        fig.savefig(f"afis_{self.ts}.png")
+        fig.savefig(f"afis_{self.timestamp}.png")

@@ -75,7 +75,7 @@ class C2Fringes(BaseSetup):
         dim_x, dim_y = params[0], params[1]
         data = np.asarray(sem.bufferImage("A")).astype("int16")
         if DEBUG:
-            sem.SaveToOtherFile("A", "JPG", "NONE", self.logDir + f"/C2_fringes_{self.ts}.jpg")
+            sem.SaveToOtherFile("A", "JPG", "NONE", self.log_dir + f"/C2_fringes_{self.timestamp}.jpg")
 
         # Rotate img by -45 deg and extract a line profile of certain width
         data = ndimg.rotate(data, -45)
@@ -95,4 +95,4 @@ class C2Fringes(BaseSetup):
         plt.grid(True)
 
         fig.tight_layout()
-        fig.savefig(f"C2_fringes_{self.ts}.png")
+        fig.savefig(f"C2_fringes_{self.timestamp}.png")

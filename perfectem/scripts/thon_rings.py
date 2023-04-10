@@ -76,7 +76,7 @@ class ThonRings(BaseSetup):
 
         rad = radial_profile(res)
         if DEBUG:
-            sem.SaveToOtherFile("AF", "JPG", "NONE", self.logDir + f"/thon_rings_{self.ts}.jpg")
+            sem.SaveToOtherFile("AF", "JPG", "NONE", self.log_dir + f"/thon_rings_{self.timestamp}.jpg")
 
         textstr = f"""
                     THON RINGS
@@ -114,4 +114,4 @@ class ThonRings(BaseSetup):
 
         fig.tight_layout()
         plt.grid()
-        fig.savefig(f"thon_rings_{self.ts}.png")
+        fig.savefig(f"thon_rings_{self.timestamp}.png")

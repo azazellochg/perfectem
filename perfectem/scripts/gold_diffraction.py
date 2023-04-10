@@ -72,7 +72,7 @@ class GoldDiffr(BaseSetup):
         pix = params[4] * 10
         sem.FFT("A")
         if DEBUG:
-            sem.SaveToOtherFile("AF", "JPG", "NONE", self.logDir + f"/gold_diffr_{self.ts}.jpg")
+            sem.SaveToOtherFile("AF", "JPG", "NONE", self.log_dir + f"/gold_diffr_{self.timestamp}.jpg")
         data = np.asarray(sem.bufferImage("AF")).astype("int16")
 
         textstr = f"""
@@ -90,4 +90,4 @@ class GoldDiffr(BaseSetup):
         """
 
         fig, axes = plot_fft_and_text(data, spec=self.specification, pix=pix, text=textstr)
-        fig.savefig(f"gold_diffr_{self.ts}.png")
+        fig.savefig(f"gold_diffr_{self.timestamp}.png")

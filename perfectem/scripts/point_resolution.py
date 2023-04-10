@@ -81,7 +81,7 @@ class PointRes(BaseSetup):
 
         rad = radial_profile(res)
         if DEBUG:
-            sem.SaveToOtherFile("AF", "JPG", "NONE", self.logDir + f"/thon_rings_{self.ts}.jpg")
+            sem.SaveToOtherFile("AF", "JPG", "NONE", self.log_dir + f"/thon_rings_{self.timestamp}.jpg")
 
         textstr = f"""
                     POINT TO POINT RESOLUTION
@@ -119,4 +119,4 @@ class PointRes(BaseSetup):
 
         fig.tight_layout()
         plt.grid()
-        fig.savefig(f"point_resolution_{self.ts}.png")
+        fig.savefig(f"point_resolution_{self.timestamp}.png")
