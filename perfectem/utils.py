@@ -114,3 +114,27 @@ def invert_pixel_axis(dims: int = 1024, pixsize: float = 1.0) -> Tuple[Any, List
     x_labels[0] = np.inf
 
     return x_ticks.tolist(), x_labels.tolist()
+
+
+def mrad_to_invA(mrad, eV):
+    """ Convert mrad to inverse Angstrom. Taken from https://github.com/HamishGBrown/py_multislice """
+
+    # Planck's constant times speed of light in eV Angstrom
+    hc = 1.23984193e4
+    # Electron rest mass in eV
+    m0c2 = 5.109989461e5
+    E = np.sqrt(eV * (eV + 2 * m0c2)) / hc
+
+    return mrad * E / 1000
+
+
+def invA_to_mrad(invA, eV):
+    """ Convert inverse Angstrom to mrad. Taken from https://github.com/HamishGBrown/py_multislice """
+
+    # Planck's constant times speed of light in eV Angstrom
+    hc = 1.23984193e4
+    # Electron rest mass in eV
+    m0c2 = 5.109989461e5
+    E = np.sqrt(eV * (eV + 2 * m0c2)) / hc
+
+    return invA / E * 1000
