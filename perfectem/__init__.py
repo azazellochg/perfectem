@@ -26,36 +26,38 @@
 
 import importlib
 import argparse
+from typing import List, Optional
 
 from .config import microscopes
 
-__version__ = '0.9'
+__version__ = '0.9.1'
 
-test_dict = {
-    1: ["AFIS", "AFIS validation"],
-    2: ["Anisotropy", "Magnification anisotropy"],
-    3: ["C2Fringes", "C2 Fresnel fringes"],
-    4: ["GainRef", "Gain reference check"],
-    5: ["GoldDiffr", "Gold diffraction"],
-    6: ["InfoLimit", "Information limit (Young fringes)"],
-    7: ["PointRes", "Point resolution"],
-    8: ["StageDrift", "Stage drift"],
-    9: ["ThonRings", "Thon rings"],
-    10: ["TiltAxis", "Tilt axis offset"],
-}
+tests = (
+    ("AFIS", "AFIS validation"),
+    ("Anisotropy", "Magnification anisotropy"),
+    ("C2Fringes", "C2 Fresnel fringes"),
+    ("GainRef", "Gain reference check"),
+    ("GoldDiffr", "Gold diffraction"),
+    ("InfoLimit", "Information limit (Young fringes)"),
+    ("PointRes", "Point resolution"),
+    ("StageDrift", "Stage drift"),
+    ("ThonRings", "Thon rings"),
+    ("TiltAxis", "Tilt axis offset"),
+)
 
 
-def show(extra=False):
-    for t in test_dict:
-        print(f"\t[{t}] {test_dict[t][1]}")
-        if extra:
+def show_all_tests(print_docstr: bool = False) -> None:
+    """ Print list of tests, with an optional docstring for each. """
+    for num, test in enumerate(tests, start=1):
+        print(f"\t[{num}] {test[1]}")
+        if print_docstr:
             module = importlib.import_module("perfectem.scripts")
-            func = getattr(module, test_dict[t][0])
+            func = getattr(module, test[0])
             print(func.__doc__)
             print("="*80)
 
 
-def main(argv=None):
+def main(argv: Optional[List] = None) -> None:
     try:
         import serialem
     except ImportError:
@@ -66,30 +68,31 @@ def main(argv=None):
                         help="List available tests")
     parser.add_argument("-d", "--desc", default=False, action='store_true',
                         help="Show detailed description for each test")
-
     args = parser.parse_args(argv)
 
     if args.list or args.desc:
         print("\nAvailable tests:")
-        show(args.desc)
+        show_all_tests(args.desc)
     else:
         print("\nAvailable microscopes:")
-        for scope in microscopes:
-            print(f"\t[{scope}] {microscopes[scope][0]}")
+        for scope_num, scope in enumerate(microscopes, start=1):
+            print(f"\t[{scope_num}] {scope[0]}")
 
-        scope = int(input("\nInput the microscope number: ").strip())
-        scope_name = microscopes[scope][0]
-        if scope in range(1, len(microscopes)):
+        scope_num = int(input("\nInput the microscope number: ").strip()) - 1
+
+        if scope_num in range(len(microscopes)):
+            scope_name = microscopes[scope_num][0]
             print("\nChoose a performance test to run:")
-            show()
-            num = int(input("\nInput the test number: ").strip())
+            show_all_tests()
 
-            if num in range(1, 11):
-                funcname = test_dict[num][0]
+            test_num = int(input("\nInput the test number: ").strip()) - 1
+
+            if test_num in range(len(tests)):
+                func_name = tests[test_num][0]
                 module = importlib.import_module("perfectem.scripts")
-                func = getattr(module, funcname)
-                print(func.__doc__)
-                func(scope_name=scope_name, **microscopes[scope][1][funcname]).run()
+                func_object = getattr(module, func_name)
+                print(func_object.__doc__)
+                func_object(scope_name=scope_name, **microscopes[scope_num][1][func_name]).run()
             else:
                 raise IndexError("Wrong test number!")
 

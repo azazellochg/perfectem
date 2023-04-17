@@ -1,3 +1,7 @@
+0.9.1:
+    - adding type hints, pyproject.toml
+    - use change_aperture func
+    - add connect to SEM func
 0.9:
     - use linear for Falcon, counting for K2/K3
     - redo SEM commands check

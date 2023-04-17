@@ -25,6 +25,7 @@
 # **************************************************************************
 
 import numpy as np
+from typing import Any
 import matplotlib.pyplot as plt
 import scipy.ndimage as ndimg
 import serialem as sem
@@ -52,15 +53,15 @@ class C2Fringes(BaseSetup):
 
     """
 
-    def __init__(self, log_fn="C2_fringes", **kwargs):
+    def __init__(self, log_fn: str = "C2_fringes", **kwargs: Any) -> None:
         super().__init__(log_fn, **kwargs)
         self.defocus = kwargs.get("defocus", -1)  # relevant only for FFI
         self.integrate = 200  # line profile width, px
 
-    def _run(self):
-        sem.Pause("Please change C2 aperture to 50 um and move stage to an empty area")
+    def _run(self) -> None:
+        self.change_aperture("c2", 50)
         self.setup_beam(self.mag, self.spot, self.beam_size, check_dose=False)
-        sem.Pause("Please center the beam")
+        sem.Pause("Please go to an empty area and center the beam")
         self.setup_beam(self.mag, self.spot, self.beam_size)
         self.setup_area(self.exp, self.binning, preset="R")
         sem.SetAbsoluteFocus(0)
@@ -74,7 +75,7 @@ class C2Fringes(BaseSetup):
         dim_x, dim_y = params[0], params[1]
         data = np.asarray(sem.bufferImage("A")).astype("int16")
         if DEBUG:
-            sem.SaveToOtherFile("A", "JPG", "NONE", self.logDir + f"/C2_fringes_{self.ts}.jpg")
+            sem.SaveToOtherFile("A", "JPG", "NONE", f"C2_fringes_{self.timestamp}.jpg")
 
         # Rotate img by -45 deg and extract a line profile of certain width
         data = ndimg.rotate(data, -45)
@@ -94,4 +95,4 @@ class C2Fringes(BaseSetup):
         plt.grid(True)
 
         fig.tight_layout()
-        fig.savefig(f"C2_fringes_{self.ts}.png")
+        fig.savefig(f"C2_fringes_{self.timestamp}.png")

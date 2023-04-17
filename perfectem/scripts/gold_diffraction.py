@@ -25,6 +25,7 @@
 # **************************************************************************
 
 import numpy as np
+from typing import Any
 import serialem as sem
 
 from ..common import BaseSetup
@@ -47,13 +48,13 @@ class GoldDiffr(BaseSetup):
         energy spread, and from variations in the lens currents, which induces focus variation with time.
     """
 
-    def __init__(self, log_fn="gold_diffr", **kwargs):
+    def __init__(self, log_fn: str = "gold_diffr", **kwargs: Any) -> None:
         super().__init__(log_fn, **kwargs)
         self.defocus = kwargs.get("defocus", -0.25)
         self.specification = kwargs.get("spec", 0.1)  # nm
 
-    def _run(self):
-        sem.Pause("Please change C2 aperture to 150 um")
+    def _run(self) -> None:
+        self.change_aperture("c2", 150)
         self.setup_beam(self.mag, self.spot, self.beam_size)
         sem.Pause("Please center the beam, roughly focus the image, check beam tilt pp and rotation center")
         self.setup_beam(self.mag, self.spot, self.beam_size)
@@ -71,7 +72,7 @@ class GoldDiffr(BaseSetup):
         pix = params[4] * 10
         sem.FFT("A")
         if DEBUG:
-            sem.SaveToOtherFile("AF", "JPG", "NONE", self.logDir + f"/gold_diffr_{self.ts}.jpg")
+            sem.SaveToOtherFile("AF", "JPG", "NONE", f"gold_diffr_{self.timestamp}.jpg")
         data = np.asarray(sem.bufferImage("AF")).astype("int16")
 
         textstr = f"""
@@ -89,4 +90,4 @@ class GoldDiffr(BaseSetup):
         """
 
         fig, axes = plot_fft_and_text(data, spec=self.specification, pix=pix, text=textstr)
-        fig.savefig(f"gold_diffr_{self.ts}.png")
+        fig.savefig(f"gold_diffr_{self.timestamp}.png")

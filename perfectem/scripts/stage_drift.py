@@ -26,6 +26,7 @@
 
 import math
 import logging
+from typing import Dict, Tuple, List, Any
 import matplotlib.pyplot as plt
 import serialem as sem
 
@@ -43,7 +44,7 @@ class StageDrift(BaseSetup):
         Specification: < 0.5 nm/min
     """
 
-    def __init__(self, log_fn="stage_drift", **kwargs):
+    def __init__(self, log_fn: str = "stage_drift", **kwargs: Any) -> None:
         super().__init__(log_fn, **kwargs)
         self.drift_crit = 1  # stop after reaching this A/sec
         self.max_time = 180.  # give up after max_time in sec
@@ -51,16 +52,18 @@ class StageDrift(BaseSetup):
         self.tilt = 45  # tilt in deg to use
         self.times = 3  # times to move/measure in one direction
 
-    def measure_drift(self):
+    def measure_drift(self) -> Tuple[Dict[str, List], Dict[str, float], Tuple[float]]:
         """ Measure drift in different directions N times. Return a dict with results. """
-        moves = {"+X": (self.shift, 0),
-                 "-X": (-self.shift, 0),
-                 "+Y": (0, self.shift),
-                 "-Y": (0, -self.shift),
-                 "-A": -self.tilt,
-                 "+A": self.tilt}
+        moves = {
+            "+X": (self.shift, 0),
+            "-X": (-self.shift, 0),
+            "+Y": (0, self.shift),
+            "-Y": (0, -self.shift),
+            "-A": (-self.tilt,),
+            "+A": (self.tilt,)
+        }
 
-        res = {
+        res: Dict[str, List] = {
             "+X": [],
             "-X": [],
             "+Y": [],
@@ -69,17 +72,17 @@ class StageDrift(BaseSetup):
             "+A": []
         }
 
-        stage = sem.ReportStageXYZ()
+        stage: Tuple[float] = sem.ReportStageXYZ()
         logging.info(f"Current position is: {stage}")
 
-        def timer():
+        def timer() -> List[Tuple[float, float]]:
             """ Measure drift and save (drift, time) values"""
             sem.ResetClock()
-            r = []
+            r: List[Tuple[float, float]] = []
             while True:
                 sem.AutoFocus(-2)
                 (x, y) = sem.ReportFocusDrift()
-                drift = 10 * math.sqrt(x ** 2 + y ** 2)
+                drift = 10 * math.sqrt(x**2 + y**2)
                 t = sem.ReportClock()
                 r.append((drift, t))
                 if drift <= self.drift_crit:
@@ -92,43 +95,46 @@ class StageDrift(BaseSetup):
                     break
             return r
 
-        for move in moves.items():
-            if "A" in move[0]:
-                logging.info(f"Tilting in {move[0]} direction")
-                sem.TiltTo(move[1], 1)
+        for name, move in moves.items():
+            if "A" in name:
+                logging.info(f"Tilting in {name} direction")
+                sem.TiltTo(move[0], 1)
                 r = timer()
-                res[move[0]].append(r)
+                res[name].append(r)
                 sem.TiltTo(0, 1)
             else:
-                logging.info(f"Moving 1um in {move[0]} direction")
+                logging.info(f"Moving 1um in {name} direction")
                 for i in range(self.times):
                     logging.info(f"Measure #{i + 1}")
-                    sem.MoveStage(move[1][0], move[1][1])
+                    sem.MoveStage(move[0], move[1])
                     r = timer()
-                    res[move[0]].append(r)
+                    res[name].append(r)
             logging.info("-" * 40)
 
         if DEBUG:
-            for i in res:
-                logging.debug(f"{i}: {res[i]}")
+            for k, v in res.items():
+                logging.debug(f"{k}: {v}")
 
         logging.info(f"Average of {self.times} trials:")
         avg_res = {}
-        for move in res:
+        for name, drift in res.items():
             t = []
-            for trial in res[move]:
+            for trial in drift:
                 if trial[-1][0] <= self.drift_crit:
                     t.append(trial[-1][1])
             if t:
                 avg_time = sum(t) / len(t)
-                logging.info(f"{move} drift reached {self.drift_crit} A/s in {avg_time:0.2f}s")
-                avg_res[move] = avg_time
+                logging.info(f"{name} drift reached {self.drift_crit} A/s in {avg_time:0.2f}s")
+                avg_res[name] = avg_time
             else:
                 logging.info(f"Target {self.drift_crit} A/s never reached.")
 
         return res, avg_res, stage
 
-    def plot_results(self, res, avg_res, position):
+    def plot_results(self,
+                     res: Dict[str, List],
+                     avg_res: Dict[str, float],
+                     position: Tuple[float]) -> None:
         fig = plt.figure(figsize=(19.2, 14.4))
         gs = fig.add_gridspec(4, 2)
         ax0 = fig.add_subplot(gs[0, :])  # text
@@ -177,25 +183,24 @@ class StageDrift(BaseSetup):
         lines, labels = fig.axes[-1].get_legend_handles_labels()
         fig.legend(lines, labels, bbox_to_anchor=(1.25, 0.8))
         fig.tight_layout()
-        fig.savefig(f"stage_drift_{self.ts}.png")
+        fig.savefig(f"stage_drift_{self.timestamp}.png")
 
         #plt.ion()
         #plt.show()
 
-    def _run(self):
+    def _run(self) -> None:
         if self.SCOPE_HAS_AUTOFILL and sem.DewarsRemainingTime() < 600:
             raise RuntimeError("<10 min left before the next LN autofill cycle, this test is cancelled.")
-            sem.Exit()
-        sem.Pause("Please change C2 aperture to 50 um")
+
+        self.change_aperture("c2", 50)
         self.setup_beam(self.mag, self.spot, self.beam_size, check_dose=False)
         sem.Pause("Please center the beam, roughly focus the image, check beam tilt pp and rotation center")
         self.setup_beam(self.mag, self.spot, self.beam_size)
         self.setup_area(self.exp, self.binning, preset="F")
+
         self.autofocus(-2, 0.1, do_ast=False)
-        sem.SetUserSetting("DriftProtection", 0)  # to speed up
         self.check_before_acquire()
 
         res, avg_res, position = self.measure_drift()
         position = sem.ReportStageXYZ()
-        sem.SetUserSetting("DriftProtection", 1, 1)
         self.plot_results(res, avg_res, position)

@@ -25,6 +25,7 @@
 # **************************************************************************
 
 import logging
+from typing import Any, List
 import matplotlib.pyplot as plt
 import numpy as np
 import serialem as sem
@@ -46,13 +47,14 @@ class AFIS(BaseSetup):
         Specification (Tundra): coma < 1300 nm, astigmatism < 30 nm for 6 um shift
     """
 
-    def __init__(self, log_fn="afis", **kwargs):
+    def __init__(self, log_fn: str = "afis",
+                 **kwargs: Any) -> None:
         super().__init__(log_fn, **kwargs)
         self.defocus = kwargs.get("defocus", -2)
         self.shift = kwargs.get("max_imgsh", 12.0)
         self.specification = kwargs.get("spec", (750, 100))  # for Krios (coma in nm, astig in nm)
 
-    def _run(self):
+    def _run(self) -> None:
         sem.Pause("Open EPU and set Acquisition mode = Faster in the Session Setup. Also change C2 aperture to 50 um")
         self.setup_beam(self.mag, self.spot, self.beam_size, check_dose=False)
         sem.Pause("Please center the beam, roughly focus the image, check beam tilt pp and rotation center")
@@ -94,7 +96,7 @@ class AFIS(BaseSetup):
 
         self.plot(bis_positions, res)
 
-    def plot(self, positions, results):
+    def plot(self, positions: List, results: List) -> None:
         pos = np.asarray(positions)
         res = np.asarray(results)
 
@@ -156,4 +158,4 @@ class AFIS(BaseSetup):
 
         #plt.ion()
         #plt.show()
-        fig.savefig(f"afis_{self.ts}.png")
+        fig.savefig(f"afis_{self.timestamp}.png")

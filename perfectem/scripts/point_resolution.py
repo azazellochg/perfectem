@@ -25,6 +25,7 @@
 # **************************************************************************
 
 import numpy as np
+from typing import Any
 import matplotlib.pyplot as plt
 import serialem as sem
 
@@ -47,13 +48,13 @@ class PointRes(BaseSetup):
         The point to point test is not needed.
     """
 
-    def __init__(self, log_fn="point_resolution", **kwargs):
+    def __init__(self, log_fn: str = "point_resolution", **kwargs: Any) -> None:
         super().__init__(log_fn, **kwargs)
         self.defocus = kwargs.get("defocus", -0.087)  # 99nm at 200kV, 87nm at 300kV
         self.specification = kwargs.get("spec", 0.2)  # for Krios, in nm
 
-    def _run(self):
-        sem.Pause("Please change C2 aperture to 50 um")
+    def _run(self) -> None:
+        self.change_aperture("c2", 50)
         self.setup_beam(self.mag, self.spot, self.beam_size, check_dose=False)
         sem.Pause("Please center the beam, roughly focus the image, check beam tilt pp and rotation center")
         self.setup_beam(self.mag, self.spot, self.beam_size)
@@ -80,7 +81,7 @@ class PointRes(BaseSetup):
 
         rad = radial_profile(res)
         if DEBUG:
-            sem.SaveToOtherFile("AF", "JPG", "NONE", self.logDir + f"/thon_rings_{self.ts}.jpg")
+            sem.SaveToOtherFile("AF", "JPG", "NONE", f"thon_rings_{self.timestamp}.jpg")
 
         textstr = f"""
                     POINT TO POINT RESOLUTION
@@ -118,4 +119,4 @@ class PointRes(BaseSetup):
 
         fig.tight_layout()
         plt.grid()
-        fig.savefig(f"point_resolution_{self.ts}.png")
+        fig.savefig(f"point_resolution_{self.timestamp}.png")

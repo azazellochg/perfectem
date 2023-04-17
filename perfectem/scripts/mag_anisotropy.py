@@ -26,6 +26,7 @@
 
 import math
 import logging
+from typing import Tuple, Any, List
 import numpy as np
 import scipy.optimize as opt
 import matplotlib.pyplot as plt
@@ -46,13 +47,13 @@ class Anisotropy(BaseSetup):
         Specification: < 1%
     """
 
-    def __init__(self, log_fn="mag_anisotropy", **kwargs):
+    def __init__(self, log_fn: str = "mag_anisotropy", **kwargs: Any) -> None:
         super().__init__(log_fn, **kwargs)
         self.num_img = 10  # number of images
         self.def_min = 5000  # min def in Angstroms
         self.def_max = 50000  # max def in Angstroms
 
-    def _find_limits(self, defocus, var):
+    def _find_limits(self, defocus: float, var: np.ndarray) -> Tuple[float, ...]:
         """ The analytic expressions are very ugly and
             so it is simpler to just search over the range. """
 
@@ -84,7 +85,7 @@ class Anisotropy(BaseSetup):
 
         return fmax, fmin, amax, amin
 
-    def _fun(self, var, data):
+    def _fun(self, var: np.ndarray, data: np.ndarray) -> float:
         """
            Integral of 0 to 2pi of the square of the difference. This can
            be done analytically but the expressions are awful and so
@@ -114,7 +115,7 @@ class Anisotropy(BaseSetup):
 
         return _sum
 
-    def prepare_for_plot(self, data):
+    def prepare_for_plot(self, data: List[List]) -> None:
         b = np.asarray(data)
         #dfmax = b[:, 0]
         #dfmin = b[:, 1]
@@ -205,10 +206,10 @@ class Anisotropy(BaseSetup):
         ax2.axis('off')
 
         fig.tight_layout()
-        fig.savefig(f"mag_anisotropy_{self.ts}.png")
+        fig.savefig(f"mag_anisotropy_{self.timestamp}.png")
 
-    def _run(self):
-        sem.Pause("Please change C2 aperture to 50 um")
+    def _run(self) -> None:
+        self.change_aperture("c2", 50)
         self.setup_beam(self.mag, self.spot, self.beam_size, check_dose=False)
         sem.Pause("Please center the beam, roughly focus the image, check beam tilt pp and rotation center")
         self.setup_beam(self.mag, self.spot, self.beam_size)
@@ -229,7 +230,7 @@ class Anisotropy(BaseSetup):
             sem.SetDefocus(-def_set / 10000)
             sem.Record()
             if DEBUG:
-                sem.SaveToOtherFile("A", "JPG", "NONE", self.logDir + f"/def_{def_set}.jpg")
+                sem.SaveToOtherFile("A", "JPG", "NONE", f"def_{def_set}.jpg")
             sem.FFT("A")
             try:
                 min_limit = -def_set/10000+2

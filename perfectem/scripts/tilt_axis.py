@@ -26,6 +26,7 @@
 
 import logging
 import numpy as np
+from typing import List, Any
 import matplotlib.pyplot as plt
 import scipy.optimize as opt
 import serialem as sem
@@ -43,17 +44,19 @@ class TiltAxis(BaseSetup):
         Revision: v1.1
     """
 
-    def __init__(self, log_fn="tilt_axis", **kwargs):
+    def __init__(self, log_fn: str = "tilt_axis", **kwargs: Any):
         super().__init__(log_fn, **kwargs)
         self.increment = 5  # tilt step
         self.maxTilt = 15  # maximum +/- tilt angle
         self.offset = 5  # +/- offset for measured positions in microns from tilt axis
         # (also accepts lists e.g. [2, 4, 6])
 
-    def _dz(self, alpha, y0):
+    def _dz(self, alpha: float, y0: float) -> Any:
         return y0 * np.tan(np.radians(-alpha))
 
-    def _tilt(self, tilt, offsets, focus0, focus, angles):
+    def _tilt(self, tilt: int, offsets: List[int],
+              focus0: List[float], focus: List[List],
+              angles: List[float]) -> None:
         sem.TiltTo(tilt)
 
         for i in range(len(offsets)):
@@ -69,7 +72,9 @@ class TiltAxis(BaseSetup):
 
         angles.append(float(tilt))
 
-    def plot_results(self, offsets, rel_focus, angles):
+    def plot_results(self, offsets: List[int],
+                     rel_focus: List[List],
+                     angles: List[float]) -> None:
         offsets, rel_focus = zip(*sorted(zip(offsets, rel_focus)))  # ensure right order for plot points
         fig, ax = plt.subplots(figsize=(8, 6))
         ax.set_title('Z Shifts [microns]')
@@ -81,11 +86,11 @@ class TiltAxis(BaseSetup):
 
         ax.legend()
         fig.tight_layout()
-        fig.savefig(f"tilt_axis_offset_{self.ts}.png")
+        fig.savefig(f"tilt_axis_offset_{self.timestamp}.png")
 
-    def _run(self):
+    def _run(self) -> None:
         # Rough eucentricity first
-        sem.Pause("Please change C2 aperture to 50 um")
+        self.change_aperture("c2", 50)
         if not self.SCOPE_HAS_C3:
             self.setup_beam(mag=6700, spot=3, beamsize=58.329, mode="micro")
         else:
@@ -113,9 +118,9 @@ class TiltAxis(BaseSetup):
         else:
             offsets.extend([-self.offset, self.offset])
 
-        angles = []
-        focus = [[] for _ in range(len(offsets))]
-        focus0 = []
+        angles: List[float] = []
+        focus: List[List] = [[] for _ in range(len(offsets))]
+        focus0: List[float] = []
 
         steps = 2 * self.maxTilt / self.increment + 1
         tilt = starttilt

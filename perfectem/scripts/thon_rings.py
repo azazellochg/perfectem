@@ -25,6 +25,7 @@
 # **************************************************************************
 
 import numpy as np
+from typing import Any
 import matplotlib.pyplot as plt
 import serialem as sem
 
@@ -42,13 +43,13 @@ class ThonRings(BaseSetup):
         Specification (Glacios): rings visible beyond 0.37 nm at -2 um defocus.
     """
 
-    def __init__(self, log_fn="thon_rings", **kwargs):
+    def __init__(self, log_fn: str = "thon_rings", **kwargs: Any):
         super().__init__(log_fn, **kwargs)
         self.defocus = kwargs.get("defocus", -1)
         self.specification = kwargs.get("spec", 0.33)  # for Krios, in nm
 
-    def _run(self):
-        sem.Pause("Please change C2 aperture to 50 um")
+    def _run(self) -> None:
+        self.change_aperture("c2", 50)
         self.setup_beam(self.mag, self.spot, self.beam_size, check_dose=False)
         sem.Pause("Please center the beam, roughly focus the image, check beam tilt pp and rotation center")
         self.setup_beam(self.mag, self.spot, self.beam_size)
@@ -75,7 +76,7 @@ class ThonRings(BaseSetup):
 
         rad = radial_profile(res)
         if DEBUG:
-            sem.SaveToOtherFile("AF", "JPG", "NONE", self.logDir + f"/thon_rings_{self.ts}.jpg")
+            sem.SaveToOtherFile("AF", "JPG", "NONE", f"thon_rings_{self.timestamp}.jpg")
 
         textstr = f"""
                     THON RINGS
@@ -113,4 +114,4 @@ class ThonRings(BaseSetup):
 
         fig.tight_layout()
         plt.grid()
-        fig.savefig(f"thon_rings_{self.ts}.png")
+        fig.savefig(f"thon_rings_{self.timestamp}.png")
