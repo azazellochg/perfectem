@@ -1,8 +1,0 @@
-# https://mypy.readthedocs.io/en/stable/config_file.html
-[tool.mypy]
-files = "perfectem/"
-strict = true
-disallow_any_generics = false
-disallow_subclassing_any = false
-show_error_codes = true
-pretty = true

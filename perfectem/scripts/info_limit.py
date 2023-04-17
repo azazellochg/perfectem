@@ -84,7 +84,7 @@ class InfoLimit(BaseSetup):
         sem.AddImages("A", "B")
         sem.FFT("A")
         if DEBUG:
-            sem.SaveToOtherFile("AF", "JPG", "NONE", self.log_dir + f"/info_limit_0-tilt_{self.timestamp}.jpg")
+            sem.SaveToOtherFile("AF", "JPG", "NONE", f"info_limit_0-tilt_{self.timestamp}.jpg")
         sem.ImageShiftByMicrons(-self.shift, 0.)
         data = np.asarray(sem.bufferImage("AF")).astype("int16")
 

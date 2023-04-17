@@ -99,6 +99,7 @@ class BaseSetup:
 
         sem.SuppressReports()
         sem.ErrorsToLog()
+        sem.SetDirectory(os.getcwd())
 
     def select_camera(self) -> None:
         """ Choose camera to use. """
@@ -192,7 +193,7 @@ class BaseSetup:
         logging.info(f"Dose rate: {eps} eps")
         spot = int(sem.ReportSpotSize())
         while True:
-            if eps < 120.0:  # keep below 120 eps
+            if eps < 200.0:  # keep below 200 eps
                 break
             else:
                 eps /= 2
@@ -201,26 +202,25 @@ class BaseSetup:
         if spot != int(sem.ReportSpotSize()) and spot < 12:
             logging.info(f"Increasing spot size to {spot} to reduce dose rate below 120 eps")
             sem.SetSpotSize(spot)
-            sem.NormalizeLenses(4)
 
         # Restore previous settings
         sem.SetExposure("F", old_exp)
         sem.SetBinning("F", old_bin)
 
-    def check_drift(self, crit: float = 2.0,
-                    interval: int = 2,
-                    timeout: int = 60) -> None:
+    def check_drift(self, crit: float = 1.0,
+                    interval: int = 1,
+                    timeout: int = 180) -> None:
         """ Wait for drift to go below crit in Angstroms/s.
         :param crit: A/s target rate
         :param interval: repeat every N seconds
         :param timeout: give up and raise error after N seconds
         """
 
-        x, y = sem.ReportFocusDrift()[0], sem.ReportFocusDrift()[1]
+        (x, y) = sem.ReportFocusDrift()
         drift = math.sqrt(x**2 + y**2)
         if (10*drift - crit) > 0.01:
             logging.info(f"Waiting for drift to get below {crit} A/sec...")
-            sem.DriftWaitTask(crit, "A", timeout, interval, 1, "A")
+            sem.DriftWaitTask(crit, "A", timeout, interval, 1, "F")
 
     def setup_beam(self, mag: int, spot: int, beamsize: float,
                    mode: str = "nano",
@@ -234,24 +234,12 @@ class BaseSetup:
         mag_changed = old_mag != mag
         spot_changed = int(sem.ReportSpotSize()) != spot
 
-        normalize = dict()
         if probe_changed:
             sem.SetProbeMode(mode)
-            normalize.update({"PROJ": 1, "OBJ": 2, "COND": 4})
         if spot_changed:
             sem.SetSpotSize(spot)
-            normalize.update({"COND": 4})
         if mag_changed:
             sem.SetMag(mag)
-            normalize.update({"PROJ": 1, "COND": 4})
-            _, new_lm, _ = sem.ReportMag()
-            if new_lm != old_lm:
-                normalize.update({"PROJ": 1, "OBJ": 2})
-
-        norm = sum(normalize.values())
-        if norm != 0:
-            logging.info(f"Normalizing lenses... ({norm}: {normalize.keys()})")
-            sem.NormalizeLenses(norm) if norm < 7 else sem.NormalizeAllLenses()
 
         if not self.SCOPE_HAS_C3:
             sem.SetPercentC2(beamsize)

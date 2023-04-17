@@ -110,7 +110,7 @@ def invert_pixel_axis(dims: int = 1024, pixsize: float = 1.0) -> Tuple[Any, List
     """
     step = dims // 20
     x_ticks = np.arange(0, dims//2, step)
-    x_labels = np.round(np.ndarray([dims*pixsize / (i + 1e-5) for i in x_ticks]) / 10, 2)
+    x_labels = np.round(np.array([dims*pixsize / (i + 1e-5) for i in x_ticks]) / 10, 2)
     x_labels[0] = np.inf
 
     return x_ticks.tolist(), x_labels.tolist()

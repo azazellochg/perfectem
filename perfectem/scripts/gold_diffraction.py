@@ -72,7 +72,7 @@ class GoldDiffr(BaseSetup):
         pix = params[4] * 10
         sem.FFT("A")
         if DEBUG:
-            sem.SaveToOtherFile("AF", "JPG", "NONE", self.log_dir + f"/gold_diffr_{self.timestamp}.jpg")
+            sem.SaveToOtherFile("AF", "JPG", "NONE", f"gold_diffr_{self.timestamp}.jpg")
         data = np.asarray(sem.bufferImage("AF")).astype("int16")
 
         textstr = f"""

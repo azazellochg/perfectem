@@ -81,7 +81,7 @@ class PointRes(BaseSetup):
 
         rad = radial_profile(res)
         if DEBUG:
-            sem.SaveToOtherFile("AF", "JPG", "NONE", self.log_dir + f"/thon_rings_{self.timestamp}.jpg")
+            sem.SaveToOtherFile("AF", "JPG", "NONE", f"thon_rings_{self.timestamp}.jpg")
 
         textstr = f"""
                     POINT TO POINT RESOLUTION

@@ -49,4 +49,4 @@ class GainRef(BaseSetup):
 
         sem.Record()
         #get autocorrelation from sem or otherwise and save it
-        sem.SaveToOtherFile("A", "JPG", "NONE", self.log_dir + f"/gain_check_{self.timestamp}.jpg")
+        sem.SaveToOtherFile("A", "JPG", "NONE", f"gain_check_{self.timestamp}.jpg")

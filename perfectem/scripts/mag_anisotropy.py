@@ -230,7 +230,7 @@ class Anisotropy(BaseSetup):
             sem.SetDefocus(-def_set / 10000)
             sem.Record()
             if DEBUG:
-                sem.SaveToOtherFile("A", "JPG", "NONE", self.log_dir + f"/def_{def_set}.jpg")
+                sem.SaveToOtherFile("A", "JPG", "NONE", f"def_{def_set}.jpg")
             sem.FFT("A")
             try:
                 min_limit = -def_set/10000+2

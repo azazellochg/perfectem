@@ -48,8 +48,8 @@ tests = (
 
 def show_all_tests(print_docstr: bool = False) -> None:
     """ Print list of tests, with an optional docstring for each. """
-    for test in tests:
-        print(f"\t[{test[0]}] {test[1]}")
+    for num, test in enumerate(tests, start=1):
+        print(f"\t[{num}] {test[1]}")
         if print_docstr:
             module = importlib.import_module("perfectem.scripts")
             func = getattr(module, test[0])

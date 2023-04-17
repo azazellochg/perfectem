@@ -82,7 +82,7 @@ class StageDrift(BaseSetup):
             while True:
                 sem.AutoFocus(-2)
                 (x, y) = sem.ReportFocusDrift()
-                drift = 10 * math.sqrt(x ** 2 + y ** 2)
+                drift = 10 * math.sqrt(x**2 + y**2)
                 t = sem.ReportClock()
                 r.append((drift, t))
                 if drift <= self.drift_crit:
@@ -100,15 +100,15 @@ class StageDrift(BaseSetup):
                 logging.info(f"Tilting in {name} direction")
                 sem.TiltTo(move[0], 1)
                 r = timer()
-                res[name].extend(r)
+                res[name].append(r)
                 sem.TiltTo(0, 1)
             else:
-                logging.info(f"Moving 1um in {move[0]} direction")
+                logging.info(f"Moving 1um in {name} direction")
                 for i in range(self.times):
                     logging.info(f"Measure #{i + 1}")
                     sem.MoveStage(move[0], move[1])
                     r = timer()
-                    res[name].extend(r)
+                    res[name].append(r)
             logging.info("-" * 40)
 
         if DEBUG:
@@ -117,9 +117,9 @@ class StageDrift(BaseSetup):
 
         logging.info(f"Average of {self.times} trials:")
         avg_res = {}
-        for name in res.keys():
+        for name, drift in res.items():
             t = []
-            for trial in res[name]:
+            for trial in drift:
                 if trial[-1][0] <= self.drift_crit:
                     t.append(trial[-1][1])
             if t:
@@ -197,11 +197,10 @@ class StageDrift(BaseSetup):
         sem.Pause("Please center the beam, roughly focus the image, check beam tilt pp and rotation center")
         self.setup_beam(self.mag, self.spot, self.beam_size)
         self.setup_area(self.exp, self.binning, preset="F")
+
         self.autofocus(-2, 0.1, do_ast=False)
-        sem.SetUserSetting("DriftProtection", 0)  # to speed up
         self.check_before_acquire()
 
         res, avg_res, position = self.measure_drift()
         position = sem.ReportStageXYZ()
-        sem.SetUserSetting("DriftProtection", 1, 1)
         self.plot_results(res, avg_res, position)
