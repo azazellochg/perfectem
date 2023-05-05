@@ -59,6 +59,9 @@ Available scripts
 - C2 Fresnel fringes
     - Specification: on FFI system there should be <5 fringes at 96 kx in nanoprobe close to focus
     - Description: Take a picture of a flood beam to see if the fringes from C2 aperture extend all the way to the center (non-FFI systems).
+- Eucentricity
+    - Specification: <1 um in X/Y, <3 um defocus
+    - Description: Estimate X,Y and defocus offset while tilting the stage.
 - Gain reference
     - Specification: none
     - Description: Take a picture of a flood beam and check the auto-correlation image.
@@ -78,7 +81,7 @@ Available scripts
     - Specification (Krios): rings visible beyond 0.33 nm at -1 um defocus. Glacios: rings visible beyond 0.37 nm at -2 um defocus.
     - Description: Take a high-resolution image on carbon and fit CTF rings as far as you can. Calculate a radial average from one quadrant.
 - Tilt axis offset
-    - Specification: <1 um for X/Y, defocus change over tilt <3 um
+    - Specification: <1 um
     - Description: Estimate the tilt axis offset optimized for movement along the z-axis during tilting
 
 Running scripts

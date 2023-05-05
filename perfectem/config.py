@@ -41,6 +41,7 @@ krios2_falcon4 = {
     "TiltAxis": {"beam": 1.1, "spot": 5, "mag": 75000, "exp": 0.5, "binning": 2},
     "GainRef": {"beam": 1.1, "spot": 7, "mag": 96000, "exp": 1, "binning": 1},
     "AFIS": {"beam": 1.1, "spot": 7, "mag": 96000, "exp": 1, "binning": 2, "defocus": -2, "max_imgsh": 12.0, "spec": (750, 10)},  # specs: (coma in nm, astig in nm)
+    "Eucentricity": {"beam": 1.1, "spot": 5, "mag": 75000, "exp": 0.5, "binning": 2}
 }
 
 krios1_k3 = {
@@ -54,6 +55,7 @@ krios1_k3 = {
     "TiltAxis": {"beam": 1.1, "spot": 5, "mag": 105000, "exp": 0.5, "binning": 2},
     "GainRef": {"beam": 1.1, "spot": 5, "mag": 105000, "exp": 1, "binning": 1},
     "AFIS": {"beam": 1.1, "spot": 5, "mag": 105000, "exp": 1, "binning": 2, "defocus": -2, "max_imgsh": 12.0, "spec": (750, 10)},
+    "Eucentricity": {"beam": 1.1, "spot": 5, "mag": 105000, "exp": 0.5, "binning": 2}
 }
 
 krios3_k3 = {
@@ -67,6 +69,7 @@ krios3_k3 = {
     "TiltAxis": {"beam": 0.66, "spot": 5, "mag": 105000, "exp": 0.5, "binning": 2},
     "GainRef": {"beam": 0.66, "spot": 5, "mag": 105000, "exp": 1, "binning": 1},
     "AFIS": {"beam": 0.66, "spot": 5, "mag": 105000, "exp": 1, "binning": 2, "defocus": -2, "max_imgsh": 12.0, "spec": (750, 10)},
+    "Eucentricity": {"beam": 0.66, "spot": 5, "mag": 105000, "exp": 0.5, "binning": 2}
 }
 
 glacios_falcon3 = {
@@ -80,6 +83,7 @@ glacios_falcon3 = {
     "TiltAxis": {"beam": 44.46, "spot": 3, "mag": 92000, "exp": 0.5, "binning": 2},
     "GainRef": {"beam": 44.46, "spot": 3, "mag": 92000, "exp": 1, "binning": 1},
     "AFIS": {"beam": 44.46, "spot": 3, "mag": 92000, "exp": 1, "binning": 2, "defocus": -2, "max_imgsh": 12.0, "spec": (1200, 15)},
+    "Eucentricity": {"beam": 44.46, "spot": 3, "mag": 92000, "exp": 0.5, "binning": 2}
 }
 
 microscopes = (

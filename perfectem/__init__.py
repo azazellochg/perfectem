@@ -30,12 +30,13 @@ from typing import List, Optional
 
 from .config import microscopes
 
-__version__ = '0.9.1'
+__version__ = '0.9.2'
 
 tests = (
     ("AFIS", "AFIS validation"),
     ("Anisotropy", "Magnification anisotropy"),
     ("C2Fringes", "C2 Fresnel fringes"),
+    ("Eucentricity", "Eucentricity check"),
     ("GainRef", "Gain reference check"),
     ("GoldDiffr", "Gold diffraction"),
     ("InfoLimit", "Information limit (Young fringes)"),
