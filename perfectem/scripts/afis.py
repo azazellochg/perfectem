@@ -31,7 +31,7 @@ import numpy as np
 import serialem as sem
 
 from ..common import BaseSetup
-from ..utils import pretty_date
+from ..utils import pretty_date, mrad_to_invA
 
 
 class AFIS(BaseSetup):
@@ -53,6 +53,9 @@ class AFIS(BaseSetup):
         self.defocus = kwargs.get("defocus", -2)
         self.shift = kwargs.get("max_imgsh", 12.0)
         self.specification = kwargs.get("spec", (750, 100))  # for Krios (coma in nm, astig in nm)
+
+    def _mrad_to_nm(self, mrad):
+        return mrad_to_invA(mrad, sem.ReportHighVoltage() * 1000) * 10
 
     def _run(self) -> None:
         sem.Pause("Open EPU and set Acquisition mode = Faster in the Session Setup. Also change C2 aperture to 50 um")

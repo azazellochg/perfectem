@@ -79,7 +79,7 @@ class Eucentricity(BaseSetup):
                             Measurement performed       {pretty_date(get_time=True)}
                             Microscope type             {self.scope_name}
                             Recorded at magnification   {self.mag // 1000} kx
-                            Stage position:             {x0, y0, z0}
+                            Stage position:             {[round(x, 3) for x in [x0,y0,z0]]}
                             Camera used                 {sem.ReportCameraName(self.CAMERA_NUM)}
 
                             Tilt the stage from 0 to max in both directions with
