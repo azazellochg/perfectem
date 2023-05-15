@@ -25,9 +25,7 @@
 # **************************************************************************
 
 import logging
-from typing import Any, List
-import matplotlib.pyplot as plt
-import numpy as np
+from typing import Any
 import serialem as sem
 
 from ..common import BaseSetup
@@ -68,18 +66,20 @@ class AFIS(BaseSetup):
         sem.SetUserSetting("DriftProtection", 0)  # to speed up
         self.autofocus(self.defocus, 0.05, do_ast=True, do_coma=True)
 
-        bis_positions = [(-self.shift, 0),
-                         (0, 0),
-                         (self.shift, 0),
-                         (0, -self.shift),
-                         (0, 0),
-                         (0, self.shift)]
+        bis_positions = [
+            (-self.shift, -self.shift),
+            (-self.shift, 0),
+            (self.shift, 0),
+            (0, -self.shift),
+            (0, self.shift),
+            (self.shift, self.shift)
+        ]
         res = []
         
         sem.NoMessageBoxOnError()
         self.check_before_acquire()
         for img in bis_positions:
-            sem.SetImageShift(img[0], img[1], self.DELAY)  # units match microns in delphi scripting exampler
+            sem.SetImageShift(img[0], img[1], self.DELAY)  # units ~ match microns in delphi scripting exampler
             try:
                 sem.AutoFocus(-2)
                 sem.FixAstigmatismByCTF(1, 1, 0)
@@ -97,50 +97,6 @@ class AFIS(BaseSetup):
         sem.NoMessageBoxOnError(0)
         sem.SetUserSetting("DriftProtection", 1, 1)
 
-        self.plot(bis_positions, res)
-
-    def plot(self, positions: List, results: List) -> None:
-        pos = np.asarray(positions)
-        res = np.asarray(results)
-
-        fig = plt.figure(figsize=(19.2, 14.4))
-        gs = fig.add_gridspec(3, 2)
-        ax0 = fig.add_subplot(gs[0, :])
-        ax1 = fig.add_subplot(gs[1, 0])
-        ax2 = fig.add_subplot(gs[1, 1])
-        ax3 = fig.add_subplot(gs[2, 0])
-        ax4 = fig.add_subplot(gs[2, 1])
-
-        # image shift X
-        ax1.plot(pos[:3, 0], res[:3, 0], 'r', label="Beam tilt X (mrad)")
-        ax1.plot(pos[:3, 0], res[:3, 1], 'b', label="Beam tilt Y (mrad)")
-        ax1.set_title('Optimized beam tilt')
-        ax1.set_xlabel("Image shift X")
-        ax1.legend()
-        ax1.grid(True)
-
-        ax2.plot(pos[:3, 0], res[:3, 2], 'gray', label="Obj. astigmatism X")
-        ax2.plot(pos[:3, 0], res[:3, 3], 'g', label="Obj. astigmatism Y")
-        ax2.set_title('Optimized objective astigmatism')
-        ax2.set_xlabel("Image shift X")
-        ax2.legend()
-        ax2.grid(True)
-
-        # image shift Y
-        ax3.plot(pos[3:, 1], res[3:, 0], 'r', label="Beam tilt X (mrad)")
-        ax3.plot(pos[3:, 1], res[3:, 1], 'b', label="Beam tilt Y (mrad)")
-        ax3.set_title('Optimized beam tilt')
-        ax3.set_xlabel("Image shift Y")
-        ax3.legend()
-        ax3.grid(True)
-
-        ax4.plot(pos[3:, 1], res[3:, 2], 'gray', label="Obj. astigmatism X")
-        ax4.plot(pos[3:, 1], res[3:, 3], 'g', label="Obj. astigmatism Y")
-        ax4.set_title('Optimized objective astigmatism')
-        ax4.set_xlabel("Image shift Y")
-        ax4.legend()
-        ax4.grid(True)
-
         textstr = f"""
                     AFIS calibration check
 
@@ -155,10 +111,5 @@ class AFIS(BaseSetup):
                     Specification (Krios): coma < 750 nm, astigmatism < 10 nm for 5 um shift
                     Specification (Talos): coma < 1200 nm, astigmatism < 15 nm for 6 um shift
         """
-        ax0.text(0, 0, textstr, fontsize=20)
-        ax0.axis('off')
-        fig.tight_layout()
 
-        #plt.ion()
-        #plt.show()
-        fig.savefig(f"afis_{self.timestamp}.png")
+        logging.info(textstr)

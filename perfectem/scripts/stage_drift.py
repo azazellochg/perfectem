@@ -185,9 +185,6 @@ class StageDrift(BaseSetup):
         fig.tight_layout()
         fig.savefig(f"stage_drift_{self.timestamp}.png")
 
-        #plt.ion()
-        #plt.show()
-
     def _run(self) -> None:
         if self.SCOPE_HAS_AUTOFILL and sem.DewarsRemainingTime() < 600:
             raise RuntimeError("<10 min left before the next LN autofill cycle, this test is cancelled.")

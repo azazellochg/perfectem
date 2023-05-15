@@ -34,3 +34,4 @@ from .afis import AFIS
 from .gain_reference import GainRef
 from .spatial_coherence import C2Fringes
 from .tilt_axis import TiltAxis
+from .eucentricity import Eucentricity

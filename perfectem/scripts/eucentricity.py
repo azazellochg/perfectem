@@ -26,7 +26,7 @@
 
 import logging
 import numpy as np
-from typing import List, Any
+from typing import List, Any, Optional
 import matplotlib.pyplot as plt
 import serialem as sem
 
@@ -44,27 +44,29 @@ class Eucentricity(BaseSetup):
         self.increment = 5  # tilt step
         self.specification = kwargs.get("spec", (1, 3))
 
-    def _tilt(self, tilt, x0, y0, z0) -> List[float]:
+    def _tilt(self, tilt, x0, y0) -> Optional[List[float]]:
         sem.TiltTo(tilt)
-        # angle = sem.ReportTiltAngle()
+        logging.info(f"Tilting to {tilt} deg.")
         x, y, z = sem.ReportStageXYZ()
         sem.AutoFocus(-1)
         defocus, *_ = sem.ReportAutoFocus()
-        # save difference
-        return [tilt, x-x0, y-y0, abs(defocus+2)]
+        if sem.ReportMeanCounts("A") < 5:  # avoid grid bars
+            return None
+
+        return [tilt, abs(x-x0), abs(y-y0), abs(defocus+2)]
 
     def plot_results(self, results, x0, y0, z0) -> None:
         results = np.asarray(results)
-        results = np.sort(results, axis=0)
+        results = results[results[:, 0].argsort()]
 
         fig = plt.figure(figsize=(19.2, 14.4))
         gs = fig.add_gridspec(2, 2)
         ax1 = fig.add_subplot(gs[0, 0])
         ax2 = fig.add_subplot(gs[0, 1])
 
-        ax1.plot(results[:, 0], results[:, 1], label="X displacement (um)")
-        ax1.plot(results[:, 0], results[:, 2], label="Y displacement (um)")
-        ax1.plot(results[:, 0], results[:, 3], label="Defocus difference (um)")
+        ax1.plot(results[:, 0], results[:, 1], marker='o', label="X displacement (um)")
+        ax1.plot(results[:, 0], results[:, 2], marker='o', label="Y displacement (um)")
+        ax1.plot(results[:, 0], results[:, 3], marker='o', label="Defocus difference (um)")
         ax1.axhline(y=self.specification[0], color='r', linestyle='--')
         ax1.axhline(y=self.specification[1], color='r', linestyle='--')
         ax1.set_xlabel("Tilt angle, deg.")
@@ -74,12 +76,12 @@ class Eucentricity(BaseSetup):
         ax1.legend()
 
         textstr = f"""
-                            Stage drift test
+                            Eucentricity test
 
                             Measurement performed       {pretty_date(get_time=True)}
                             Microscope type             {self.scope_name}
                             Recorded at magnification   {self.mag // 1000} kx
-                            Stage position:             {[round(x, 3) for x in [x0,y0,z0]]}
+                            Stage position:             {[round(x, 2) for x in [x0,y0,z0]]}
                             Camera used                 {sem.ReportCameraName(self.CAMERA_NUM)}
 
                             Tilt the stage from 0 to max in both directions with
@@ -114,19 +116,24 @@ class Eucentricity(BaseSetup):
         self.setup_area(self.exp, self.binning, preset="F")
         self.autofocus(-2, 0.1, do_ast=False)
 
+        results: List[List] = []
         sem.TiltTo(0)
         x0, y0, z0 = sem.ReportStageXYZ()
-        results: List[List] = []
+        logging.info(f"Current stage position: {x0}, {y0}, {z0}")
+        results.append([0, 0, 0, 0])
 
-        for tilt in range(0, -70, -self.increment):
-            res = self._tilt(tilt, x0, y0, z0)
-            results.append(res)
+        for tilt in range(-5, -75, -self.increment):
+            res = self._tilt(tilt, x0, y0)
+            if res is not None:
+                results.append(res)
 
         sem.TiltTo(0)
+        sem.Delay(3)
 
-        for tilt in range(0, 70, self.increment):
-            res = self._tilt(tilt, x0, y0, z0)
-            results.append(res)
+        for tilt in range(5, 75, self.increment):
+            res = self._tilt(tilt, x0, y0)
+            if res is not None:
+                results.append(res)
 
         sem.TiltTo(0)
 

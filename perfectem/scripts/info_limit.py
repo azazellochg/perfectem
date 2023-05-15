@@ -99,7 +99,7 @@ class InfoLimit(BaseSetup):
 
                     The information limit is a measure of the highest frequency
                     that is transferred through the optical system. During exposure
-                    of the CCD the image is shifted ~0.12nm to produce Young's fringes
+                    of the CCD the image is shifted {self.shift*1000}nm to produce Young's fringes
                     in the FFT. The extent of the fringes is a measure of the information limit.
 
                     Specification: {self.specification} nm

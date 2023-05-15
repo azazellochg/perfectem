@@ -33,10 +33,10 @@ DEBUG = 1  # set to 1 for more diagnostic output
 krios2_falcon4 = {
     "StageDrift": {"beam": 1.1, "spot": 4, "mag": 96000, "exp": 0.5, "binning": 2},
     "Anisotropy": {"beam": 1.1, "spot": 4, "mag": 96000, "exp": 0.5, "binning": 2},
-    "InfoLimit": {"beam": 1.1, "spot": 3, "mag": 600000, "exp": 1, "binning": 2, "defocus": -0.5, "spec": 0.14},  # C2 150
+    "InfoLimit": {"beam": 1.2, "spot": 3, "mag": 600000, "exp": 1, "binning": 2, "defocus": -0.5, "spec": 0.14},  # C2 150
     "ThonRings": {"beam": 0.7, "spot": 2, "mag": 250000, "exp": 1, "binning": 2, "defocus": -1, "spec": 0.33},
     "PointRes": {"beam": 0.7, "spot": 2, "mag": 380000, "exp": 2, "binning": 2, "defocus": -0.087, "spec": 0.20},
-    "GoldDiffr": {"beam": 1.1, "spot": 3, "mag": 600000, "exp": 1, "binning": 2, "defocus": -0.5, "spec": 0.1},  # C2 150
+    "GoldDiffr": {"beam": 1.2, "spot": 3, "mag": 600000, "exp": 1, "binning": 2, "defocus": -0.5, "spec": 0.1},  # C2 150
     "C2Fringes": {"beam": 0.42, "spot": 6, "mag": 96000, "exp": 0.5, "binning": 1},
     "TiltAxis": {"beam": 1.1, "spot": 5, "mag": 75000, "exp": 0.5, "binning": 2},
     "GainRef": {"beam": 1.1, "spot": 7, "mag": 96000, "exp": 1, "binning": 1},
