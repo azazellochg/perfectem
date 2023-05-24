@@ -1,6 +1,22 @@
 The ``perfectem`` package provides a set of scripts designed to test TEM performance. Some tests have been adapted from TFS SAT procedures.
 The scripts are using SerialEM's Python module.
 
+.. image:: https://img.shields.io/pypi/v/perfectem.svg
+        :target: https://pypi.python.org/pypi/perfectem
+        :alt: PyPI release
+
+.. image:: https://img.shields.io/pypi/l/perfectem.svg
+        :target: https://pypi.python.org/pypi/perfectem
+        :alt: License
+
+.. image:: https://img.shields.io/pypi/pyversions/perfectem.svg
+        :target: https://pypi.python.org/pypi/perfectem
+        :alt: Supported Python versions
+
+.. image:: https://img.shields.io/pypi/dm/perfectem
+        :target: https://pypi.python.org/pypi/perfectem
+        :alt: Downloads
+
 Installation
 ------------
 
