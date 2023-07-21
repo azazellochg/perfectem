@@ -200,7 +200,7 @@ class Anisotropy(BaseSetup):
                     {anisomag_str}
                     {anisoang_str}
 
-                    Specification: anisotropy <1%
+                    Specification: anisotropy < 1%
         """
         ax2.text(0, 0, textstr, fontsize=20)
         ax2.axis('off')

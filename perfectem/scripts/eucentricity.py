@@ -37,12 +37,15 @@ class Eucentricity(BaseSetup):
     """
         Name: Stage eucentricity check
         Desc: Estimates X,Y and defocus offset while tilting the stage.
+
+        Specification (Krios G4): <1 um in X/Y, <3 um defocus
+        Specification (Krios, Glacios): <2 um in X/Y, <4 um defocus
     """
 
     def __init__(self, log_fn: str = "eucentricity", **kwargs: Any):
         super().__init__(log_fn, **kwargs)
         self.increment = 5  # tilt step
-        self.specification = kwargs.get("spec", (1, 3))
+        self.specification = kwargs.get("spec", (1, 3))  # shift and defocus, in um
 
     def _tilt(self, tilt, x0, y0) -> Optional[List[float]]:
         sem.TiltTo(tilt)
@@ -87,7 +90,7 @@ class Eucentricity(BaseSetup):
                             Tilt the stage from 0 to max in both directions with
                             {self.increment} deg. increment and measure offset in X, Y and defocus
 
-                            Specification (Krios G4): <1 um in X/Y, <3 um defocus
+                            Specification: <{self.specification[0]} um in X/Y, <{self.specification[1]} um defocus
                 """
         ax2.text(0, 0, textstr, fontsize=20)
         ax2.axis('off')

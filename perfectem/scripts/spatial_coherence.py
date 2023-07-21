@@ -61,7 +61,7 @@ class C2Fringes(BaseSetup):
     def _run(self) -> None:
         self.change_aperture("c2", 50)
         self.setup_beam(self.mag, self.spot, self.beam_size, check_dose=False)
-        sem.Pause("Please go to an empty area and center the beam")
+        sem.Pause("Please go to an empty area and accurately center the beam")
         self.setup_beam(self.mag, self.spot, self.beam_size)
         self.setup_area(self.exp, self.binning, preset="R")
         sem.SetAbsoluteFocus(0)
