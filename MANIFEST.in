@@ -7,3 +7,4 @@ include LICENSE
 # Include the changelog
 include CHANGES.txt
 
+include perfectem/SEM_python/*

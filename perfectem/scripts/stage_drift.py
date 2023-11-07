@@ -38,9 +38,8 @@ from ..config import DEBUG
 class StageDrift(BaseSetup):
     """
         Name: Stage drift test.
-        Desc: 1) From a starting position move 1 um in each
+        Desc: From a starting position move 1 um in each
               direction and measure drift until it is below threshold.
-              2) Repeat the same test by tilting the stage to +/- 45 deg
         Specification: < 0.5 nm/min
     """
 
@@ -49,7 +48,6 @@ class StageDrift(BaseSetup):
         self.drift_crit = 1  # stop after reaching this A/sec
         self.max_time = 180.  # give up after max_time in sec
         self.shift = 1  # shift in um to use
-        self.tilt = 45  # tilt in deg to use
         self.times = 3  # times to move/measure in one direction
 
     def measure_drift(self) -> Tuple[Dict[str, List], Dict[str, float], Tuple[float]]:
@@ -58,18 +56,14 @@ class StageDrift(BaseSetup):
             "+X": (self.shift, 0),
             "-X": (-self.shift, 0),
             "+Y": (0, self.shift),
-            "-Y": (0, -self.shift),
-            "-A": (-self.tilt,),
-            "+A": (self.tilt,)
+            "-Y": (0, -self.shift)
         }
 
         res: Dict[str, List] = {
             "+X": [],
             "-X": [],
             "+Y": [],
-            "-Y": [],
-            "-A": [],
-            "+A": []
+            "-Y": []
         }
 
         stage: Tuple[float] = sem.ReportStageXYZ()
@@ -96,19 +90,12 @@ class StageDrift(BaseSetup):
             return r
 
         for name, move in moves.items():
-            if "A" in name:
-                logging.info(f"Tilting in {name} direction")
-                sem.TiltTo(move[0], 1)
+            logging.info(f"Moving 1um in {name} direction")
+            for i in range(self.times):
+                logging.info(f"Measure #{i + 1}")
+                sem.MoveStage(move[0], move[1])
                 r = timer()
                 res[name].append(r)
-                sem.TiltTo(0, 1)
-            else:
-                logging.info(f"Moving 1um in {name} direction")
-                for i in range(self.times):
-                    logging.info(f"Measure #{i + 1}")
-                    sem.MoveStage(move[0], move[1])
-                    r = timer()
-                    res[name].append(r)
             logging.info("-" * 40)
 
         if DEBUG:
@@ -136,16 +123,14 @@ class StageDrift(BaseSetup):
                      avg_res: Dict[str, float],
                      position: Tuple[float]) -> None:
         fig = plt.figure(figsize=(19.2, 14.4))
-        gs = fig.add_gridspec(4, 2)
+        gs = fig.add_gridspec(3, 2)
         ax0 = fig.add_subplot(gs[0, :])  # text
         ax1 = fig.add_subplot(gs[1, 1])
         ax2 = fig.add_subplot(gs[1, 0])
         ax3 = fig.add_subplot(gs[2, 1])
         ax4 = fig.add_subplot(gs[2, 0])
-        ax5 = fig.add_subplot(gs[3, 1])
-        ax6 = fig.add_subplot(gs[3, 0])
 
-        ax = [ax1, ax2, ax3, ax4, ax5, ax6]
+        ax = [ax1, ax2, ax3, ax4]
 
         for r, a in zip(res, ax):
             data = res[r]
@@ -171,9 +156,8 @@ class StageDrift(BaseSetup):
                             Stage position:             {[round(x, 2) for x in position]}
                             Camera used                 {sem.ReportCameraName(self.CAMERA_NUM)}
 
-                            1) From a starting position move {self.shift} um in each direction and 
+                            From a starting position move {self.shift} um in each direction and 
                             measure drift until it is below threshold.
-                            2) Measure drift after tilting to +/- {self.tilt} deg.
 
                             Specification (Krios): < 0.5 nm/min ?
                 """
@@ -186,8 +170,8 @@ class StageDrift(BaseSetup):
         fig.savefig(f"stage_drift_{self.timestamp}.png")
 
     def _run(self) -> None:
-        if self.SCOPE_HAS_AUTOFILL and sem.DewarsRemainingTime() < 600:
-            raise RuntimeError("<10 min left before the next LN autofill cycle, this test is cancelled.")
+        if self.SCOPE_HAS_AUTOFILL and sem.DewarsRemainingTime() < 300:
+            sem.Pause("10 min left before the next LN autofill cycle, do you really want to continue?")
 
         self.change_aperture("c2", 50)
         self.setup_beam(self.mag, self.spot, self.beam_size, check_dose=False)

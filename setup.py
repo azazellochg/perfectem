@@ -31,34 +31,53 @@ https://github.com/pypa/sampleproject
 """
 
 # Always prefer setuptools over distutils
-from setuptools import setup, find_packages
+from setuptools import setup, find_packages, Extension
+import sys
 from os import path
 from perfectem import __version__
 
 here = path.abspath(path.dirname(__file__))
+# Get the long description from the README file
+with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
+    long_description = f.read()
+
+libs = []
+if sys.platform.startswith("win"):
+    libs.append('wsock32')
+
+serialemmodule = Extension('serialem',
+                           define_macros=[('MAJOR_VERSION', '1'),
+                                          ('MINOR_VERSION', '0')],
+                           sources=['perfectem/SEM_python/SerialEMModule.cpp',
+                                    'perfectem/SEM_python/PySEMSocket.cpp'],
+                           libraries=libs,
+                           depends=['perfectem/SEM_python/PySEMSocket.h',
+                                    'perfectem/SEM_python/MacroMasterList.h'])
 
 setup(
     name='perfectem',
     version=__version__,
     description='Run TEM performance tests with SerialEM',
-    long_description='See https://github.com/azazellochg/perfectem for more details',
+    long_description=long_description,
+    long_description_content_type='text/x-rst',
     url='https://github.com/azazellochg/perfectem',
     author='Grigory Sharov',
     author_email='gsharov@mrc-lmb.cam.ac.uk',
     classifiers=[
         'Development Status :: 3 - Alpha',
         'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
-        'Programming Language :: Python :: 3'
+        'Programming Language :: Python :: 3',
+        'Operating System :: POSIX :: Linux',
+        'Operating System :: Microsoft :: Windows'
     ],
     keywords='cryo-em python serialem',
     packages=find_packages(),
+    ext_modules=[serialemmodule],
     install_requires=['mrcfile', 'numpy', 'scipy', 'matplotlib'],
     extras_require={
-      "dev": [
-          "mypy"
-      ]
+      "dev": ["mypy"]
     },
-    python_requires='>=3.6',
+    python_requires='>=3.8',
     entry_points={'console_scripts': ['perfectem=perfectem:main']},
     project_urls={
         'Bug Reports': 'https://github.com/azazellochg/perfectem/issues',

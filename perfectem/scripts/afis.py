@@ -106,7 +106,7 @@ class AFIS(BaseSetup):
                     Defocus                     {self.defocus} um
                     Camera used                 {sem.ReportCameraName(self.CAMERA_NUM)}
 
-                    Remaining coma and astigmatism are measured at +/- {self.shift} um positions.
+                    Remaining coma and astigmatism are measured at +/- {self.shift} um beam shift positions.
 
                     Specification (Krios): coma < 750 nm, astigmatism < 10 nm for 5 um shift
                     Specification (Talos): coma < 1200 nm, astigmatism < 15 nm for 6 um shift

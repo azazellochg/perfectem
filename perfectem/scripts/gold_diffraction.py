@@ -67,6 +67,7 @@ class GoldDiffr(BaseSetup):
 
         if self.CAMERA_HAS_DIVIDEBY2:
             sem.SetDivideBy2(1)
+        sem.Delay(self.DELAY, "s")
         sem.Record()
         params = sem.ImageProperties("A")
         pix = params[4] * 10
@@ -84,7 +85,7 @@ class GoldDiffr(BaseSetup):
                     Defocus                     {self.defocus} um
                     Camera used                 {sem.ReportCameraName(self.CAMERA_NUM)}
 
-                    One should see gold diffraction spots beyond 1 A.
+                    One should see gold diffraction spots beyond {self.specification*10} A.
 
                     Specification: {self.specification} nm
         """

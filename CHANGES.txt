@@ -1,3 +1,13 @@
+0.9.4:
+    - add atlas realignment test
+    - update Delay command
+    - fix changing apertures
+    - include SEM Python module
+    - installation on Windows works
+0.9.3:
+    - remove alpha tilt from stage drift test for now
+    - update config for Glacios
+    - minor changes
 0.9.2:
     - add eucentricity test
 0.9.1:

@@ -77,7 +77,7 @@ class InfoLimit(BaseSetup):
             sem.SetDivideBy2(1)
         sem.Record()
         sem.ImageShiftByMicrons(self.shift, 0.)
-        sem.Delay(self.delay)
+        sem.Delay(self.delay, "s")
         sem.Record()
         params = sem.ImageProperties("A")
         pix = params[4] * 10

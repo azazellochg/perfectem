@@ -77,7 +77,9 @@ class TiltAxis(BaseSetup):
                      angles: List[float]) -> None:
         offsets, rel_focus = zip(*sorted(zip(offsets, rel_focus)))  # ensure right order for plot points
         fig, ax = plt.subplots(figsize=(8, 6))
-        ax.set_title('Z Shifts [microns]')
+        ax.set_title("Tilt axis offset")
+        ax.set_xlabel("Z shift, um")
+        ax.set_ylabel("Defocus offset, um")
         for i in range(len(angles)):
             values = []
             for j in range(len(offsets)):
