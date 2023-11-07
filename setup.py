@@ -37,6 +37,10 @@ from os import path
 from perfectem import __version__
 
 here = path.abspath(path.dirname(__file__))
+# Get the long description from the README file
+with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
+    long_description = f.read()
+
 libs = []
 if sys.platform.startswith("win"):
     libs.append('wsock32')
@@ -54,7 +58,8 @@ setup(
     name='perfectem',
     version=__version__,
     description='Run TEM performance tests with SerialEM',
-    long_description='See https://github.com/azazellochg/perfectem for more details',
+    long_description=long_description,
+    long_description_content_type='text/x-rst',
     url='https://github.com/azazellochg/perfectem',
     author='Grigory Sharov',
     author_email='gsharov@mrc-lmb.cam.ac.uk',
