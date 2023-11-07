@@ -182,12 +182,13 @@ class BaseSetup:
 
     def check_eps(self) -> None:
         """ Check max eps after setup beam but before area setup. """
+        # TODO: verify minimum dose rate for Falcon3/4
 
         logging.info("Checking dose rate...")
         old_exp, _ = sem.ReportExposure("F")
         old_bin = int(sem.ReportBinning("F"))
 
-        self.setup_area(exp=0.25, binning=1, preset="F")
+        self.setup_area(exp=0.22, binning=1, preset="F")
         sem.Focus()
         _, _, _, _, eps = sem.ElectronStats("A")
         logging.info(f"Dose rate: {eps} eps")
@@ -246,7 +247,7 @@ class BaseSetup:
         else:  # (illum. area, fraction)
             sem.SetIlluminatedArea(beamsize * 0.01)
 
-        sem.Delay(self.DELAY)
+        sem.Delay(self.DELAY, "s")
 
         logging.info("Setting illumination: done!")
         if check_dose:
@@ -277,7 +278,6 @@ class BaseSetup:
 
     def euc_by_stage(self, fine: bool = False) -> None:
         """ Check FOV before running eucentricity by stage. """
-
         min_fov = sem.ReportProperty("EucentricityCoarseMinField")  # um
         pix = sem.ReportCurrentPixelSize("T")  # nm, with binning
         area_x, area_y, _, _, _, _ = sem.ReportCameraSetArea("T")  # binned pix

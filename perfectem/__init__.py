@@ -30,7 +30,7 @@ from typing import List, Optional
 
 from .config import microscopes
 
-__version__ = '0.9.3'
+__version__ = '0.9.4b1'
 
 tests = (
     ("AFIS", "AFIS validation"),
@@ -66,36 +66,29 @@ def main(argv: Optional[List] = None) -> None:
 
     parser = argparse.ArgumentParser(description="This script launches selected TEM performance test")
     parser.add_argument("-l", "--list", default=False, action='store_true',
-                        help="List available tests")
-    parser.add_argument("-d", "--desc", default=False, action='store_true',
                         help="Show detailed description for each test")
     args = parser.parse_args(argv)
-
-    if args.list or args.desc:
-        print("\nAvailable tests:")
-        show_all_tests(args.desc)
+    if args.list:
+        show_all_tests(print_docstr=True)
+        return
     else:
+        print("\nChoose a performance test to run: (run program with -l to see the details for each test)")
+        show_all_tests(False)
+        test_num = int(input("\nInput the test number: ").strip()) - 1
+        if test_num not in range(len(tests)):
+            raise IndexError("Wrong test number!")
+
         print("\nAvailable microscopes:")
         for scope_num, scope in enumerate(microscopes, start=1):
             print(f"\t[{scope_num}] {scope[0]}")
 
         scope_num = int(input("\nInput the microscope number: ").strip()) - 1
-
-        if scope_num in range(len(microscopes)):
-            scope_name = microscopes[scope_num][0]
-            print("\nChoose a performance test to run:")
-            show_all_tests()
-
-            test_num = int(input("\nInput the test number: ").strip()) - 1
-
-            if test_num in range(len(tests)):
-                func_name = tests[test_num][0]
-                module = importlib.import_module("perfectem.scripts")
-                func_object = getattr(module, func_name)
-                print(func_object.__doc__)
-                func_object(scope_name=scope_name, **microscopes[scope_num][1][func_name]).run()
-            else:
-                raise IndexError("Wrong test number!")
-
-        else:
+        if scope_num not in range(len(microscopes)):
             raise IndexError("Wrong microscope number!")
+        scope_name = microscopes[scope_num][0]
+
+        func_name = tests[test_num][0]
+        module = importlib.import_module("perfectem.scripts")
+        func_object = getattr(module, func_name)
+        print(func_object.__doc__)
+        func_object(scope_name=scope_name, **microscopes[scope_num][1][func_name]).run()

@@ -131,7 +131,7 @@ class Eucentricity(BaseSetup):
                 results.append(res)
 
         sem.TiltTo(0)
-        sem.Delay(3)
+        sem.Delay(3, "s")
 
         for tilt in range(5, 75, self.increment):
             res = self._tilt(tilt, x0, y0)

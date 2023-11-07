@@ -67,7 +67,7 @@ class GoldDiffr(BaseSetup):
 
         if self.CAMERA_HAS_DIVIDEBY2:
             sem.SetDivideBy2(1)
-        sem.Delay(self.DELAY)
+        sem.Delay(self.DELAY, "s")
         sem.Record()
         params = sem.ImageProperties("A")
         pix = params[4] * 10
