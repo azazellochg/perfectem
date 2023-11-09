@@ -30,7 +30,7 @@ from typing import List, Optional
 
 from .config import microscopes
 
-__version__ = '0.9.4b1'
+__version__ = '0.9.4'
 
 tests = (
     ("AFIS", "AFIS validation"),
