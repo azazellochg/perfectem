@@ -387,8 +387,9 @@ class BaseSetup:
         """
         aperture = 1 if name.lower() == "c2" else 2
 
-        if self.SCOPE_HAS_APER_CTRL and sem.ReportApertureSize(aperture) != size:
-            logging.info(f"Changing {name.upper()} aperture to: {size}")
-            sem.SetApertureSize(aperture, size)
+        if self.SCOPE_HAS_APER_CTRL:
+            if int(sem.ReportApertureSize(aperture)) != size:
+                logging.info(f"Changing {name.upper()} aperture to: {size}")
+                sem.SetApertureSize(aperture, size)
         else:
-            sem.Pause(f"Please change {name.upper()} aperture to: {size}")
+            sem.Pause(f"Please set {name.upper()} aperture to: {size}")
