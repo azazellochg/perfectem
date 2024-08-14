@@ -32,6 +32,7 @@ https://github.com/pypa/sampleproject
 
 # Always prefer setuptools over distutils
 from setuptools import setup, find_packages, Extension
+from setuptools.command.build_ext import build_ext
 import sys
 from os import path
 from perfectem import __version__
@@ -51,8 +52,18 @@ serialemmodule = Extension('serialem',
                            sources=['perfectem/SEM_python/SerialEMModule.cpp',
                                     'perfectem/SEM_python/PySEMSocket.cpp'],
                            libraries=libs,
+                           optional=True,
                            depends=['perfectem/SEM_python/PySEMSocket.h',
                                     'perfectem/SEM_python/MacroMasterList.h'])
+
+
+class BuildSEMPython(build_ext):
+    def run(self):
+        try:
+            import serialem
+        except ImportError:
+            build_ext.run(self)
+
 
 setup(
     name='perfectem',
@@ -64,7 +75,7 @@ setup(
     author='Grigory Sharov',
     author_email='gsharov@mrc-lmb.cam.ac.uk',
     classifiers=[
-        'Development Status :: 3 - Alpha',
+        'Development Status :: 4 - Beta',
         'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
         'Programming Language :: Python :: 3',
         'Operating System :: POSIX :: Linux',
@@ -73,6 +84,7 @@ setup(
     keywords='cryo-em python serialem',
     packages=find_packages(),
     ext_modules=[serialemmodule],
+    cmdclass={"build_ext": BuildSEMPython},
     install_requires=['mrcfile', 'numpy', 'scipy', 'matplotlib'],
     extras_require={
       "dev": ["mypy"]

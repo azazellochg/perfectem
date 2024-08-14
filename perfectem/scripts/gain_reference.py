@@ -25,14 +25,16 @@
 # **************************************************************************
 
 from typing import Any
+import numpy as np
 import serialem as sem
 
 from ..common import BaseSetup
+from ..utils import plot_fft_and_text
 
 
 class GainRef(BaseSetup):
     """
-        Name: Gain reference check for Falcon.
+        Name: Gain reference check for a camera.
         Desc: Take a picture of a flood beam and check the auto-correlation.
     """
 
@@ -48,5 +50,9 @@ class GainRef(BaseSetup):
         self.check_before_acquire()
 
         sem.Record()
-        #get autocorrelation from sem or otherwise and save it
-        sem.SaveToOtherFile("A", "JPG", "NONE", f"gain_check_{self.timestamp}.jpg")
+        data = np.asarray(sem.bufferImage("A")).astype("int16")
+        data_ft = np.fft.fft(data, axis=1)
+        data_ac = np.fft.ifft(data_ft * np.conjugate(data_ft), axis=1).real
+
+        fig, axes = plot_fft_and_text(data_ac)
+        fig.savefig(f"gain_check_{self.timestamp}.jpg")

@@ -53,7 +53,8 @@ class Anisotropy(BaseSetup):
         self.def_min = 5000  # min def in Angstroms
         self.def_max = 50000  # max def in Angstroms
 
-    def _find_limits(self, defocus: float, var: np.ndarray) -> Tuple[float, ...]:
+    @staticmethod
+    def _find_limits(defocus: float, var: np.ndarray) -> Tuple[float, ...]:
         """ The analytic expressions are very ugly and
             so it is simpler to just search over the range. """
 
@@ -85,7 +86,8 @@ class Anisotropy(BaseSetup):
 
         return fmax, fmin, amax, amin
 
-    def _fun(self, var: np.ndarray, data: np.ndarray) -> float:
+    @staticmethod
+    def _fun(var: np.ndarray, data: np.ndarray) -> float:
         """
            Integral of 0 to 2pi of the square of the difference. This can
            be done analytically but the expressions are awful and so

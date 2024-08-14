@@ -146,7 +146,8 @@ class BaseSetup:
             # Retract objective aperture
             self.change_aperture("obj", 0)
 
-    def func_is_implemented(self, func: str, arg: Optional[Any] = None) -> bool:
+    @staticmethod
+    def func_is_implemented(func: str, arg: Optional[Any] = None) -> bool:
         """ Check is SerialEM supports a certain command. """
 
         try:
@@ -208,7 +209,8 @@ class BaseSetup:
         sem.SetExposure("F", old_exp)
         sem.SetBinning("F", old_bin)
 
-    def check_drift(self, crit: float = 1.0,
+    @staticmethod
+    def check_drift(crit: float = 1.0,
                     interval: int = 1,
                     timeout: int = 180) -> None:
         """ Wait for drift to go below crit in Angstroms/s.
@@ -276,7 +278,8 @@ class BaseSetup:
 
         logging.info("Setting camera: done!")
 
-    def euc_by_stage(self, fine: bool = False) -> None:
+    @staticmethod
+    def euc_by_stage(fine: bool = False) -> None:
         """ Check FOV before running eucentricity by stage. """
         min_fov = sem.ReportProperty("EucentricityCoarseMinField")  # um
         pix = sem.ReportCurrentPixelSize("T")  # nm, with binning
@@ -322,7 +325,8 @@ class BaseSetup:
         sem.SetSpotSize(old_spot)
         sem.SetIlluminatedArea(old_beam)
 
-    def autofocus(self, target: float, precision: float = 0.05,
+    @staticmethod
+    def autofocus(target: float, precision: float = 0.05,
                   do_ast: bool = True, do_coma: bool = False,
                   high_mag: bool = False) -> None:
         """ Autofocus until the result is within precision (um) from a target. """
@@ -383,8 +387,9 @@ class BaseSetup:
         """
         aperture = 1 if name.lower() == "c2" else 2
 
-        if self.SCOPE_HAS_APER_CTRL and sem.ReportApertureSize(aperture) != size:
-            logging.info(f"Changing {name.upper()} aperture to: {size}")
-            sem.SetApertureSize(aperture, size)
+        if self.SCOPE_HAS_APER_CTRL:
+            if int(sem.ReportApertureSize(aperture)) != size:
+                logging.info(f"Changing {name.upper()} aperture to: {size}")
+                sem.SetApertureSize(aperture, size)
         else:
-            sem.Pause(f"Please change {name.upper()} aperture to: {size}")
+            sem.Pause(f"Please set {name.upper()} aperture to: {size}")

@@ -20,12 +20,11 @@ The scripts are using SerialEM's Python module. Installation on both Windows and
 Installation
 ------------
 
-.. warning:: The project is still in development phase, no beta version has been released yet. Installing from sources is recommended.
-
 Requirements:
 
     * python >= 3.8
     * matplotlib, mrcfile, numpy, scipy
+    * SerialEM Python module will be compiled during installation unless already present
 
 Installation from PyPI
 ######################
@@ -49,7 +48,7 @@ Execute from the command line (assuming you have your Python interpreter in the 
 Offline installation
 ####################
 
-#. Download \*.whl files for `perfectem <https://pypi.org/project/perfectem/#files>`_, `matplotlib <https://pypi.org/project/matplotlib/#files>`_, `mrcfile <https://pypi.org/project/mrcfile/#files>`_, `numpy <https://pypi.org/project/numpy/#files>`_ and `scipy <https://pypi.org/project/scipy/#files>`_ into the current folder
+#. Download \*.whl files for `matplotlib <https://pypi.org/project/matplotlib/#files>`_, `mrcfile <https://pypi.org/project/mrcfile/#files>`_, `numpy <https://pypi.org/project/numpy/#files>`_ and `scipy <https://pypi.org/project/scipy/#files>`_ into the current folder
 #. Download https://github.com/azazellochg/perfectem sources
 #. Execute from the command line (assuming you have your Python interpreter in the path):
 
@@ -58,14 +57,14 @@ Offline installation
 .. code-block:: python
 
     py -m pip install matplotlib mrcfile numpy scipy perfectem --no-index --find-links .
-    py -m pip install -e <source_directory>
+    py -m pip install -e <perfectem_source_directory>
 
 **Linux:**
 
 .. code-block:: python
 
     pip install matplotlib mrcfile numpy scipy perfectem --no-index --find-links .
-    pip install -e <source_directory>
+    pip install -e <perfectem_source_directory>
 
 Available scripts
 -----------------
@@ -111,7 +110,7 @@ Running scripts
 
 The scripts have been tested only on TFS Titan Krios and Glacios microscopes. All tests except maybe Point resolution (which needs a Pt-Ir grid) require a cross-grating grid (e.g. **AGS106L** Diffraction grating replica with latex spheres) inserted and the eucentric height adjusted. Also, it is assumed that the microscope is already well aligned.
 
-First, have a look at **config.py**: edit *microscopes* dictionary and individual parameters for each test. Make sure SerialEM is open. To start the program, simply type in the Window CMD:
+First, have a look at **config.py**: edit *microscopes* dictionary and individual parameters for each test. Make sure SerialEM is open. To start the program, simply type in the Windows CMD / Linux console:
 
 .. code-block:: python
 

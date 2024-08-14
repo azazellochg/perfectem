@@ -47,7 +47,8 @@ class Eucentricity(BaseSetup):
         self.increment = 5  # tilt step
         self.specification = kwargs.get("spec", (1, 3))  # shift and defocus, in um
 
-    def _tilt(self, tilt, x0, y0) -> Optional[List[float]]:
+    @staticmethod
+    def _tilt(tilt, x0, y0) -> Optional[List[float]]:
         sem.TiltTo(tilt)
         logging.info(f"Tilting to {tilt} deg.")
         x, y, z = sem.ReportStageXYZ()
