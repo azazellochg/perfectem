@@ -48,5 +48,5 @@ class GainRef(BaseSetup):
         self.check_before_acquire()
 
         sem.Record()
-        #get autocorrelation from sem or otherwise and save it
+        # get autocorrelation from sem or otherwise and save it
         sem.SaveToOtherFile("A", "JPG", "NONE", f"gain_check_{self.timestamp}.jpg")

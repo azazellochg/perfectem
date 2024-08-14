@@ -52,7 +52,8 @@ class AFIS(BaseSetup):
         self.shift = kwargs.get("max_imgsh", 12.0)
         self.specification = kwargs.get("spec", (750, 100))  # for Krios (coma in nm, astig in nm)
 
-    def _mrad_to_nm(self, mrad):
+    @staticmethod
+    def _mrad_to_nm(mrad):
         return mrad_to_invA(mrad, sem.ReportHighVoltage() * 1000) * 10
 
     def _run(self) -> None:

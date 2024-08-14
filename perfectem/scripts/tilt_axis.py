@@ -38,10 +38,10 @@ class TiltAxis(BaseSetup):
     """
         Name: Tilt axis offset check
         Desc: Estimates tilt axis offset for PACEtomo.
-              More information at http://github.com/eisfabian/PACEtomo
+              More information at https://github.com/eisfabian/PACEtomo
         Author: Fabian Eisenstein
         Created: 2022/05/10
-        Revision: v1.1
+        Revision: v1.8
     """
 
     def __init__(self, log_fn: str = "tilt_axis", **kwargs: Any):
@@ -51,10 +51,12 @@ class TiltAxis(BaseSetup):
         self.offset = 5  # +/- offset for measured positions in microns from tilt axis
         # (also accepts lists e.g. [2, 4, 6])
 
-    def _dz(self, alpha: float, y0: float) -> Any:
+    @staticmethod
+    def _dz(alpha: float, y0: float) -> Any:
         return y0 * np.tan(np.radians(-alpha))
 
-    def _tilt(self, tilt: int, offsets: List[int],
+    @staticmethod
+    def _tilt(tilt: int, offsets: List[int],
               focus0: List[float], focus: List[List],
               angles: List[float]) -> None:
         sem.TiltTo(tilt)
@@ -137,17 +139,31 @@ class TiltAxis(BaseSetup):
                 rel_focus[j][i] -= focus0[j]
 
         y0 = np.zeros(len(offsets))
+        y0_neg = np.zeros(len(offsets))
+        y0_pos = np.zeros(len(offsets))
         for j in range(len(offsets)):
-            y0[j], cov = opt.curve_fit(self._dz, angles, rel_focus[j], p0=0)
+            y0[j], *_ = opt.curve_fit(self._dz, angles, rel_focus[j], p0=0)
+            y0_neg[j], *_ = opt.curve_fit(self._dz, [angle for angle in angles if angle <= 0],
+                                          rel_focus[j][:len([angle for angle in angles if angle <= 0])],
+                                          p0=0)
+            y0_pos[j], *_ = opt.curve_fit(self._dz, [angle for angle in angles if angle >= 0],
+                                          rel_focus[j][len([angle for angle in angles if angle < 0]):],
+                                          p0=0)
 
         logging.info(f"Remaining tilt axis offsets:")
         for i in range(0, len(offsets)):
-            logging.info(f"[{offsets[i]}]: {round(y0[i] + offsets[i], 2)}")
+            logging.info(f"[{offsets[i]}]: {y0[i] + offsets[i]}, neg: "
+                         f"{y0_neg[i] + offsets[i]}, pos: {y0_pos[i] + offsets[i]}")
 
         avg_offset = sum(y0) / len(offsets)
-        logging.info(f"Average remaining tilt axis offset: {avg_offset:0.2f}")
-        total_offset = round(avg_offset + old_offset, 2)
-        logging.info(f"Total tilt axis offset is {total_offset}")
+        avg_offset_neg = sum(y0_neg) / len(offsets)
+        avg_offset_pos = sum(y0_pos) / len(offsets)
+
+        logging.info(f"Average remaining tilt axis offset: {avg_offset:0.2f}, "
+                     f"neg: {avg_offset_neg:0.2f}, pos: {avg_offset_pos:0.2f}")
+
+        total_offset = avg_offset + old_offset
+        logging.info(f"Total tilt axis offset is {total_offset:0.2f}")
 
         sem.TiltTo(0)
         sem.ResetImageShift()
