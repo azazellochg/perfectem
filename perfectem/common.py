@@ -258,7 +258,8 @@ class BaseSetup:
     def setup_area(self, exp: float, binning: int,
                    area: str = "F",
                    preset: str = "F",
-                   mode: Optional[str] = None) -> None:
+                   mode: Optional[int] = None,
+                   frames: Optional[bool] = False) -> None:
         """ Setup camera settings for a certain preset. """
 
         logging.info(f"Setting camera: preset={preset}, exp={exp}, binning={binning}, area={area}")
@@ -271,7 +272,11 @@ class BaseSetup:
         sem.NoMessageBoxOnError()
         try:
             sem.SetK2ReadMode(preset, camera_mode)  # linear=0, counting=1
-            sem.SetDoseFracParams(preset, 0, 0, 0)  # no frames
+            if frames:
+                sem.SetFrameTime(preset, 0.000001)  # will be fixed by SEM to a min number
+                sem.SetDoseFracParams(preset, 1, 0, 1, 1, 0)  # align frames with SEM plugin
+            else:
+                sem.SetDoseFracParams(preset, 0, 0, 0, 0, 0)  # no frames
         except sem.SEMerror or sem.SEMmoduleError:
             pass
         sem.NoMessageBoxOnError(0)

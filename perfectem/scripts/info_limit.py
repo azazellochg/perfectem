@@ -40,7 +40,7 @@ class InfoLimit(BaseSetup):
         Desc: Take two images with a small image shift (2 nm), add them together
               and calculate FFT. You should observe Young fringes going up
               to 1 A.
-        Specification (Krios): 0.14 nm at 0 tilt, 0.23 nm at 70 deg. tilt.
+        Specification (Krios<G4): 0.14 nm at 0 tilt, 0.23 nm at 70 deg. tilt.
         Specification (Glacios): 0.23 nm at 0 tilt, 0.34 nm at 70 deg. tilt.
 
         1) The information limit for HRTEMs is the inverse of the maximum spatial object frequency.
@@ -56,11 +56,11 @@ class InfoLimit(BaseSetup):
         super().__init__(log_fn, **kwargs)
         self.shift = 0.002  # image shift in um
         self.delay = 5  # in sec
-        self.defocus = kwargs.get("defocus", -0.3)  # the 1st CTF ring is smaller than the 1st gold diffraction ring; 3-4x Scherzer defocus
+        self.defocus = kwargs.get("defocus", -0.5)  # the 1st CTF ring is smaller than the 1st gold diffraction ring; 3-4x Scherzer defocus
         self.specification = kwargs.get("spec", 0.14)  # for Krios, in nm
 
     def _run(self) -> None:
-        self.change_aperture("c2", 150)
+        self.change_aperture("c2", 50)
         self.setup_beam(self.mag, self.spot, self.beam_size, check_dose=False)
         sem.Pause("Please center the beam, roughly focus the image, check beam tilt pp and rotation center")
         self.setup_beam(self.mag, self.spot, self.beam_size)
@@ -69,7 +69,7 @@ class InfoLimit(BaseSetup):
         self.setup_area(exp=0.5, binning=4, preset="F")
         self.autofocus(self.defocus, 0.05, do_coma=True, high_mag=True)
         self.check_drift()
-        self.setup_area(self.exp, self.binning, preset="R")
+        self.setup_area(self.exp, self.binning, preset="R", frames=True)
         self.check_before_acquire()
 
         logging.info(f"Taking two images with {self.shift} um image shift difference")
