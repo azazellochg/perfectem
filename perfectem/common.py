@@ -125,12 +125,12 @@ class BaseSetup:
             sem.SelectCamera(camera_num)
             self.CAMERA_NUM = camera_num
             cam_name = sem.ReportCameraName(self.CAMERA_NUM)
-            if "Falcon" in cam_name:
-                self.CAMERA_MODE = 0
-                self.CAMERA_HAS_DIVIDEBY2 = False
-            elif "K2" or "K3" in cam_name:
+            if "K2" or "K3" in cam_name:
                 self.CAMERA_MODE = 1  # always counting
                 self.CAMERA_HAS_DIVIDEBY2 = True
+            if "Falcon 4" in cam_name:
+                self.CAMERA_MODE = 1  # always counting
+                self.CAMERA_HAS_DIVIDEBY2 = False
 
             _, _, mode = sem.ReportMag()
             if mode == 1:  # EFTEM

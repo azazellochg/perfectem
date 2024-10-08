@@ -68,12 +68,10 @@ class AFIS(BaseSetup):
         self.autofocus(self.defocus, 0.05, do_ast=True, do_coma=True)
 
         bis_positions = [
-            (-self.shift, -self.shift),
             (-self.shift, 0),
             (self.shift, 0),
             (0, -self.shift),
-            (0, self.shift),
-            (self.shift, self.shift)
+            (0, self.shift)
         ]
         res = []
         

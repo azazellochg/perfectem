@@ -31,17 +31,17 @@ DEBUG = 0  # set to 1 for more diagnostic output
 # beam size in microns (Krios, 3-cond. lenses) or percents (2-cond. lenses)
 
 krios2_falcon4i = {
-    "StageDrift": {"beam": 1.1, "spot": 4, "mag": 96000, "exp": 0.5, "binning": 2},
-    "Anisotropy": {"beam": 1.1, "spot": 4, "mag": 96000, "exp": 0.5, "binning": 2},
-    "InfoLimit": {"beam": 0.4, "spot": 2, "mag": 600000, "exp": 1, "binning": 2, "defocus": -0.5, "spec": 0.14},
+    "StageDrift": {"beam": 0.7, "spot": 7, "mag": 96000, "exp": 1, "binning": 2},
+    "Anisotropy": {"beam": 0.7, "spot": 7, "mag": 96000, "exp": 1, "binning": 2},
+    "InfoLimit": {"beam": 0.42, "spot": 2, "mag": 740000, "exp": 3, "binning": 2, "defocus": -0.5, "spec": 0.14},
     "ThonRings": {"beam": 0.7, "spot": 2, "mag": 250000, "exp": 1, "binning": 2, "defocus": -1, "spec": 0.33},
     "PointRes": {"beam": 0.7, "spot": 2, "mag": 380000, "exp": 2, "binning": 2, "defocus": -0.087, "spec": 0.20},
-    "GoldDiffr": {"beam": 0.4, "spot": 3, "mag": 600000, "exp": 1, "binning": 2, "defocus": -0.5, "spec": 0.1},
-    "C2Fringes": {"beam": 0.42, "spot": 6, "mag": 96000, "exp": 0.5, "binning": 1},
-    "TiltAxis": {"beam": 1.1, "spot": 5, "mag": 75000, "exp": 0.5, "binning": 2},
-    "GainRef": {"beam": 1.1, "spot": 7, "mag": 96000, "exp": 1, "binning": 1},
-    "AFIS": {"beam": 1.1, "spot": 7, "mag": 96000, "exp": 1, "binning": 2, "defocus": -2, "max_imgsh": 12.0, "spec": (750, 10)},  # specs: (coma in nm, astig in nm)
-    "Eucentricity": {"beam": 1.1, "spot": 5, "mag": 75000, "exp": 0.5, "binning": 2, "spec": (2, 4)},
+    "GoldDiffr": {"beam": 0.42, "spot": 2, "mag": 740000, "exp": 3, "binning": 2, "defocus": -0.5, "spec": 0.1},
+    "C2Fringes": {"beam": 0.7, "spot": 7, "mag": 96000, "exp": 1, "binning": 1},
+    "TiltAxis": {"beam": 0.9, "spot": 7, "mag": 75000, "exp": 1, "binning": 2},
+    "GainRef": {"beam": 0.7, "spot": 7, "mag": 96000, "exp": 1, "binning": 1},
+    "AFIS": {"beam": 0.7, "spot": 7, "mag": 96000, "exp": 1, "binning": 2, "defocus": -2, "max_imgsh": 12.0, "spec": (750, 10)},  # specs: (coma in nm, astig in nm)
+    "Eucentricity": {"beam": 0.9, "spot": 7, "mag": 75000, "exp": 1, "binning": 2, "spec": (2, 4)},
 }
 
 krios1_k3 = {

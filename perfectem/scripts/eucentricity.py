@@ -126,7 +126,7 @@ class Eucentricity(BaseSetup):
         logging.info(f"Current stage position: {x0}, {y0}, {z0}")
         results.append([0, 0, 0, 0])
 
-        for tilt in range(-5, -75, -self.increment):
+        for tilt in range(-5, -65, -self.increment):
             res = self._tilt(tilt, x0, y0)
             if res is not None:
                 results.append(res)
@@ -134,7 +134,7 @@ class Eucentricity(BaseSetup):
         sem.TiltTo(0)
         sem.Delay(3, "s")
 
-        for tilt in range(5, 75, self.increment):
+        for tilt in range(5, 65, self.increment):
             res = self._tilt(tilt, x0, y0)
             if res is not None:
                 results.append(res)

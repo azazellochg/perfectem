@@ -26,6 +26,7 @@
 
 from typing import Any
 import numpy as np
+from scipy.signal import correlate
 import serialem as sem
 
 from ..common import BaseSetup
@@ -42,17 +43,21 @@ class GainRef(BaseSetup):
         super().__init__(log_fn, **kwargs)
 
     def _run(self) -> None:
-        sem.Pause("Please move stage to an empty area")
         self.setup_beam(self.mag, self.spot, self.beam_size)
-        sem.Pause("Please center the beam")
+        sem.Pause("Please move stage to an empty area and center the beam")
         self.setup_beam(self.mag, self.spot, self.beam_size)
         self.setup_area(self.exp, self.binning, preset="R")
         self.check_before_acquire()
 
         sem.Record()
         data = np.asarray(sem.bufferImage("A")).astype("int16")
-        data_ft = np.fft.fft(data, axis=1)
-        data_ac = np.fft.ifft(data_ft * np.conjugate(data_ft), axis=1).real
+        # Subtract the mean to center the data
+        data = data - np.mean(data)
+        acf = correlate(data, data, method='fft')
+        # Normalize the ACF
+        acf /= np.max(acf)
+        # Get the center of the ACF
+        acf = acf[acf.shape[0] // 2:, acf.shape[1] // 2:]
 
-        fig, axes = plot_fft_and_text(data_ac)
-        fig.savefig(f"gain_check_{self.timestamp}.jpg")
+        fig, axes = plot_fft_and_text(acf)
+        fig.savefig(f"gain_check_acf_{self.timestamp}.png")
