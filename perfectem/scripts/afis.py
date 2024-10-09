@@ -57,9 +57,10 @@ class AFIS(BaseSetup):
         return mrad_to_invA(mrad, sem.ReportHighVoltage() * 1000) * 10
 
     def _run(self) -> None:
-        sem.Pause("Open EPU and set Acquisition mode = Faster in the Session Setup. Also change C2 aperture to 50 um")
+        self.change_aperture("c2", 50)
         self.setup_beam(self.mag, self.spot, self.beam_size, check_dose=False)
-        sem.Pause("Please center the beam, roughly focus the image, check beam tilt pp and rotation center")
+        sem.Pause("Open EPU and set Acquisition mode = Faster in the Session Setup. "
+                  "Center the beam, roughly focus the image, check beam tilt pp and rotation center")
         self.setup_beam(self.mag, self.spot, self.beam_size)
         self.setup_area(self.exp, self.binning, preset="R")
         self.setup_area(exp=1, binning=2, preset="F")

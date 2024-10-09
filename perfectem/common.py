@@ -170,6 +170,7 @@ class BaseSetup:
         logging.info(f"Starting script {test_name} {start_time.strftime('%d/%m/%Y %H:%M:%S')}")
 
         try:
+            sem.SetImageShift(0, 0)
             if abs(sem.ReportTiltAngle()) > 0.1:
                 sem.TiltTo(0)
             self._run()
@@ -183,7 +184,6 @@ class BaseSetup:
 
     def check_eps(self) -> None:
         """ Check max eps after setup beam but before area setup. """
-        # TODO: verify minimum dose rate for Falcon3/4
 
         logging.info("Checking dose rate...")
         old_exp, _ = sem.ReportExposure("F")
@@ -202,7 +202,7 @@ class BaseSetup:
                 spot += 1
 
         if spot != int(sem.ReportSpotSize()) and spot < 12:
-            logging.info(f"Increasing spot size to {spot} to reduce dose rate below 120 eps")
+            logging.info(f"Increasing spot size to {spot} to reduce dose rate below 200 eps")
             sem.SetSpotSize(spot)
 
         # Restore previous settings
@@ -356,7 +356,7 @@ class BaseSetup:
         logging.info(f"Autofocusing to {target} um...")
         sem.AutoFocus()
 
-        if high_mag:
+        if high_mag and target < -0.7:
             # fix astigmatism again, closer to focus
             sem.FixAstigmatismByCTF()
 
