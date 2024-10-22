@@ -36,12 +36,13 @@ __version__ = '0.9.5'
 
 tests = {
     "AFIS": "AFIS validation",
+    "AtlasRealignment": "Atlas realignment",
     "Anisotropy": "Magnification anisotropy",
     "C2Fringes": "C2 Fresnel fringes",
     "Eucentricity": "Eucentricity check",
     "GainRef": "Gain reference check",
     "GoldDiffr": "Gold diffraction",
-    "InfoLimit": "Information limit (Young fringes)",
+    "InfoLimit": "Information limit",
     "PointRes": "Point resolution",
     "StageDrift": "Stage drift",
     "ThonRings": "Thon rings",
