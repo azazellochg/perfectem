@@ -101,10 +101,10 @@ glacios_falcon3 = {
     "AtlasRealignment": {"beam": 100.0, "spot": 5, "mag": 170, "exp": 0.5, "binning": 2},
 }
 
-microscopes = (
-    ("Krios_1", krios1_k3),
-    ("Krios_2", krios2_falcon4i),
-    ("Krios_3", krios3_k3),
-    ("Krios_4", krios4_F4i),
-    ("Glacios", glacios_falcon3),
-)
+microscopes = {
+    "Krios_1": krios1_k3,
+    "Krios_2": krios2_falcon4i,
+    "Krios_3": krios3_k3,
+    "Krios_4": krios4_F4i,
+    "Glacios": glacios_falcon3,
+}

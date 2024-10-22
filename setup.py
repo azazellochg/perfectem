@@ -90,9 +90,10 @@ setup(
       "dev": ["mypy"]
     },
     python_requires='>=3.8',
-    entry_points={'console_scripts': ['perfectem=perfectem:main']},
+    entry_points={'console_scripts': ['perfectem=perfectem:main'],
+                  'gui_scripts': ['perfectem-gui=perfectem:main_gui']},
     project_urls={
         'Bug Reports': 'https://github.com/azazellochg/perfectem/issues',
-        'Source': 'https://github.com/azazellochg/perfectem',
-    },
+        'Source': 'https://github.com/azazellochg/perfectem'
+    }
 )

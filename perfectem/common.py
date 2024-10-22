@@ -39,7 +39,8 @@ from .config import SERIALEM_PORT, SERIALEM_IP
 class BaseSetup:
     """ Initialization and common functions. """
 
-    def __init__(self, log_fn: str, scope_name: str, **kwargs: Any) -> None:
+    def __init__(self, log_fn: str, scope_name: str,
+                 camera_num: Optional[int] = None, **kwargs: Any) -> None:
         """ Setup logger, camera settings and common SerialEM params. """
 
         sem.ConnectToSEM(SERIALEM_PORT, SERIALEM_IP)
@@ -48,7 +49,7 @@ class BaseSetup:
         self.SCOPE_HAS_C3 = self.func_is_implemented("ReportIlluminatedArea")
         self.SCOPE_HAS_AUTOFILL = self.func_is_implemented("AreDewarsFilling")
         self.SCOPE_HAS_APER_CTRL = self.func_is_implemented("ReportApertureSize", 1)
-        self.CAMERA_NUM = 1
+        self.CAMERA_NUM = camera_num or 1
         self.CAMERA_HAS_DIVIDEBY2 = False
         self.CAMERA_MODE = 0  # linear
         self.DELAY = 3
@@ -60,7 +61,7 @@ class BaseSetup:
                      f"hasAutofill={self.SCOPE_HAS_AUTOFILL}, "
                      f"hasApertureControl={self.SCOPE_HAS_APER_CTRL}")
 
-        self.select_camera()
+        self.select_camera(camera_num)
 
         sem.ClearPersistentVars()
         sem.SetUserSetting("DriftProtection", 1, 1)
@@ -101,40 +102,40 @@ class BaseSetup:
         sem.ErrorsToLog()
         sem.SetDirectory(os.getcwd())
 
-    def select_camera(self) -> None:
+    def select_camera(self, camera_num: Optional[int] = None) -> None:
         """ Choose camera to use. """
+        if camera_num is None:  # enter from cmd, not GUI
+            camera_num = 1
+            camera_names = []
+            while True:
+                name = sem.ReportCameraName(camera_num)
+                if name == "NOCAM":
+                    break
+                else:
+                    camera_names.append(name)
+                    camera_num += 1
 
-        camera_num = 1
-        camera_names = []
-        while True:
-            name = sem.ReportCameraName(camera_num)
-            if name == "NOCAM":
-                break
-            else:
-                camera_names.append(name)
-                camera_num += 1
+            print("Choose camera to use with SerialEM:\n")
+            for i, c in enumerate(camera_names):
+                print(f"\t[{i + 1}] {c}")
 
-        print("Choose camera to use with SerialEM:\n")
-        for i, c in enumerate(camera_names):
-            print(f"\t[{i + 1}] {c}")
+            camera_num = int(input("\nInput the camera number: ").strip())
+            if camera_num > len(camera_names) or camera_num < 1:
+                raise IndexError("Wrong camera number!")
 
-        camera_num = int(input("\nInput the camera number: ").strip())
-        if camera_num > len(camera_names) or camera_num < 1:
-            raise IndexError("Wrong camera number!")
-        else:
-            sem.SelectCamera(camera_num)
-            self.CAMERA_NUM = camera_num
-            cam_name = sem.ReportCameraName(self.CAMERA_NUM)
-            if "K2" or "K3" in cam_name:
-                self.CAMERA_MODE = 1  # always counting
-                self.CAMERA_HAS_DIVIDEBY2 = True
-            if "Falcon 4" in cam_name:
-                self.CAMERA_MODE = 1  # always counting
-                self.CAMERA_HAS_DIVIDEBY2 = False
+        sem.SelectCamera(camera_num)
+        self.CAMERA_NUM = camera_num
+        cam_name = sem.ReportCameraName(self.CAMERA_NUM)
+        if "K2" or "K3" in cam_name:
+            self.CAMERA_MODE = 1  # always counting
+            self.CAMERA_HAS_DIVIDEBY2 = True
+        if "Falcon 4" in cam_name:
+            self.CAMERA_MODE = 1  # always counting
+            self.CAMERA_HAS_DIVIDEBY2 = False
 
-            _, _, mode = sem.ReportMag()
-            if mode == 1:  # EFTEM
-                sem.SetSlitIn(0)  # retract slit
+        _, _, mode = sem.ReportMag()
+        if mode == 1:  # EFTEM
+            sem.SetSlitIn(0)  # retract slit
 
         if not sem.ReportColumnOrGunValve():
             print("Opening col. valves...")
