@@ -117,4 +117,10 @@ First, have a look at **config.py**: edit *microscopes* dictionary and individua
 
     perfectem
 
-If you prefer button clicking over console, try `perfectem-gui`. The simple GUI requires Python built with tkinter support.
+If you prefer clicking buttons over console, you can create a desktop script **PerfectEM.bat** that contains one line:
+
+.. code-block::
+
+    perfectem-gui
+
+PS. The simple GUI requires Python built with tkinter support.
