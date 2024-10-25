@@ -54,7 +54,7 @@ class AFIS(BaseSetup):
 
     @staticmethod
     def _mrad_to_nm(mrad):
-        return mrad_to_invA(mrad, sem.ReportHighVoltage() * 1000) * 10
+        return 0.1 / mrad_to_invA(mrad, sem.ReportHighVoltage() * 1000)
 
     def _run(self) -> None:
         self.change_aperture("c2", 50)

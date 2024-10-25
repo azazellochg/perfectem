@@ -5,6 +5,7 @@
     - reset img shifts at the start
     - skip auto-stigmate very close to focus, because SEM will increase the defocus
     - add wait for drift for eucentricity and tilt axis tests
+    - add simple GUI as an option
 0.9.4:
     - add atlas realignment test
     - update Delay command

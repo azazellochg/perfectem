@@ -81,7 +81,7 @@ class GoldDiffr(BaseSetup):
 
                     Measurement performed       {pretty_date(get_time=True)}
                     Microscope type             {self.scope_name}
-                    Recorded at magnification   {self.mag // 1000} kx
+                    Recorded at magnification   {self.mag // 1000} kx ({round(pix, 3)} A/px)
                     Defocus                     {self.defocus} um
                     Camera used                 {sem.ReportCameraName(self.CAMERA_NUM)}
 
