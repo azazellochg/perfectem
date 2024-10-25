@@ -24,14 +24,15 @@
 # *
 # **************************************************************************
 
-from .stage_drift import StageDrift
-from .mag_anisotropy import Anisotropy
-from .info_limit import InfoLimit
-from .thon_rings import ThonRings
-from .point_resolution import PointRes
-from .gold_diffraction import GoldDiffr
 from .afis import AFIS
-from .gain_reference import GainRef
-from .spatial_coherence import C2Fringes
-from .tilt_axis import TiltAxis
+from .atlas_realignment import AtlasRealignment
 from .eucentricity import Eucentricity
+from .gain_reference import GainRef
+from .gold_diffraction import GoldDiffr
+from .info_limit import InfoLimit
+from .mag_anisotropy import Anisotropy
+from .point_resolution import PointRes
+from .spatial_coherence import C2Fringes
+from .stage_drift import StageDrift
+from .thon_rings import ThonRings
+from .tilt_axis import TiltAxis

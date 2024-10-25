@@ -47,7 +47,7 @@ class TiltAxis(BaseSetup):
     def __init__(self, log_fn: str = "tilt_axis", **kwargs: Any):
         super().__init__(log_fn, **kwargs)
         self.increment = 5  # tilt step
-        self.maxTilt = 15  # maximum +/- tilt angle
+        self.maxTilt = 25  # maximum +/- tilt angle
         self.offset = 5  # +/- offset for measured positions in microns from tilt axis
         # (also accepts lists e.g. [2, 4, 6])
 
@@ -55,14 +55,14 @@ class TiltAxis(BaseSetup):
     def _dz(alpha: float, y0: float) -> Any:
         return y0 * np.tan(np.radians(-alpha))
 
-    @staticmethod
-    def _tilt(tilt: int, offsets: List[int],
+    def _tilt(self, tilt: int, offsets: List[int],
               focus0: List[float], focus: List[List],
               angles: List[float]) -> None:
         sem.TiltTo(tilt)
 
         for i in range(len(offsets)):
             sem.ImageShiftByMicrons(0, offsets[i])
+            sem.DriftWaitTask(2.0, "A", 180, 1, 1, "F")
             sem.AutoFocus(-1)
             defocus, *_ = sem.ReportAutoFocus()
             focus[i].append(float(defocus))

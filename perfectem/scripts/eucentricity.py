@@ -52,6 +52,7 @@ class Eucentricity(BaseSetup):
         sem.TiltTo(tilt)
         logging.info(f"Tilting to {tilt} deg.")
         x, y, z = sem.ReportStageXYZ()
+        sem.DriftWaitTask(2.0, "A", 180, 1, 1, "F")
         sem.AutoFocus(-1)
         defocus, *_ = sem.ReportAutoFocus()
         if sem.ReportMeanCounts("A") < 5:  # avoid grid bars
@@ -126,7 +127,7 @@ class Eucentricity(BaseSetup):
         logging.info(f"Current stage position: {x0}, {y0}, {z0}")
         results.append([0, 0, 0, 0])
 
-        for tilt in range(-5, -75, -self.increment):
+        for tilt in range(-5, -65, -self.increment):
             res = self._tilt(tilt, x0, y0)
             if res is not None:
                 results.append(res)
@@ -134,7 +135,7 @@ class Eucentricity(BaseSetup):
         sem.TiltTo(0)
         sem.Delay(3, "s")
 
-        for tilt in range(5, 75, self.increment):
+        for tilt in range(5, 65, self.increment):
             res = self._tilt(tilt, x0, y0)
             if res is not None:
                 results.append(res)

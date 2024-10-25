@@ -54,7 +54,7 @@ class GoldDiffr(BaseSetup):
         self.specification = kwargs.get("spec", 0.1)  # nm
 
     def _run(self) -> None:
-        self.change_aperture("c2", 150)
+        self.change_aperture("c2", 50)
         self.setup_beam(self.mag, self.spot, self.beam_size)
         sem.Pause("Please center the beam, roughly focus the image, check beam tilt pp and rotation center")
         self.setup_beam(self.mag, self.spot, self.beam_size)
@@ -62,7 +62,7 @@ class GoldDiffr(BaseSetup):
         self.setup_area(exp=0.5, binning=4, preset="R")
         self.autofocus(self.defocus, 0.05, do_coma=True, high_mag=True)
         self.check_drift()
-        self.setup_area(self.exp, self.binning, preset="R")
+        self.setup_area(self.exp, self.binning, preset="R", frames=True)
         self.check_before_acquire()
 
         if self.CAMERA_HAS_DIVIDEBY2:
@@ -81,7 +81,7 @@ class GoldDiffr(BaseSetup):
 
                     Measurement performed       {pretty_date(get_time=True)}
                     Microscope type             {self.scope_name}
-                    Recorded at magnification   {self.mag // 1000} kx
+                    Recorded at magnification   {self.mag // 1000} kx ({round(pix, 3)} A/px)
                     Defocus                     {self.defocus} um
                     Camera used                 {sem.ReportCameraName(self.CAMERA_NUM)}
 

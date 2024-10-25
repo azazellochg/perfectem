@@ -88,7 +88,7 @@ class PointRes(BaseSetup):
 
                     Measurement performed       {pretty_date(get_time=True)}
                     Microscope name             {self.scope_name}
-                    Recorded at magnification   {self.mag // 1000} kx
+                    Recorded at magnification   {self.mag // 1000} kx  ({round(pix, 3)} A/px)
                     Defocus                     {int(self.defocus*1000)} nm
                     Camera used                 {sem.ReportCameraName(self.CAMERA_NUM)}
 

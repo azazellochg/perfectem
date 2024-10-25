@@ -69,10 +69,11 @@ Offline installation
 Available scripts
 -----------------
 
-- AFIS
+- AFIS validation
     - Specification (Krios): coma < 750 nm, astigmatism < 10 nm for 5 um shift. Glacios: coma < 1200 nm, astigmatism < 15 nm for 6 um shift
     - Description: Measure residual beam tilt and astigmatism at different image shift positions while EPU is open.
 - Atlas realignment
+    - Specification: none
     - Description: Compare the shift and rotation between two atlases acquired when reloading the same grid.
 - Magnification anisotropy
     - Specification: <1%
@@ -80,10 +81,10 @@ Available scripts
 - C2 Fresnel fringes
     - Specification: on FFI system there should be <5 fringes at 96 kx in nanoprobe close to focus
     - Description: Take a picture of a flood beam to see if the fringes from C2 aperture extend all the way to the center (non-FFI systems).
-- Eucentricity
+- Eucentricity check
     - Specification: <2 um in X/Y, <4 um defocus (Krios G2, G3, G3i)
     - Description: Estimate X,Y and defocus offset while tilting the stage.
-- Gain reference
+- Gain reference check
     - Specification: none
     - Description: Take a picture of a flood beam and check the auto-correlation image.
 - Gold diffraction
@@ -115,3 +116,11 @@ First, have a look at **config.py**: edit *microscopes* dictionary and individua
 .. code-block:: python
 
     perfectem
+
+If you prefer clicking buttons over console, you can create a desktop script **PerfectEM.bat** that contains one line:
+
+.. code-block::
+
+    perfectem-gui
+
+PS. The simple GUI requires Python built with tkinter support.

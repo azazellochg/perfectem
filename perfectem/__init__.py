@@ -1,3 +1,5 @@
+#!python
+# -*- coding: utf-8 -*-
 # **************************************************************************
 # *
 # * Authors:     Grigory Sharov (gsharov@mrc-lmb.cam.ac.uk) [1]
@@ -30,30 +32,31 @@ from typing import List, Optional
 
 from .config import microscopes
 
-__version__ = '0.9.4'
+__version__ = '0.9.5'
 
-tests = (
-    ("AFIS", "AFIS validation"),
-    ("Anisotropy", "Magnification anisotropy"),
-    ("C2Fringes", "C2 Fresnel fringes"),
-    ("Eucentricity", "Eucentricity check"),
-    ("GainRef", "Gain reference check"),
-    ("GoldDiffr", "Gold diffraction"),
-    ("InfoLimit", "Information limit (Young fringes)"),
-    ("PointRes", "Point resolution"),
-    ("StageDrift", "Stage drift"),
-    ("ThonRings", "Thon rings"),
-    ("TiltAxis", "Tilt axis offset"),
-)
+tests = {
+    "AFIS": "AFIS validation",
+    "AtlasRealignment": "Atlas realignment",
+    "Anisotropy": "Magnification anisotropy",
+    "C2Fringes": "C2 Fresnel fringes",
+    "Eucentricity": "Eucentricity check",
+    "GainRef": "Gain reference check",
+    "GoldDiffr": "Gold diffraction",
+    "InfoLimit": "Information limit",
+    "PointRes": "Point resolution",
+    "StageDrift": "Stage drift",
+    "ThonRings": "Thon rings",
+    "TiltAxis": "Tilt axis offset"
+}
 
 
 def show_all_tests(print_docstr: bool = False) -> None:
     """ Print list of tests, with an optional docstring for each. """
-    for num, test in enumerate(tests, start=1):
-        print(f"\t[{num}] {test[1]}")
+    for i, item in enumerate(tests.items()):
+        print(f"\t[{i+1}] {item[1]}")
         if print_docstr:
             module = importlib.import_module("perfectem.scripts")
-            func = getattr(module, test[0])
+            func = getattr(module, item[0])
             print(func.__doc__)
             print("="*80)
 
@@ -61,7 +64,7 @@ def show_all_tests(print_docstr: bool = False) -> None:
 def main(argv: Optional[List] = None) -> None:
     try:
         import serialem
-    except ImportError:
+    except ModuleNotFoundError:
         raise ImportError("This program must be run on the computer with SerialEM Python module")
 
     parser = argparse.ArgumentParser(description="This script launches selected TEM performance test")
@@ -79,16 +82,23 @@ def main(argv: Optional[List] = None) -> None:
             raise IndexError("Wrong test number!")
 
         print("\nAvailable microscopes:")
-        for scope_num, scope in enumerate(microscopes, start=1):
-            print(f"\t[{scope_num}] {scope[0]}")
+        for scope_num, scope in enumerate(microscopes.keys(), start=1):
+            print(f"\t[{scope_num}] {scope}")
 
         scope_num = int(input("\nInput the microscope number: ").strip()) - 1
         if scope_num not in range(len(microscopes)):
             raise IndexError("Wrong microscope number!")
-        scope_name = microscopes[scope_num][0]
+        scope_name = list(microscopes.keys())[scope_num]
 
-        func_name = tests[test_num][0]
+        func_name = list(tests.keys())[test_num]
         module = importlib.import_module("perfectem.scripts")
         func_object = getattr(module, func_name)
         print(func_object.__doc__)
-        func_object(scope_name=scope_name, **microscopes[scope_num][1][func_name]).run()
+        func_args = list(microscopes.values())[scope_num][func_name]
+        func_object(scope_name=scope_name, **func_args).run()
+
+
+def main_gui() -> None:
+    from .gui import Application
+    gui = Application(tests, microscopes)
+    gui.create_widgets()

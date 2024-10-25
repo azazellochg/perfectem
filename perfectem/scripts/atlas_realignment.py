@@ -87,7 +87,8 @@ class AtlasRealignment(BaseSetup):
             if sem.ReportSlotStatus(grid) != 0:
                 raise RuntimeError(f"Failed to load grid {grid}")
             sem.MoveStageTo(0, 0)
-            self.change_aperture("c2", 150)
+            if not self.SCOPE_HAS_C3:  # For Talos / Glacios
+                self.change_aperture("c2", 150)
             self.setup_beam(self.mag, self.spot, self.beam_size, check_dose=False)
             self.setup_area(self.exp, self.binning, preset="R")
             self.check_before_acquire()

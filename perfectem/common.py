@@ -39,7 +39,8 @@ from .config import SERIALEM_PORT, SERIALEM_IP
 class BaseSetup:
     """ Initialization and common functions. """
 
-    def __init__(self, log_fn: str, scope_name: str, **kwargs: Any) -> None:
+    def __init__(self, log_fn: str, scope_name: str,
+                 camera_num: Optional[int] = None, **kwargs: Any) -> None:
         """ Setup logger, camera settings and common SerialEM params. """
 
         sem.ConnectToSEM(SERIALEM_PORT, SERIALEM_IP)
@@ -48,7 +49,7 @@ class BaseSetup:
         self.SCOPE_HAS_C3 = self.func_is_implemented("ReportIlluminatedArea")
         self.SCOPE_HAS_AUTOFILL = self.func_is_implemented("AreDewarsFilling")
         self.SCOPE_HAS_APER_CTRL = self.func_is_implemented("ReportApertureSize", 1)
-        self.CAMERA_NUM = 1
+        self.CAMERA_NUM = camera_num or 1
         self.CAMERA_HAS_DIVIDEBY2 = False
         self.CAMERA_MODE = 0  # linear
         self.DELAY = 3
@@ -60,7 +61,7 @@ class BaseSetup:
                      f"hasAutofill={self.SCOPE_HAS_AUTOFILL}, "
                      f"hasApertureControl={self.SCOPE_HAS_APER_CTRL}")
 
-        self.select_camera()
+        self.select_camera(camera_num)
 
         sem.ClearPersistentVars()
         sem.SetUserSetting("DriftProtection", 1, 1)
@@ -101,40 +102,40 @@ class BaseSetup:
         sem.ErrorsToLog()
         sem.SetDirectory(os.getcwd())
 
-    def select_camera(self) -> None:
+    def select_camera(self, camera_num: Optional[int] = None) -> None:
         """ Choose camera to use. """
+        if camera_num is None:  # enter from cmd, not GUI
+            camera_num = 1
+            camera_names = []
+            while True:
+                name = sem.ReportCameraName(camera_num)
+                if name == "NOCAM":
+                    break
+                else:
+                    camera_names.append(name)
+                    camera_num += 1
 
-        camera_num = 1
-        camera_names = []
-        while True:
-            name = sem.ReportCameraName(camera_num)
-            if name == "NOCAM":
-                break
-            else:
-                camera_names.append(name)
-                camera_num += 1
+            print("Choose camera to use with SerialEM:\n")
+            for i, c in enumerate(camera_names):
+                print(f"\t[{i + 1}] {c}")
 
-        print("Choose camera to use with SerialEM:\n")
-        for i, c in enumerate(camera_names):
-            print(f"\t[{i + 1}] {c}")
+            camera_num = int(input("\nInput the camera number: ").strip())
+            if camera_num > len(camera_names) or camera_num < 1:
+                raise IndexError("Wrong camera number!")
 
-        camera_num = int(input("\nInput the camera number: ").strip())
-        if camera_num > len(camera_names) or camera_num < 1:
-            raise IndexError("Wrong camera number!")
-        else:
-            sem.SelectCamera(camera_num)
-            self.CAMERA_NUM = camera_num
-            cam_name = sem.ReportCameraName(self.CAMERA_NUM)
-            if "Falcon" in cam_name:
-                self.CAMERA_MODE = 0
-                self.CAMERA_HAS_DIVIDEBY2 = False
-            elif "K2" or "K3" in cam_name:
-                self.CAMERA_MODE = 1  # always counting
-                self.CAMERA_HAS_DIVIDEBY2 = True
+        sem.SelectCamera(camera_num)
+        self.CAMERA_NUM = camera_num
+        cam_name = sem.ReportCameraName(self.CAMERA_NUM)
+        if "K2" or "K3" in cam_name:
+            self.CAMERA_MODE = 1  # always counting
+            self.CAMERA_HAS_DIVIDEBY2 = True
+        if "Falcon 4" in cam_name:
+            self.CAMERA_MODE = 1  # always counting
+            self.CAMERA_HAS_DIVIDEBY2 = False
 
-            _, _, mode = sem.ReportMag()
-            if mode == 1:  # EFTEM
-                sem.SetSlitIn(0)  # retract slit
+        _, _, mode = sem.ReportMag()
+        if mode == 1:  # EFTEM
+            sem.SetSlitIn(0)  # retract slit
 
         if not sem.ReportColumnOrGunValve():
             print("Opening col. valves...")
@@ -170,6 +171,7 @@ class BaseSetup:
         logging.info(f"Starting script {test_name} {start_time.strftime('%d/%m/%Y %H:%M:%S')}")
 
         try:
+            sem.SetImageShift(0, 0)
             if abs(sem.ReportTiltAngle()) > 0.1:
                 sem.TiltTo(0)
             self._run()
@@ -183,7 +185,6 @@ class BaseSetup:
 
     def check_eps(self) -> None:
         """ Check max eps after setup beam but before area setup. """
-        # TODO: verify minimum dose rate for Falcon3/4
 
         logging.info("Checking dose rate...")
         old_exp, _ = sem.ReportExposure("F")
@@ -202,7 +203,7 @@ class BaseSetup:
                 spot += 1
 
         if spot != int(sem.ReportSpotSize()) and spot < 12:
-            logging.info(f"Increasing spot size to {spot} to reduce dose rate below 120 eps")
+            logging.info(f"Increasing spot size to {spot} to reduce dose rate below 200 eps")
             sem.SetSpotSize(spot)
 
         # Restore previous settings
@@ -258,7 +259,8 @@ class BaseSetup:
     def setup_area(self, exp: float, binning: int,
                    area: str = "F",
                    preset: str = "F",
-                   mode: Optional[str] = None) -> None:
+                   mode: Optional[int] = None,
+                   frames: Optional[bool] = False) -> None:
         """ Setup camera settings for a certain preset. """
 
         logging.info(f"Setting camera: preset={preset}, exp={exp}, binning={binning}, area={area}")
@@ -271,7 +273,11 @@ class BaseSetup:
         sem.NoMessageBoxOnError()
         try:
             sem.SetK2ReadMode(preset, camera_mode)  # linear=0, counting=1
-            sem.SetDoseFracParams(preset, 0, 0, 0)  # no frames
+            if frames:
+                sem.SetFrameTime(preset, 0.000001)  # will be fixed by SEM to a min number
+                sem.SetDoseFracParams(preset, 1, 0, 1, 1, 0)  # align frames with SEM plugin
+            else:
+                sem.SetDoseFracParams(preset, 0, 0, 0, 0, 0)  # no frames
         except sem.SEMerror or sem.SEMmoduleError:
             pass
         sem.NoMessageBoxOnError(0)
@@ -279,7 +285,7 @@ class BaseSetup:
         logging.info("Setting camera: done!")
 
     @staticmethod
-    def euc_by_stage(fine: bool = False) -> None:
+    def euc_by_stage(fine: bool = True) -> None:
         """ Check FOV before running eucentricity by stage. """
         min_fov = sem.ReportProperty("EucentricityCoarseMinField")  # um
         pix = sem.ReportCurrentPixelSize("T")  # nm, with binning
@@ -290,9 +296,9 @@ class BaseSetup:
                             f"{area} um < EucentricityCoarseMinField={min_fov}, "
                             "SerialEM will decrease the magnification automatically")
         sem.SetAbsoluteFocus(0)
-        sem.ChangeFocus(-50)
+        sem.ChangeFocus(-30)
         sem.Eucentricity(2 if fine else 1)
-        sem.ChangeFocus(50)
+        sem.ChangeFocus(30)
 
     def euc_by_beamtilt(self) -> None:
         """ Adapted from https://sphinx-emdocs.readthedocs.io/en/latest/serialEM-note-more-about-z-height.html#z-byv2-function """
@@ -351,7 +357,7 @@ class BaseSetup:
         logging.info(f"Autofocusing to {target} um...")
         sem.AutoFocus()
 
-        if high_mag:
+        if high_mag and target < -0.7:
             # fix astigmatism again, closer to focus
             sem.FixAstigmatismByCTF()
 

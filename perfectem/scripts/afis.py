@@ -54,12 +54,13 @@ class AFIS(BaseSetup):
 
     @staticmethod
     def _mrad_to_nm(mrad):
-        return mrad_to_invA(mrad, sem.ReportHighVoltage() * 1000) * 10
+        return 0.1 / mrad_to_invA(mrad, sem.ReportHighVoltage() * 1000)
 
     def _run(self) -> None:
-        sem.Pause("Open EPU and set Acquisition mode = Faster in the Session Setup. Also change C2 aperture to 50 um")
+        self.change_aperture("c2", 50)
         self.setup_beam(self.mag, self.spot, self.beam_size, check_dose=False)
-        sem.Pause("Please center the beam, roughly focus the image, check beam tilt pp and rotation center")
+        sem.Pause("Open EPU and set Acquisition mode = Faster in the Session Setup. "
+                  "Center the beam, roughly focus the image, check beam tilt pp and rotation center")
         self.setup_beam(self.mag, self.spot, self.beam_size)
         self.setup_area(self.exp, self.binning, preset="R")
         self.setup_area(exp=1, binning=2, preset="F")
@@ -68,12 +69,10 @@ class AFIS(BaseSetup):
         self.autofocus(self.defocus, 0.05, do_ast=True, do_coma=True)
 
         bis_positions = [
-            (-self.shift, -self.shift),
             (-self.shift, 0),
             (self.shift, 0),
             (0, -self.shift),
-            (0, self.shift),
-            (self.shift, self.shift)
+            (0, self.shift)
         ]
         res = []
         
