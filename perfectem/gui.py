@@ -142,16 +142,16 @@ class Application:
         return self.cameras
 
     def run(self,
-            scope: tk.StringVar,
-            camera: tk.StringVar,
-            test: tk.StringVar) -> None:
+            scopeVar: tk.StringVar,
+            cameraVar: tk.StringVar,
+            testVar: tk.StringVar) -> None:
         """ Execute selected test. """
-        scope, camera, test = scope.get(), camera.get(), test.get()
+        scope, camera, test = scopeVar.get(), cameraVar.get(), testVar.get()
         if not scope or not camera or not test:
             self.show_message(msgtype="error", text="Please select a microscope and camera.")
             return
 
-        func_name = None
+        func_name = ""
         for item in self.tests.items():
             if item[1] == test:
                 func_name = item[0]
