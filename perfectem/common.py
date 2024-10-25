@@ -285,7 +285,7 @@ class BaseSetup:
         logging.info("Setting camera: done!")
 
     @staticmethod
-    def euc_by_stage(fine: bool = False) -> None:
+    def euc_by_stage(fine: bool = True) -> None:
         """ Check FOV before running eucentricity by stage. """
         min_fov = sem.ReportProperty("EucentricityCoarseMinField")  # um
         pix = sem.ReportCurrentPixelSize("T")  # nm, with binning
@@ -296,9 +296,9 @@ class BaseSetup:
                             f"{area} um < EucentricityCoarseMinField={min_fov}, "
                             "SerialEM will decrease the magnification automatically")
         sem.SetAbsoluteFocus(0)
-        sem.ChangeFocus(-50)
+        sem.ChangeFocus(-30)
         sem.Eucentricity(2 if fine else 1)
-        sem.ChangeFocus(50)
+        sem.ChangeFocus(30)
 
     def euc_by_beamtilt(self) -> None:
         """ Adapted from https://sphinx-emdocs.readthedocs.io/en/latest/serialEM-note-more-about-z-height.html#z-byv2-function """

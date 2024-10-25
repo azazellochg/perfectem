@@ -62,7 +62,7 @@ class TiltAxis(BaseSetup):
 
         for i in range(len(offsets)):
             sem.ImageShiftByMicrons(0, offsets[i])
-            sem.DriftWaitTask(5.0, "A", 180, 1, 1, "F")
+            sem.DriftWaitTask(2.0, "A", 180, 1, 1, "F")
             sem.AutoFocus(-1)
             defocus, *_ = sem.ReportAutoFocus()
             focus[i].append(float(defocus))

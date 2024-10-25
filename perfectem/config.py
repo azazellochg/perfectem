@@ -73,17 +73,17 @@ krios3_k3 = {
 }
 
 krios4_F4i = {
-    "StageDrift": {"beam": 0.66, "spot": 5, "mag": 105000, "exp": 0.5, "binning": 2},
-    "Anisotropy": {"beam": 0.66, "spot": 5, "mag": 105000, "exp": 0.5, "binning": 2},
-    "InfoLimit": {"beam": 1.2, "spot": 2, "mag": 350000, "exp": 1, "binning": 1, "defocus": -0.5, "spec": 0.12},
-    "ThonRings": {"beam": 1.02, "spot": 3, "mag": 270000, "exp": 1, "binning": 2, "defocus": -1, "spec": 0.33},
-    "PointRes": {"beam": 1.02, "spot": 3, "mag": 350000, "exp": 1, "binning": 2, "defocus": -0.087, "spec": 0.20},
-    "GoldDiffr": {"beam": 1.02, "spot": 3, "mag": 710000, "exp": 3, "binning": 2, "defocus": -0.5, "spec": 0.1},
-    "C2Fringes": {"beam": 0.66, "spot": 5, "mag": 105000, "exp": 0.5, "binning": 1, "defocus": -1.0},
-    "TiltAxis": {"beam": 0.66, "spot": 5, "mag": 105000, "exp": 0.5, "binning": 2},
-    "GainRef": {"beam": 0.66, "spot": 5, "mag": 105000, "exp": 1, "binning": 1},
-    "AFIS": {"beam": 0.66, "spot": 5, "mag": 105000, "exp": 1, "binning": 2, "defocus": -2, "max_imgsh": 12.0, "spec": (750, 10)},
-    "Eucentricity": {"beam": 0.66, "spot": 5, "mag": 105000, "exp": 0.5, "binning": 2, "spec": (2, 4)},
+    "StageDrift": {"beam": 0.8, "spot": 5, "mag": 130000, "exp": 1, "binning": 2},
+    "Anisotropy": {"beam": 0.8, "spot": 5, "mag": 130000, "exp": 1, "binning": 2},
+    "InfoLimit": {"beam": 0.32, "spot": 2, "mag": 910000, "exp": 3, "binning": 2, "defocus": -0.5, "spec": 0.12},
+    "ThonRings": {"beam": 1.0, "spot": 3, "mag": 270000, "exp": 1, "binning": 2, "defocus": -1, "spec": 0.33},
+    "PointRes": {"beam": 1.0, "spot": 3, "mag": 350000, "exp": 1, "binning": 2, "defocus": -0.087, "spec": 0.20},
+    "GoldDiffr": {"beam": 0.32, "spot": 2, "mag": 910000, "exp": 3, "binning": 2, "defocus": -0.5, "spec": 0.1},
+    "C2Fringes": {"beam": 0.8, "spot": 5, "mag": 130000, "exp": 1, "binning": 1, "defocus": -1.0},
+    "TiltAxis": {"beam": 0.8, "spot": 5, "mag": 130000, "exp": 1, "binning": 2},
+    "GainRef": {"beam": 0.8, "spot": 5, "mag": 130000, "exp": 1, "binning": 1},
+    "AFIS": {"beam": 0.8, "spot": 5, "mag": 130000, "exp": 1, "binning": 2, "defocus": -2, "max_imgsh": 12.0, "spec": (750, 10)},
+    "Eucentricity": {"beam": 0.8, "spot": 5, "mag": 130000, "exp": 1, "binning": 2, "spec": (2, 4)},
 }
 
 glacios_falcon3 = {
