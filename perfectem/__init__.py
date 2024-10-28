@@ -32,7 +32,7 @@ from typing import List, Optional
 
 from .config import microscopes
 
-__version__ = '0.9.5'
+__version__ = '0.9.6'
 
 tests = {
     "AFIS": "AFIS validation",
@@ -65,7 +65,7 @@ def main(argv: Optional[List] = None) -> None:
     try:
         import serialem
     except ModuleNotFoundError:
-        raise ImportError("This program must be run on the computer with SerialEM Python module")
+        raise ModuleNotFoundError("This program must be run on the computer with SerialEM Python module")
 
     parser = argparse.ArgumentParser(description="This script launches selected TEM performance test")
     parser.add_argument("-l", "--list", default=False, action='store_true',

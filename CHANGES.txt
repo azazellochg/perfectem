@@ -1,3 +1,5 @@
+0.9.6:
+    - tbd
 0.9.5:
     - afis # of checks reduced to 4
     - added frame alignment with SEM plugin, enabled for Young fringes and gold diffraction tests
