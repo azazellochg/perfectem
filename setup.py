@@ -31,16 +31,10 @@ https://github.com/pypa/sampleproject
 """
 
 # Always prefer setuptools over distutils
-from setuptools import setup, find_packages, Extension
+from setuptools import setup, Extension
 from setuptools.command.build_ext import build_ext
 import sys
-from os import path
-from perfectem import __version__
 
-here = path.abspath(path.dirname(__file__))
-# Get the long description from the README file
-with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
-    long_description = f.read()
 
 libs = []
 if sys.platform.startswith("win"):
@@ -66,34 +60,6 @@ class BuildSEMPython(build_ext):
 
 
 setup(
-    name='perfectem',
-    version=__version__,
-    description='Run TEM performance tests with SerialEM',
-    long_description=long_description,
-    long_description_content_type='text/x-rst',
-    url='https://github.com/azazellochg/perfectem',
-    author='Grigory Sharov',
-    author_email='gsharov@mrc-lmb.cam.ac.uk',
-    classifiers=[
-        'Development Status :: 4 - Beta',
-        'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
-        'Programming Language :: Python :: 3',
-        'Operating System :: POSIX :: Linux',
-        'Operating System :: Microsoft :: Windows'
-    ],
-    keywords='cryo-em python serialem',
-    packages=find_packages(),
     ext_modules=[serialemmodule],
-    cmdclass={"build_ext": BuildSEMPython},
-    install_requires=['mrcfile', 'numpy', 'scipy', 'matplotlib'],
-    extras_require={
-      "dev": ["mypy"]
-    },
-    python_requires='>=3.8',
-    entry_points={'console_scripts': ['perfectem=perfectem:main'],
-                  'gui_scripts': ['perfectem-gui=perfectem:main_gui']},
-    project_urls={
-        'Bug Reports': 'https://github.com/azazellochg/perfectem/issues',
-        'Source': 'https://github.com/azazellochg/perfectem'
-    }
+    cmdclass={"build_ext": BuildSEMPython}
 )
