@@ -1,0 +1,37 @@
+[build-system]
+requires = ["setuptools>61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "perfectem"
+dynamic = ["version"]
+authors = [{name = "Grigory Sharov", email = "gsharov@mrc-lmb.cam.ac.uk"}]
+description = "Run TEM performance tests with SerialEM"
+readme = {file = "README.rst", content-type = "text/x-rst"}
+requires-python = ">=3.8"
+keywords = ["cryo-em", "python", "serialem"]
+classifiers=[
+    'Development Status :: 4 - Beta',
+    'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
+    'Programming Language :: Python :: 3',
+    'Operating System :: POSIX :: Linux',
+    'Operating System :: Microsoft :: Windows'
+]
+license = {file = "LICENSE"}
+dependencies = ["mrcfile", "numpy", "scipy", "matplotlib"]
+
+[project.optional-dependencies]
+dev = ["mypy"]
+
+[project.urls]
+Homepage = "https://github.com/azazellochg/perfectem"
+Issues = "https://github.com/azazellochg/perfectem/issues"
+
+[project.scripts]
+perfectem = "perfectem:main"
+
+[project.gui-scripts]
+perfectem-gui = "perfectem:main_gui"
+
+[tool.setuptools.dynamic]
+version = {attr = "perfectem.__version__"}
