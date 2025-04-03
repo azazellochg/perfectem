@@ -1,10 +1,6 @@
-# Include the README
-include *.rst
-
-# Include the license file
+include README.rst
 include LICENSE
-
-# Include the changelog
 include CHANGES.txt
-
 include perfectem/SEM_python/*
+
+global-exclude *~ *.py[cod] *.so

@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>61.0"]
+requires = ["setuptools>=40.0.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -11,11 +11,18 @@ readme = {file = "README.rst", content-type = "text/x-rst"}
 requires-python = ">=3.8"
 keywords = ["cryo-em", "python", "serialem"]
 classifiers=[
-    'Development Status :: 4 - Beta',
-    'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
-    'Programming Language :: Python :: 3',
-    'Operating System :: POSIX :: Linux',
-    'Operating System :: Microsoft :: Windows'
+              'Development Status :: 4 - Beta',
+              'Intended Audience :: Science/Research',
+              'Intended Audience :: Developers',
+              'Operating System :: OS Independent',
+              'Programming Language :: Python :: 3.8',
+              'Programming Language :: Python :: 3.9',
+              'Programming Language :: Python :: 3.10',
+              'Programming Language :: Python :: 3.11',
+              'Programming Language :: Python :: 3.12',
+              'Topic :: Scientific/Engineering',
+              'Topic :: Software Development :: Libraries',
+              'License :: OSI Approved :: GNU General Public License v3 (GPLv3)'
 ]
 license = {file = "LICENSE"}
 dependencies = ["mrcfile", "numpy", "scipy", "matplotlib"]
