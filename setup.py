@@ -57,6 +57,8 @@ class BuildSEMPython(build_ext):
         except ImportError:
             build_ext.run(self)
 
+with open(path.join(here, "requirements.txt")) as f:
+    requirements = f.read().splitlines()
 
 setup(
     name='perfectem',
@@ -87,7 +89,7 @@ setup(
     license="GNU General Public License v3 (GPLv3)",
     ext_modules=[serialemmodule],
     cmdclass={"build_ext": BuildSEMPython},
-    install_requires=['mrcfile', 'numpy', 'scipy', 'matplotlib'],
+    install_requires=[requirements],
     extras_require={
       "dev": ["mypy"]
     },
