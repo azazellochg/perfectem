@@ -68,7 +68,7 @@ setup(
     author='Grigory Sharov',
     author_email='gsharov@mrc-lmb.cam.ac.uk',
     classifiers=[
-        'Development Status :: 4 - Beta',
+        'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Science/Research',
         'Intended Audience :: Developers',
         'Operating System :: OS Independent',
