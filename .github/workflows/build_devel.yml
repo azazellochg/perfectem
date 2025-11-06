@@ -6,9 +6,6 @@ on:
   push:
     branches: [ devel ]
 
-env:
-  FOLDER_WITH_VERSION: perfectem
-
 jobs:
   build:
     runs-on: "ubuntu-latest"
