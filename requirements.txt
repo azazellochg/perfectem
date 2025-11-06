@@ -1,0 +1,5 @@
+mrcfile
+numpy
+scipy
+matplotlib
+setuptools

@@ -103,23 +103,24 @@ private:
   char *mArgsBuffer;
   int mArgBufSize;
   int mNumBytesSend;
+  float mBufImageTimeout;
 
 public:
   int InitializeSocket(int port = 0, const char *ipAddress = NULL);
-  int ExchangeMessages();
+  int ExchangeMessages(int *numExtraBytes);
   int OpenServerSocket();
   void CloseServer();
   int ReallocArgsBufIfNeeded(int needSize);
 
   void InitializePacking(int funcCode);
-  void SendAndReceiveArgs();
+  void SendAndReceiveArgs(int *numExtraBytes = NULL);
   int SendOneArgReturnRetVal(int funcCode, int argument);
   const char *GetOneString(int funcCode);
   void AddStringAsLongArray(const char *name, LONG *longArr, int maxLen);
   LONG *AddLongsAndStrings(LONG *longVals, int numLongs, 
                                   const char **strings, int numStrings);
   LONG *AddItemArrays();
-  int ReceiveImage(char *imArray, int numBytes, int numChunks);
+  int ReceiveImage(char *imArray, int numBytes, int numChunks, int NumExtraBytes);
   int SendImage(void *imArray, int imSize);
   int SendBuffer(char *buffer, int numBytes);
   void ReportErrorAndClose(int retval, const char *message);
@@ -139,4 +140,6 @@ public:
                        char *format);
   int PutImageInbuffer(void *imArray, int imType, int sizeX, int sizeY, int itemBytes,
                        int toBuf, int baseBuf, int moreBinning, int capFlag);
+  void SetBufImageTimeout(float seconds) {mBufImageTimeout = seconds;};
+  void SetTimeout(float seconds);
 };

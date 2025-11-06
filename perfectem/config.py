@@ -45,6 +45,7 @@ krios2_falcon4i = {
 }
 
 krios1_k3 = {
+    "AtlasRealignment": {"beam": 1126.0, "spot": 6, "mag": 82, "exp": 0.5, "binning": 2},
     "StageDrift": {"beam": 1.1, "spot": 5, "mag": 105000, "exp": 0.5, "binning": 2},
     "Anisotropy": {"beam": 1.1, "spot": 5, "mag": 105000, "exp": 0.5, "binning": 2},
     "InfoLimit": {"beam": 0.42, "spot": 2, "mag": 710000, "exp": 3, "binning": 2, "defocus": -0.5, "spec": 0.14},

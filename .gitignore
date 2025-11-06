@@ -15,4 +15,4 @@ __pycache__/
 .classpath
 .idea
 .directory
-
+docs/_build

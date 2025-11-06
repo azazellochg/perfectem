@@ -1,3 +1,6 @@
+Introduction
+------------
+
 The ``perfectem`` package provides a set of scripts designed to test TEM performance. Some tests have been adapted from TFS SAT procedures.
 The scripts are using SerialEM's Python module. Installation on both Windows and Linux OS is supported.
 
@@ -23,3 +26,10 @@ Documentation
 The source code is available at https://github.com/azazellochg/perfectem
 
 The documentation can be found at https://perfectem.readthedocs.io
+
+.. toctree::
+   :maxdepth: 1
+
+   self
+   installation
+   scripts

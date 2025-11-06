@@ -24,13 +24,6 @@
 # *
 # **************************************************************************
 
-"""A setuptools based setup module.
-See:
-https://packaging.python.org/en/latest/distributing.html
-https://github.com/pypa/sampleproject
-"""
-
-# Always prefer setuptools over distutils
 from setuptools import setup, find_packages, Extension
 from setuptools.command.build_ext import build_ext
 import sys
@@ -64,6 +57,8 @@ class BuildSEMPython(build_ext):
         except ImportError:
             build_ext.run(self)
 
+with open(path.join(here, "requirements.txt")) as f:
+    requirements = f.read().splitlines()
 
 setup(
     name='perfectem',
@@ -75,17 +70,26 @@ setup(
     author='Grigory Sharov',
     author_email='gsharov@mrc-lmb.cam.ac.uk',
     classifiers=[
-        'Development Status :: 4 - Beta',
-        'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
-        'Programming Language :: Python :: 3',
-        'Operating System :: POSIX :: Linux',
-        'Operating System :: Microsoft :: Windows'
+        'Development Status :: 5 - Production/Stable',
+        'Intended Audience :: Science/Research',
+        'Intended Audience :: Developers',
+        'Operating System :: OS Independent',
+        'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
+        'Programming Language :: Python :: 3.10',
+        'Programming Language :: Python :: 3.11',
+        'Programming Language :: Python :: 3.12',
+        'Topic :: Scientific/Engineering',
+        'Topic :: Software Development :: Libraries',
+        'License :: OSI Approved :: GNU General Public License v3 (GPLv3)'
     ],
-    keywords='cryo-em python serialem',
+    keywords='cryo-em TEM python serialem',
     packages=find_packages(),
+    platforms=['any'],
+    license="GNU General Public License v3 (GPLv3)",
     ext_modules=[serialemmodule],
     cmdclass={"build_ext": BuildSEMPython},
-    install_requires=['mrcfile', 'numpy', 'scipy', 'matplotlib'],
+    install_requires=[requirements],
     extras_require={
       "dev": ["mypy"]
     },

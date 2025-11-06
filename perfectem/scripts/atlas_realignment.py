@@ -24,7 +24,6 @@
 # *
 # **************************************************************************
 
-import os
 import random
 import numpy as np
 from typing import Any, List
@@ -32,7 +31,6 @@ import matplotlib.pyplot as plt
 import serialem as sem
 
 from ..common import BaseSetup
-from ..config import DEBUG
 from ..utils import pretty_date
 
 
@@ -40,13 +38,13 @@ class AtlasRealignment(BaseSetup):
     """
         Name: Atlas realignment test.
         Desc: Compare the shift and rotation between two atlases acquired when reloading the same grid.
-        Specification: < 5um, < 10deg?
+        Specification: none. < 5um, < 5deg is good
     """
 
     def __init__(self, log_fn: str = "atlas_realign", **kwargs: Any) -> None:
         super().__init__(log_fn, **kwargs)
-        self.min_shift = 5  # X/Y um shift
-        self.max_rotation = 10  # degrees
+        self.max_shift = 5  # X/Y um shift
+        self.max_rotation = 5  # degrees
 
     def prepare_for_plot(self, data: List[List]) -> None:
         avg = np.mean(np.asarray(data), 0)
@@ -78,6 +76,14 @@ class AtlasRealignment(BaseSetup):
             if status == 1:
                 occupied_slots.append(grid)
 
+        if not occupied_slots:
+            raise RuntimeError("No occupied slots found")
+
+        if not self.SCOPE_HAS_C3:  # For Talos / Glacios
+            self.change_aperture("c2", 150)
+        self.setup_beam(self.mag, self.spot, self.beam_size, check_dose=False)
+        self.setup_area(self.exp, self.binning, preset="R")
+
         min_choice = min(3, len(occupied_slots))
         grids_to_load = random.choices(occupied_slots, k=min_choice)
         results = []
@@ -86,17 +92,10 @@ class AtlasRealignment(BaseSetup):
             sem.LoadCartridge(grid)
             if sem.ReportSlotStatus(grid) != 0:
                 raise RuntimeError(f"Failed to load grid {grid}")
-            sem.MoveStageTo(0, 0)
-            if not self.SCOPE_HAS_C3:  # For Talos / Glacios
-                self.change_aperture("c2", 150)
-            self.setup_beam(self.mag, self.spot, self.beam_size, check_dose=False)
-            self.setup_area(self.exp, self.binning, preset="R")
+            sem.MoveStageTo(0, 0, 0)
             self.check_before_acquire()
-            sem.OpenNewMontage(2, 2, f"atlas_{grid}.mrc")
-            sem.SetMontageParams(1)  # stage shift
-            sem.Montage()
-            sem.Copy("B", "M")  # copy overview
-            sem.CloseFile()
+            sem.Record()
+            sem.Copy("A", "M")
 
             # reload
             sem.UnloadCartridge(grid)
@@ -105,18 +104,16 @@ class AtlasRealignment(BaseSetup):
             sem.LoadCartridge(grid)
             if sem.ReportSlotStatus(grid) != 0:
                 raise RuntimeError(f"Failed to load grid {grid}")
-            sem.MoveStageTo(0, 0)
+            sem.MoveStageTo(0, 0, 0)
 
             # realign
+            self.check_before_acquire()
             sem.Record()
             params = sem.ImageProperties("A")
             pix = params[4] / 1000  # um
-            rot, x, y = sem.AlignWithRotation("M", 0, 40)
+            rot, x, y = sem.AlignWithRotation("M", 0, 30)
             x *= pix
             y *= pix
             results.append([x, y, rot])
-            if not DEBUG:
-                os.remove(f"atlas_{grid}.mrc")
-                os.remove(f"atlas_{grid}.mrc.mdoc")
 
         self.prepare_for_plot(results)
